@@ -27,29 +27,25 @@ export function TopBar({ title, subtitle }: TopBarProps) {
   const unreadCount = storeNotifications.filter((n) => !n.read).length;
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || '{"name":"User", "role": "seller"}');
-
+  const { user } = usePermissions();
   const { filterShops, isAdmin } = usePermissions();
   const shopsRaw = useStore((s) => s.shops);
   const selectedShopId = useStore((s) => s.selectedShopId);
   const setSelectedShopId = useStore((s) => s.setSelectedShopId);
   const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
+  const updateUser = useStore((s) => s.updateUser);
 
   const shops = useMemo(() => filterShops(shopsRaw), [filterShops, shopsRaw]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    updateUser(null);
     navigate("/login");
   };
 
-  // Automatically select the first shop if none selected and not admin
-  useEffect(() => {
-    if (selectedShopId === "all" && !isAdmin && shops.length > 0) {
-      setSelectedShopId(String(shops[0].id));
-    }
-  }, [shops, isAdmin, selectedShopId, setSelectedShopId]);
+  // Removed: Automatically select the first shop if none selected and not admin
+  // This allows non-admins to use the "All My Shops" combined view.
 
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
@@ -80,7 +76,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
               <SelectValue placeholder="Select Shop" />
             </SelectTrigger>
             <SelectContent>
-              {isAdmin && <SelectItem value="all" className="text-xs font-bold">All Shops (Admin)</SelectItem>}
+              <SelectItem value="all" className="text-xs font-bold">{isAdmin ? "All Shops (Admin)" : "All My Shops"}</SelectItem>
               {shops.map((s) => (
                 <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
                   {s.name}

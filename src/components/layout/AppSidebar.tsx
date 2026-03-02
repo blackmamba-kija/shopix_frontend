@@ -41,6 +41,7 @@ export function AppSidebar() {
   const setCollapsed = useStore((s) => s.setSidebarCollapsed);
   const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
+  const updateUser = useStore((s) => s.updateUser);
   const { can, isAdmin, user } = usePermissions();
 
   // Filter nav items: admins see everything, others see what they have permission for
@@ -49,7 +50,8 @@ export function AppSidebar() {
   );
 
   const handleLogout = () => {
-    authHelper.clearSession();
+    localStorage.removeItem("token");
+    updateUser(null);
     navigate("/login");
   };
 

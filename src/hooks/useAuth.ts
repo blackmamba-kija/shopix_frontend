@@ -3,11 +3,12 @@
  * Provides the current user and permission helpers throughout the app.
  */
 
-import { authHelper, StoredUser } from "@/utils/helpers/auth.helper";
+import { StoredUser } from "@/utils/helpers/auth.helper";
+import { useStore } from "@/store/useStore";
 
 /** Returns current user or null */
 export function useAuth(): StoredUser | null {
-    return authHelper.getUser();
+    return useStore((s) => s.user);
 }
 
 /**
@@ -15,7 +16,7 @@ export function useAuth(): StoredUser | null {
  * Admins always have full access.
  */
 export function usePermissions() {
-    const user = authHelper.getUser();
+    const user = useStore((s) => s.user);
 
     const isAdmin = user?.role === "admin";
 

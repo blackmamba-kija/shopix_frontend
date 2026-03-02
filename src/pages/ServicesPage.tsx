@@ -32,10 +32,9 @@ const ServicesPage = () => {
 
   const serviceSales = (allServiceSales || []).filter(s =>
     s && s.shopId &&
-    canAccessShop(s.shopId) &&
     (selectedShop === "all" || String(s.shopId) === String(selectedShop))
   );
-  const shops = (allShops || []).filter(s => s && s.id && canAccessShop(s.id));
+  const shops = (allShops || []).filter(s => s && s.id);
   const canRecordServices = isAdmin || can("record_services");
 
   const today = new Date().toISOString().split('T')[0];

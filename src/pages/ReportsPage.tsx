@@ -22,11 +22,10 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { authHelper } from "@/utils/helpers/auth.helper";
 import { format } from "date-fns";
 
 const ReportsPage = () => {
-  const { isAdmin, canAccessShop, filterShops } = usePermissions();
+  const { user, isAdmin, canAccessShop, filterShops } = usePermissions();
   const allShops = useStore((s) => s.shops);
   const allSales = useStore((s) => s.sales);
   const allServiceSales = useStore((s) => s.serviceSales);
@@ -84,14 +83,14 @@ const ReportsPage = () => {
 
     switch (type) {
       case "sales":
-        return allSales.filter(s => canAccessShop(s.shopId) && shopFilter(s) && dateFilter(s));
+        return allSales.filter(s => shopFilter(s) && dateFilter(s));
       case "services":
-        return allServiceSales.filter(s => canAccessShop(s.shopId) && shopFilter(s) && dateFilter(s));
+        return allServiceSales.filter(s => shopFilter(s) && dateFilter(s));
       case "inventory":
-        return allProducts.filter(p => canAccessShop(p.shopId) && shopFilter(p));
+        return allProducts.filter(p => shopFilter(p));
       case "financial":
-        const filteredSales = allSales.filter(s => canAccessShop(s.shopId) && shopFilter(s) && dateFilter(s));
-        const filteredServices = allServiceSales.filter(s => canAccessShop(s.shopId) && shopFilter(s) && dateFilter(s));
+        const filteredSales = allSales.filter(s => shopFilter(s) && dateFilter(s));
+        const filteredServices = allServiceSales.filter(s => shopFilter(s) && dateFilter(s));
         return { sales: filteredSales, services: filteredServices };
       default:
         return [];
@@ -102,7 +101,6 @@ const ReportsPage = () => {
     setIsGenerating(type + "_excel");
     try {
       // Log action
-      const user = authHelper.getUser();
       const shopName = selectedShop === "all" ? "All Shops" : allShops.find(s => String(s.id) === String(selectedShop))?.name || "Shop";
       useStore.getState().addAuditLog({
         userId: user?.id || "0",

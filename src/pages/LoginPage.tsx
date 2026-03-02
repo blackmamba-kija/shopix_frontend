@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
 import { authApi } from "@/api/auth.api";
 import { authHelper } from "@/utils/helpers/auth.helper";
-import { Mail, Lock, LogIn, ShieldCheck, Sparkles, Building2, ArrowRight } from "lucide-react";
+import { useStore } from "@/store/useStore";
+import { Mail, Lock, Building2, ArrowRight, ShieldCheck, Zap, Globe, Github } from "lucide-react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +15,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const updateUser = useStore((s) => s.updateUser);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,28 +26,28 @@ const LoginPage = () => {
 
       if (response.success && response.data) {
         authHelper.setToken(response.data.token);
-        authHelper.setUser({
+        updateUser({
           ...response.data.user,
           id: String(response.data.user.id),
           assigned_shops: response.data.user.assigned_shops || [],
           permissions: response.data.user.permissions || []
         } as any);
         toast({
-          title: "Welcome Back",
-          description: "Access granted to YUSCO Management System",
+          title: "Access Granted",
+          description: "Welcome to Yusco's next-generation retail platform.",
         });
         navigate("/");
       } else {
         toast({
-          title: "Login Failed",
-          description: response.message || "Invalid credentials provided",
+          title: "Authorization Failed",
+          description: response.message || "Please check your network credentials.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Connection Error",
-        description: error instanceof Error ? error.message : "Failed to connect to the YUSCO server",
+        title: "Endpoint Unreachable",
+        description: error instanceof Error ? error.message : "The authentication server is currently unavailable.",
         variant: "destructive",
       });
     } finally {
@@ -55,106 +56,104 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white font-sans overflow-hidden">
-      {/* Left Section: Branding & Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 relative p-12 flex-col justify-between overflow-hidden">
-        {/* Modern Mesh Gradient Background */}
-        <div className="absolute inset-0 bg-slate-950">
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-600/20 blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/20 blur-[120px] animate-pulse delay-700" />
-        </div>
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#020617] relative overflow-hidden font-sans">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/10 blur-[130px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[130px] animate-pulse delay-700" />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-600/5 blur-[100px] animate-bounce duration-[10000ms]" />
+      </div>
 
-        {/* Brand Header */}
-        <div className="relative z-10 animate-in fade-in slide-in-from-left duration-700">
+      {/* Grid Overlay */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.15]" />
+
+      <div className="relative z-10 w-full max-w-[1200px] px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">
+
+        {/* Left Content: The Vision */}
+        <div className="hidden lg:flex flex-col space-y-8 animate-in fade-in slide-in-from-left duration-1000">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-blue-400" />
+            <div className="w-14 h-14 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
+              <Building2 className="w-7 h-7 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white tracking-tight uppercase">YUSCO</h2>
-              <p className="text-[10px] text-blue-400/80 font-bold tracking-[0.2em] uppercase">Enterprise</p>
+              <h1 className="text-3xl font-black text-white tracking-tighter leading-none">YUSCO</h1>
+              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.4em]">Intelligence</span>
             </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="relative z-10 space-y-8 animate-in fade-in zoom-in duration-1000">
-          <div className="space-y-4">
-            <div className="w-80 h-80 rounded-[48px] overflow-hidden shadow-2xl border border-white/20 p-2 bg-white/5 backdrop-blur-md flex items-center justify-center">
-              <img src="/yuster-logo.png" alt="Yusco" className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 scale-110" />
-            </div>
-            <h1 className="text-5xl font-black text-white leading-tight">
-              Streamline Your <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Retail Excellence</span>
-            </h1>
-            <p className="text-lg text-slate-300 max-w-md font-semibold">
-              Integrated management solution for Cosmetics, Stationery, and Modern Retail.
+          <div className="space-y-6">
+            <h2 className="text-6xl font-black text-white leading-[1.05] tracking-tighter">
+              Reimagining <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400">Retail Control.</span>
+            </h2>
+            <p className="text-xl text-slate-400 max-w-lg leading-relaxed font-medium">
+              A premium, data-driven ecosystem designed for high-performance cosmetics, stationery, and multi-sector retail groups.
             </p>
           </div>
 
-          <div className="flex gap-4">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex-1">
-              <Sparkles className="w-5 h-5 text-blue-400 mb-2" />
-              <p className="text-white font-bold text-sm">Smart Inventory</p>
-              <p className="text-slate-500 text-[10px] mt-1">Real-time tracking & alerts</p>
+          <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/5">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-white font-bold text-sm">
+                <Zap className="w-4 h-4 text-yellow-400" /> Real-time
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">Instant synchronization across all locations.</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex-1">
-              <ShieldCheck className="w-5 h-5 text-indigo-400 mb-2" />
-              <p className="text-white font-bold text-sm">Secure Auditing</p>
-              <p className="text-slate-500 text-[10px] mt-1">Traceable activity logs</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-white font-bold text-sm">
+                <ShieldCheck className="w-4 h-4 text-blue-400" /> Secure
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">Enterprise-grade auditing and protocols.</p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-white font-bold text-sm">
+                <Globe className="w-4 h-4 text-emerald-400" /> Global
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">Centralized control for regional scale.</p>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="relative z-10 flex justify-between items-center text-slate-500 text-xs font-medium border-t border-white/5 pt-8 animate-in fade-in slide-in-from-bottom duration-700">
-          <p>© 2026 YUSCO Group. Built for efficiency.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-          </div>
-        </div>
-      </div>
+        {/* Right Content: The Authentication */}
+        <div className="flex justify-center lg:justify-end animate-in fade-in slide-in-from-right duration-1000">
+          <Card className="w-full max-w-md bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-[0_32px_128px_-32px_rgba(0,0,0,0.8)] rounded-[40px] overflow-hidden">
+            <CardContent className="p-10 space-y-8">
+              <div className="space-y-2 text-center">
+                <div className="lg:hidden flex justify-center mb-6">
+                  <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+                    <Building2 className="w-8 h-8 text-blue-500" />
+                  </div>
+                </div>
+                <h3 className="text-3xl font-black text-white tracking-tight">Welcome</h3>
+                <p className="text-slate-400 font-medium text-sm">Authorized personnel only</p>
+              </div>
 
-      {/* Right Section: Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-slate-50 border-l border-slate-200">
-        <div className="w-full max-w-sm space-y-8 animate-in fade-in slide-in-from-right duration-700">
-          <div className="text-center lg:text-left space-y-2">
-            <div className="lg:hidden flex justify-center mb-6">
-              <img src="/yuster-logo.png" alt="Yusco" className="w-40 h-40 object-contain scale-125" />
-            </div>
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">System Sign In</h3>
-            <p className="text-slate-600 font-semibold text-sm italic">YUSCO Retail Control Center</p>
-          </div>
-
-          <Card className="border border-slate-200 shadow-xl bg-white rounded-3xl overflow-hidden">
-            <CardContent className="p-8">
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">Account Identifier</label>
-                    <div className="relative group">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-600 transition-colors">
+                  <div className="space-y-2 group">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                         <Mail className="w-4 h-4" />
                       </div>
                       <Input
                         type="email"
-                        placeholder="admin@yusco.com"
+                        placeholder="john@yusco.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 pl-12 bg-white border-slate-200 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all rounded-xl text-slate-900 font-medium"
+                        className="h-14 pl-12 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all rounded-2xl font-medium"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 group">
                     <div className="flex justify-between items-center px-1">
-                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Security Key</label>
-                      <a href="#" className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors">Recovery?</a>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Password</label>
+                      <button type="button" className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors">FORGOT?</button>
                     </div>
-                    <div className="relative group">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-600 transition-colors">
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                         <Lock className="w-4 h-4" />
                       </div>
                       <Input
@@ -162,7 +161,7 @@ const LoginPage = () => {
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="h-12 pl-12 bg-white border-slate-200 focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all rounded-xl text-slate-900 font-medium"
+                        className="h-14 pl-12 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all rounded-2xl font-medium"
                         required
                       />
                     </div>
@@ -172,58 +171,35 @@ const LoginPage = () => {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2 group overflow-hidden relative"
+                  className="w-full h-14 bg-white text-[#020617] hover:bg-slate-200 font-black rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 group relative overflow-hidden"
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    {isLoading ? "Authenticating..." : (
-                      <>
-                        Enter Workspace
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
+                  <span className="relative z-10 flex items-center gap-2 transition-transform duration-300 group-hover:scale-105">
+                    {isLoading ? "AUTHENTICATING..." : "SIGN IN TO WORKSPACE"}
+                    <ArrowRight className="w-4 h-4" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Button>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <LogIn className="w-3 h-3" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Demo Credentials</p>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setEmail("admin@yusco.com"); setPassword("password"); }}
-                    className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-white hover:border-blue-600/50 hover:shadow-md transition-all text-left group"
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-black text-slate-900 uppercase">Administrator</span>
-                      <Badge className="bg-blue-600 h-4 text-[8px] font-bold rounded-full">SYSTEM ROOT</Badge>
-                    </div>
-                    <p className="text-xs text-slate-700 font-bold group-hover:text-blue-700 transition-colors">admin@yusco.com</p>
-                  </button>
+              <div className="flex items-center gap-4 text-slate-600">
+                <div className="h-px flex-1 bg-white/5" />
+                <span className="text-[9px] font-black tracking-widest uppercase">YUSCO ERP SECURE</span>
+                <div className="h-px flex-1 bg-white/5" />
+              </div>
 
-                  <button
-                    type="button"
-                    onClick={() => { setEmail("viewer@yusco.com"); setPassword("password"); }}
-                    className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-white hover:border-indigo-600/50 hover:shadow-md transition-all text-left group"
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-black text-slate-900 uppercase">Operational User</span>
-                      <Badge className="bg-indigo-600 h-4 text-[8px] font-bold rounded-full border-none">RESTRICTED</Badge>
-                    </div>
-                    <p className="text-xs text-slate-700 font-bold group-hover:text-indigo-700 transition-colors">viewer@yusco.com</p>
-                  </button>
-                </div>
+              <div className="flex justify-center items-center gap-6">
+                <button className="text-slate-500 hover:text-white transition-colors"><Github className="w-5 h-5" /></button>
+                <button className="text-slate-500 hover:text-white transition-colors"><Globe className="w-5 h-5" /></button>
               </div>
             </CardContent>
           </Card>
-
-          <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-            State of the art Retail Intelligence
-          </p>
         </div>
+      </div>
+
+      {/* Footer Decoration */}
+      <div className="absolute bottom-12 left-12 lg:flex hidden items-center gap-4 text-slate-600 animate-in fade-in duration-1000 delay-1000">
+        <p className="text-[10px] font-bold tracking-widest uppercase">© 2026 Yusco Group Protocol</p>
+        <div className="w-1 h-1 rounded-full bg-slate-800" />
+        <p className="text-[10px] font-bold tracking-widest uppercase">Encryption: AES-256</p>
       </div>
     </div>
   );

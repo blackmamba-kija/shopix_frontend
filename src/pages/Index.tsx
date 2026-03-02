@@ -16,9 +16,15 @@ const Dashboard = () => {
   const selectedShopId = useStore((s) => s.selectedShopId);
   const { user, canAccessShop } = usePermissions();
 
-  const products = (allProducts || []).filter(p => canAccessShop(p.shopId) && (selectedShopId === "all" || String(p.shopId) === String(selectedShopId)));
-  const sales = (allSales || []).filter(s => canAccessShop(s.shopId) && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId)));
-  const serviceSales = (allServiceSales || []).filter(s => canAccessShop(s.shopId) && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId)));
+  const products = (allProducts || []).filter(p =>
+    p && p.shopId && (selectedShopId === "all" || String(p.shopId) === String(selectedShopId))
+  );
+  const sales = (allSales || []).filter(s =>
+    s && s.shopId && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId))
+  );
+  const serviceSales = (allServiceSales || []).filter(s =>
+    s && s.shopId && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId))
+  );
 
   const lowStockProducts = products.filter((p) => p.quantity <= 10);
   const expiringProducts = products.filter((p) => {

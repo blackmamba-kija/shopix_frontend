@@ -29,6 +29,7 @@ import NotFound from "./pages/NotFound";
 
 // Permissions
 import { authHelper } from "./utils/helpers/auth.helper";
+import { useStore } from "./store/useStore";
 
 // Configuration
 const queryClient = new QueryClient();
@@ -40,12 +41,13 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, permission }: ProtectedRouteProps) => {
+  const user = useStore((s) => s.user);
   const token = localStorage.getItem("token");
+
   if (!token) return <Navigate to="/login" replace />;
 
-  const user = authHelper.getUser();
   // Admins bypass all permission checks
-  if (user?.role !== "admin" && permission && !(user?.permissions ?? []).includes(permission)) {
+  if (user && user.role !== "admin" && permission && !(user.permissions ?? []).includes(permission)) {
     return <Navigate to="/" replace />;
   }
 

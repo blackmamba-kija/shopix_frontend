@@ -37,10 +37,9 @@ const InventoryPage = () => {
 
   const products = (allProducts || []).filter(p =>
     p && p.shopId &&
-    canAccessShop(p.shopId) &&
     (selectedShop === "all" || String(p.shopId) === String(selectedShop))
   );
-  const shops = (allShops || []).filter(s => s && s.id && canAccessShop(s.id));
+  const shops = (allShops || []).filter(s => s && s.id);
   const canAddProducts = isAdmin || can("add_products");
 
   const filtered = products.filter((p) => {

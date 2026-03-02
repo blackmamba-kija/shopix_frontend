@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usersApi, UserRecord, ALL_PERMISSIONS } from "@/api/users.api";
 import { shopsApi } from "@/api/shops.api";
 import { useStore } from "@/store/useStore";
-import { authHelper } from "@/utils/helpers/auth.helper";
 import { Shop } from "@/types/models";
 import { toast } from "sonner";
 import {
@@ -127,10 +126,10 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
             await usersApi.create({ ...form, permissions, assigned_shops: assignedShops });
 
             // Log action
-            const admin = authHelper.getUser();
+            const actor = useStore.getState().user;
             useStore.getState().addAuditLog({
-                userId: admin?.id || "0",
-                userName: admin?.name || "System",
+                userId: actor?.id || "0",
+                userName: actor?.name || "System",
                 action: "CREATE_USER",
                 module: "Users",
                 details: `Created user ${form.name} (${form.email})`
@@ -219,10 +218,10 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
             await usersApi.update(user.id, payload);
 
             // Log action
-            const admin = authHelper.getUser();
+            const actor = useStore.getState().user;
             useStore.getState().addAuditLog({
-                userId: admin?.id || "0",
-                userName: admin?.name || "System",
+                userId: actor?.id || "0",
+                userName: actor?.name || "System",
                 action: "UPDATE_USER",
                 module: "Users",
                 details: `Updated user ${form.name} (${form.email})`
@@ -312,10 +311,10 @@ export default function UsersPage() {
             await usersApi.remove(user.id);
 
             // Log action
-            const admin = authHelper.getUser();
+            const actor = useStore.getState().user;
             useStore.getState().addAuditLog({
-                userId: admin?.id || "0",
-                userName: admin?.name || "System",
+                userId: actor?.id || "0",
+                userName: actor?.name || "System",
                 action: "DELETE_USER",
                 module: "Users",
                 details: `Deleted user ${user.name} (${user.email})`

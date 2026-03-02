@@ -31,10 +31,9 @@ const SalesPage = () => {
 
   const sales = (allSales || []).filter(s =>
     s && s.shopId &&
-    canAccessShop(s.shopId) &&
     (selectedShop === "all" || String(s.shopId) === String(selectedShop))
   );
-  const shops = (allShops || []).filter(s => s && s.id && canAccessShop(s.id));
+  const shops = (allShops || []).filter(s => s && s.id);
   const canRecordSales = isAdmin || can("record_sales");
 
   const today = new Date().toISOString().split('T')[0];

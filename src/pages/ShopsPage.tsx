@@ -15,10 +15,9 @@ const ShopsPage = () => {
   const products = useStore((s) => s.products);
   const sales = useStore((s) => s.sales);
   const deleteShop = useStore((s) => s.deleteShop);
-  const { filterShops, can, isAdmin } = usePermissions();
-
-  // Restrict to assigned shops only (admins see all)
-  const shops = filterShops(allShops);
+  const { can, isAdmin } = usePermissions();
+  // The backend already filters shops for non-admins
+  const shops = allShops.filter(Boolean);
   const canManage = isAdmin || can("manage_shops");
 
   return (

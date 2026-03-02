@@ -21,6 +21,7 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
   const collapsed = useStore((s) => s.sidebarCollapsed);
   const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
+  const updateUser = useStore((s) => s.updateUser);
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,9 +37,9 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
     // Sync profile to get latest permissions/shops
     authApi.getProfile().then((res: any) => {
       if (res.success && res.data?.user) {
-        authHelper.setUser({ ...res.data.user, id: String(res.data.user.id) });
+        updateUser({ ...res.data.user, id: String(res.data.user.id) });
       } else if (res.user) { // Handle potential different response shapes
-        authHelper.setUser({ ...res.user, id: String(res.user.id) });
+        updateUser({ ...res.user, id: String(res.user.id) });
       }
     }).catch(() => { });
 
@@ -46,7 +47,7 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
     fetchProducts();
     fetchSales();
     fetchServiceSales();
-  }, [fetchShops, fetchProducts, fetchSales, fetchServiceSales]);
+  }, [fetchShops, fetchProducts, fetchSales, fetchServiceSales, updateUser]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">

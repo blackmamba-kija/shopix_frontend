@@ -5,7 +5,7 @@ import { productsApi } from "@/api/products.api";
 import { servicesApi } from "@/api/services.api";
 import { salesApi } from "@/api/sales.api";
 import { auditLogsApi } from "@/api/audit-logs.api";
-import { authHelper } from "@/utils/helpers/auth.helper";
+import { authHelper, StoredUser } from "@/utils/helpers/auth.helper";
 import {
   products as initialProducts,
   sales as initialSales,
@@ -33,6 +33,8 @@ interface StoreState {
   addServiceSale: (service: Omit<ServiceSale, "id" | "date" | "time" | "total">) => Promise<void>;
   notifications: Notification[];
   auditLogs: AuditLog[];
+  user: StoredUser | null;
+  updateUser: (user: StoredUser | null) => void;
   addNotification: (notification: Omit<Notification, "id" | "time" | "read">) => void;
   markNotificationAsRead: (id: string) => void;
   fetchAuditLogs: () => Promise<void>;
@@ -50,7 +52,13 @@ export const useStore = create<StoreState>((set, get) => ({
   serviceSales: [],
   notifications: initialNotifications,
   auditLogs: [],
+  user: authHelper.getUser(),
   selectedShopId: "all",
+  updateUser: (user) => {
+    if (user) authHelper.setUser(user);
+    else authHelper.clearUser();
+    set({ user });
+  },
   setSelectedShopId: (id: string) => set({ selectedShopId: id }),
 
   fetchShops: async () => {
