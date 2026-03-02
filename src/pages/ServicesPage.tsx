@@ -58,8 +58,15 @@ const ServicesPage = () => {
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard title="Today's Services" value={todayItems.length.toString()} icon={History} change="Records added today" changeType="neutral" />
-          <StatCard title="Today's Earnings" value={formatTsh(todayRevenue)} icon={DollarSign} change="Cash collected today" changeType="positive" />
-          <StatCard title="Filtered Total" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.total || 0), 0))} icon={TrendingUp} change={`${filtered.length} entries matching filters`} changeType="neutral" />
+          {isAdmin && (
+            <>
+              <StatCard title="Today's Earnings" value={formatTsh(todayRevenue)} icon={DollarSign} change="Cash collected today" changeType="positive" />
+              <StatCard title="Filtered Total" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.total || 0), 0))} icon={TrendingUp} change={`${filtered.length} entries matching filters`} changeType="neutral" />
+            </>
+          )}
+          {!isAdmin && (
+            <StatCard title="Active Volume" value={filtered.length.toString()} icon={TrendingUp} change="Total filtered entries" changeType="neutral" />
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

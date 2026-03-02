@@ -75,8 +75,15 @@ const InventoryPage = () => {
         {/* Stats Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard title="Total Items" value={filtered.length.toString()} icon={Box} change="Current filtered stock" changeType="neutral" />
-          <StatCard title="Stock Cost" value={formatTsh(totalStockValue)} icon={DollarSign} change="Investment in stock" changeType="neutral" />
-          <StatCard title="Est. Revenue" value={formatTsh(totalPotentialRevenue)} icon={ArrowUpRight} change="Full sale potential" changeType="positive" />
+          {isAdmin && (
+            <>
+              <StatCard title="Stock Cost" value={formatTsh(totalStockValue)} icon={DollarSign} change="Investment in stock" changeType="neutral" />
+              <StatCard title="Est. Revenue" value={formatTsh(totalPotentialRevenue)} icon={ArrowUpRight} change="Full sale potential" changeType="positive" />
+            </>
+          )}
+          {!isAdmin && (
+            <StatCard title="Unique SKU Count" value={products.length.toString()} icon={Box} change="Total product variants" changeType="neutral" />
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -141,7 +148,7 @@ const InventoryPage = () => {
                 <tr className="border-b border-border bg-secondary/20">
                   <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Product Information</th>
                   <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Location</th>
-                  <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Buying Cost</th>
+                  {isAdmin && <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Buying Cost</th>}
                   <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Selling Price</th>
                   <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Stock Level</th>
                   <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Expiry</th>
@@ -152,7 +159,7 @@ const InventoryPage = () => {
               <tbody className="divide-y divide-border">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center text-muted-foreground py-24">
+                    <td colSpan={isAdmin ? 8 : 7} className="text-center text-muted-foreground py-24">
                       <div className="flex flex-col items-center gap-3">
                         <Filter className="w-12 h-12 opacity-20" />
                         <p className="text-lg font-medium opacity-50">No products match your current search/filters</p>
@@ -174,7 +181,7 @@ const InventoryPage = () => {
                           </div>
                         </td>
                         <td className="p-4"><Badge variant="outline" className="font-semibold px-2 py-0 border-primary/20 bg-primary/5 text-primary">{shop?.name}</Badge></td>
-                        <td className="p-4 text-right text-muted-foreground font-mono">Tsh{product.buyingCost.toLocaleString()}</td>
+                        {isAdmin && <td className="p-4 text-right text-muted-foreground font-mono">Tsh{product.buyingCost.toLocaleString()}</td>}
                         <td className="p-4 text-right">
                           <span className="font-bold text-lg text-foreground tracking-tight">Tsh{product.sellingPrice.toLocaleString()}</span>
                         </td>

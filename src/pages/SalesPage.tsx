@@ -58,9 +58,16 @@ const SalesPage = () => {
     <AppLayout title="Sales" subtitle="Track and record sales transactions">
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Today's Revenue" value={formatTsh(todayRevenue)} icon={DollarSign} change={`${todaySales.length} sales today`} changeType="neutral" />
-          <StatCard title="Today's Profit" value={formatTsh(todayProfit)} icon={TrendingUp} change="Estimated earnings" changeType="positive" />
-          <StatCard title="Filtered Revenue" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.totalCost || 0), 0))} icon={ShoppingCart} change={`${filtered.length} total transactions`} changeType="neutral" />
+          {isAdmin && (
+            <>
+              <StatCard title="Today's Revenue" value={formatTsh(todayRevenue)} icon={DollarSign} change={`${todaySales.length} sales today`} changeType="neutral" />
+              <StatCard title="Today's Profit" value={formatTsh(todayProfit)} icon={TrendingUp} change="Estimated earnings" changeType="positive" />
+              <StatCard title="Filtered Revenue" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.totalCost || 0), 0))} icon={ShoppingCart} change={`${filtered.length} total transactions`} changeType="neutral" />
+            </>
+          )}
+          {!isAdmin && (
+            <StatCard title="Total Volume" value={filtered.length.toString()} icon={ShoppingCart} change="Total filtered transactions" changeType="neutral" />
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -134,13 +141,13 @@ const SalesPage = () => {
                   <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Qty</th>
                   <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Price</th>
                   <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Total</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Profit</th>
+                  {isAdmin && <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Profit</th>}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center text-muted-foreground py-20">
+                    <td colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-20">
                       <div className="flex flex-col items-center gap-3 opacity-60">
                         <Filter className="w-10 h-10" />
                         <p className="text-base font-medium">No sales found matching your criteria</p>
@@ -161,11 +168,13 @@ const SalesPage = () => {
                         <td className="p-4 text-right text-foreground font-medium">{sale.quantity}</td>
                         <td className="p-4 text-right text-muted-foreground font-mono">Tsh{sale.sellingPrice.toLocaleString()}</td>
                         <td className="p-4 text-right font-bold text-foreground text-lg">Tsh{sale.totalCost.toLocaleString()}</td>
-                        <td className="p-4 text-right">
-                          <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-success/10 text-success text-sm font-bold border border-success/20">
-                            Tsh{sale.profit.toLocaleString()}
-                          </div>
-                        </td>
+                        {isAdmin && (
+                          <td className="p-4 text-right">
+                            <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-success/10 text-success text-sm font-bold border border-success/20">
+                              Tsh{sale.profit.toLocaleString()}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })

@@ -14,7 +14,7 @@ const Dashboard = () => {
   const allServiceSales = useStore((s) => s.serviceSales);
   const allShops = useStore((s) => s.shops);
   const selectedShopId = useStore((s) => s.selectedShopId);
-  const { user, canAccessShop } = usePermissions();
+  const { user, isAdmin, canAccessShop } = usePermissions();
 
   const products = (allProducts || []).filter(p =>
     p && p.shopId && (selectedShopId === "all" || String(p.shopId) === String(selectedShopId))
@@ -87,75 +87,88 @@ const Dashboard = () => {
   return (
     <AppLayout title="Dashboard" subtitle={`Performance Overview for ${user?.name || 'Admin'}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Revenue" value={formatTsh(totalRevenue)} icon={DollarSign} change="Today's combined" changeType="positive" />
-        <StatCard title="Inventory Value" value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} products`} changeType="neutral" />
-        <StatCard title="Est. Profit" value={formatTsh(totalProfit)} icon={TrendingUp} change="Today's estimate" changeType="positive" />
+        {isAdmin && (
+          <>
+            <StatCard title="Total Revenue" value={formatTsh(totalRevenue)} icon={DollarSign} change="Today's combined" changeType="positive" />
+            <StatCard title="Inventory Value" value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} products`} changeType="neutral" />
+            <StatCard title="Est. Profit" value={formatTsh(totalProfit)} icon={TrendingUp} change="Today's estimate" changeType="positive" />
+          </>
+        )}
         <StatCard title="Critical Alerts" value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change="Items needing attention" changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} />
+        {!isAdmin && (
+          <>
+            <StatCard title="Today's Sales" value={todaySales.length.toString()} icon={ShoppingCart} change="Product sales count" changeType="neutral" />
+            <StatCard title="Today's Services" value={todayServices.length.toString()} icon={Activity} change="Service count" changeType="neutral" />
+            <StatCard title="Active Inventory" value={products.length.toString()} icon={Package} change="Unique products" changeType="neutral" />
+          </>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Main Performance Chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">Weekly Performance (Sales vs Services)</h3>
+      {isAdmin && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Main Performance Chart */}
+          <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">Weekly Performance (Sales vs Services)</h3>
+              </div>
             </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartWeeklyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v} />
+                <Tooltip
+                  cursor={{ fill: 'hsl(var(--secondary))', opacity: 0.4 }}
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                />
+                <Legend verticalAlign="top" align="right" iconType="circle" />
+                <Bar name="Product Sales" dataKey="sales" fill="hsl(221, 83%, 53%)" radius={[6, 6, 0, 0]} barSize={24} />
+                <Bar name="Service Revenue" dataKey="services" fill="hsl(262, 83%, 58%)" radius={[6, 6, 0, 0]} barSize={24} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartWeeklyData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v} />
-              <Tooltip
-                cursor={{ fill: 'hsl(var(--secondary))', opacity: 0.4 }}
-                contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
-              />
-              <Legend verticalAlign="top" align="right" iconType="circle" />
-              <Bar name="Product Sales" dataKey="sales" fill="hsl(221, 83%, 53%)" radius={[6, 6, 0, 0]} barSize={24} />
-              <Bar name="Service Revenue" dataKey="services" fill="hsl(262, 83%, 58%)" radius={[6, 6, 0, 0]} barSize={24} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Revenue Distribution */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <PieChartIcon className="w-5 h-5 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">Revenue Source (All Time)</h3>
-          </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={revenueSourceData}
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={8}
-                dataKey="value"
-              >
-                {revenueSourceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
-                formatter={(v: number) => formatTsh(v)}
-              />
-              <Legend verticalAlign="bottom" iconType="circle" />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-muted-foreground">Products</span>
-              <span className="text-foreground">{((productTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
+          {/* Revenue Distribution */}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <PieChartIcon className="w-5 h-5 text-primary" />
+              <h3 className="text-sm font-bold text-foreground">Revenue Source (All Time)</h3>
             </div>
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-muted-foreground">Services</span>
-              <span className="text-foreground">{((serviceTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={revenueSourceData}
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={8}
+                  dataKey="value"
+                >
+                  {revenueSourceData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
+                  formatter={(v: number) => formatTsh(v)}
+                />
+                <Legend verticalAlign="bottom" iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-muted-foreground">Products</span>
+                <span className="text-foreground">{((productTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
+              </div>
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-muted-foreground">Services</span>
+                <span className="text-foreground">{((serviceTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Inventory Stock Health */}
