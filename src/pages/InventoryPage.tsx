@@ -20,6 +20,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, History, Edit, Trash2 } from "lucide-react";
+import { EditProductDialog } from "@/components/forms/EditProductDialog";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const InventoryPage = () => {
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
@@ -27,6 +40,8 @@ const InventoryPage = () => {
   const allShops = useStore((s) => s.shops);
   const [statusFilter, setStatusFilter] = useState<"all" | "low" | "expiring" | "pending">("all");
   const { can, isAdmin, canAccessShop } = usePermissions();
+  const deleteProduct = useStore((s) => s.deleteProduct);
+  const fetchProducts = useStore((s) => s.fetchProducts);
 
   // New filter states
   const [search, setSearch] = useState("");
@@ -41,6 +56,8 @@ const InventoryPage = () => {
   );
   const shops = (allShops || []).filter(s => s && s.id);
   const canAddProducts = isAdmin || can("add_products");
+  const canEditProducts = isAdmin || can("edit_products");
+  const canDeleteProducts = isAdmin || can("delete_products");
 
   const filtered = products.filter((p) => {
     if (!p || p.quantity == null) return false;
@@ -232,15 +249,56 @@ const InventoryPage = () => {
                                 <History className="w-4 h-4" />
                                 <span className="font-bold text-xs text-slate-700">Stock History</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2 focus:bg-slate-100 rounded-lg cursor-pointer">
-                                <Edit className="w-4 h-4" />
-                                <span className="font-bold text-xs text-slate-700">Edit Details</span>
-                              </DropdownMenuItem>
+
+                              {canEditProducts && (
+                                <EditProductDialog
+                                  product={product}
+                                  trigger={
+                                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors">
+                                      <Edit className="w-4 h-4" />
+                                      <span className="font-bold text-xs text-slate-700">Edit Details</span>
+                                    </div>
+                                  }
+                                />
+                              )}
+
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="gap-2 focus:bg-destructive/5 focus:text-destructive rounded-lg cursor-pointer">
-                                <Trash2 className="w-4 h-4" />
-                                <span className="font-bold text-xs text-destructive">Delete Item</span>
-                              </DropdownMenuItem>
+
+                              {canDeleteProducts && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-destructive/5 text-destructive rounded-lg cursor-pointer transition-colors">
+                                      <Trash2 className="w-4 h-4" />
+                                      <span className="font-bold text-xs">Delete Item</span>
+                                    </div>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete "{product.name}" from the inventory.
+                                        This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={async () => {
+                                          try {
+                                            await deleteProduct(product.id);
+                                            toast.success("Product deleted successfully");
+                                          } catch (err) {
+                                            toast.error("Failed to delete product");
+                                          }
+                                        }}
+                                      >
+                                        Delete Product
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </td>

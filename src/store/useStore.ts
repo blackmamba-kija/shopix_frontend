@@ -27,6 +27,8 @@ interface StoreState {
   deleteShop: (id: string) => Promise<void>;
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, "id" | "registrationDate" | "status">) => Promise<void>;
+  updateProduct: (id: string, data: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   fetchSales: () => Promise<void>;
   addSale: (sale: { productId: string; shopId: string; quantity: number }) => Promise<void>;
   fetchServiceSales: () => Promise<void>;
@@ -125,6 +127,35 @@ export const useStore = create<StoreState>((set, get) => ({
       action: "CREATE",
       module: "INVENTORY",
       details: `Added product: ${newProduct.name} to shop ${get().shops.find(s => s.id === newProduct.shopId)?.name || newProduct.shopId}`
+    });
+  },
+  updateProduct: async (id, data) => {
+    const updatedProduct = await productsApi.update(id, data);
+    set((state) => ({ products: state.products.map((p) => p.id === id ? updatedProduct : p) }));
+
+    // Log action
+    const user = authHelper.getUser();
+    get().addAuditLog({
+      userId: user?.id || "0",
+      userName: user?.name || "System",
+      action: "UPDATE",
+      module: "INVENTORY",
+      details: `Updated product: ${updatedProduct.name}`
+    });
+  },
+  deleteProduct: async (id) => {
+    const productName = get().products.find(p => p.id === id)?.name || id;
+    await productsApi.remove(id);
+    set((state) => ({ products: state.products.filter((p) => p.id !== id) }));
+
+    // Log action
+    const user = authHelper.getUser();
+    get().addAuditLog({
+      userId: user?.id || "0",
+      userName: user?.name || "System",
+      action: "DELETE",
+      module: "INVENTORY",
+      details: `Deleted product: ${productName}`
     });
   },
 
