@@ -65,7 +65,7 @@ const LoginPage = () => {
       </div>
 
       {/* Grid Overlay */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.15]" />
 
       <div className="relative z-10 w-full max-w-[1200px] px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">

@@ -7,7 +7,7 @@ export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_URL ||
     (typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://localhost:8000/api"
-      : "/api"),
+      : "https://shopixb.kija.co.tz/api"),
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
