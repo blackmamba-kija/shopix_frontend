@@ -3,7 +3,6 @@ import { useStore } from "@/store/useStore";
 import { Store, MapPin, Package, TrendingUp, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { AddShopDialog } from "@/components/forms/AddShopDialog";
 import { EditShopDialog } from "@/components/forms/EditShopDialog";
 import { toast } from "sonner";
@@ -43,7 +42,7 @@ const ShopsPage = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-lg font-bold text-foreground">{shop.name}</h3>
-                      <Badge variant="outline" className={cn("text-xs capitalize", shop.type === "cosmetics" ? "text-pink-600 border-pink-200 bg-pink-50 dark:bg-pink-950 dark:border-pink-800" : "text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800")}>{shop.type}</Badge>
+                      <Badge variant="outline" className="text-xs capitalize text-primary border-primary/30 bg-primary/5">{shop.type}</Badge>
                     </div>
                     {shop.location && (
                       <div className="flex items-center text-sm text-muted-foreground">

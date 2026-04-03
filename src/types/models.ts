@@ -1,7 +1,7 @@
 export interface Shop {
   id: string;
   name: string;
-  type: "cosmetics" | "stationery";
+  type: string;
   location: string;
   status: "active" | "inactive";
   createdAt: string;

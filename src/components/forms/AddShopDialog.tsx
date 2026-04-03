@@ -8,14 +8,36 @@ import { useStore } from "@/store/useStore";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
+const SHOP_TYPES = [
+  "Cosmetics",
+  "Stationery",
+  "Electronics",
+  "Clothing & Fashion",
+  "Grocery & Food",
+  "Pharmacy",
+  "Hardware & Tools",
+  "Furniture",
+  "Books & Media",
+  "Toys & Games",
+  "Sports & Fitness",
+  "Jewelry",
+  "Auto Parts",
+  "Agriculture",
+  "General Store",
+  "Other",
+];
+
 export function AddShopDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [type, setType] = useState<"cosmetics" | "stationery">("cosmetics");
+  const [type, setType] = useState("General Store");
+  const [customType, setCustomType] = useState("");
   const [location, setLocation] = useState("");
   const addShop = useStore((s) => s.addShop);
   const fetchShops = useStore((s) => s.fetchShops);
   const [loading, setLoading] = useState(false);
+
+  const finalType = type === "Other" ? customType.trim() : type;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +45,19 @@ export function AddShopDialog() {
       toast.error("Please fill all required fields");
       return;
     }
+    if (type === "Other" && !customType.trim()) {
+      toast.error("Please specify the shop type");
+      return;
+    }
     setLoading(true);
     try {
-      await addShop({ name: name.trim(), type, location: location.trim(), status: "active" });
+      await addShop({ name: name.trim(), type: finalType, location: location.trim(), status: "active" });
       await fetchShops();
       toast.success("Shop created successfully");
       setName("");
       setLocation("");
+      setType("General Store");
+      setCustomType("");
       setOpen(false);
     } catch (err) {
       toast.error("Failed to create shop");
@@ -52,17 +80,26 @@ export function AddShopDialog() {
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
             <Label htmlFor="shop-name">Shop Name *</Label>
-            <Input id="shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Beauty Zone" maxLength={100} />
+            <Input id="shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
           </div>
           <div className="space-y-2">
             <Label>Shop Type *</Label>
-            <Select value={type} onValueChange={(v: "cosmetics" | "stationery") => setType(v)}>
+            <Select value={type} onValueChange={setType}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="cosmetics">Cosmetics</SelectItem>
-                <SelectItem value="stationery">Stationery</SelectItem>
+                {SHOP_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {type === "Other" && (
+              <Input
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Specify shop type..."
+                maxLength={50}
+              />
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="shop-location">Location *</Label>

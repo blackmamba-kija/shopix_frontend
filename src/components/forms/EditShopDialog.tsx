@@ -9,6 +9,25 @@ import { Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { Shop } from "@/types/models";
 
+const SHOP_TYPES = [
+  "Cosmetics",
+  "Stationery",
+  "Electronics",
+  "Clothing & Fashion",
+  "Grocery & Food",
+  "Pharmacy",
+  "Hardware & Tools",
+  "Furniture",
+  "Books & Media",
+  "Toys & Games",
+  "Sports & Fitness",
+  "Jewelry",
+  "Auto Parts",
+  "Agriculture",
+  "General Store",
+  "Other",
+];
+
 interface EditShopDialogProps {
     shop: Shop;
 }
@@ -16,16 +35,22 @@ interface EditShopDialogProps {
 export function EditShopDialog({ shop }: EditShopDialogProps) {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(shop.name);
-    const [type, setType] = useState<"cosmetics" | "stationery">(shop.type as ("cosmetics" | "stationery"));
+    const isKnownType = SHOP_TYPES.includes(shop.type);
+    const [type, setType] = useState(isKnownType ? shop.type : "Other");
+    const [customType, setCustomType] = useState(isKnownType ? "" : shop.type);
     const [location, setLocation] = useState(shop.location || "");
     const updateShop = useStore((s) => s.updateShop);
     const fetchShops = useStore((s) => s.fetchShops);
     const [loading, setLoading] = useState(false);
 
+    const finalType = type === "Other" ? customType.trim() : type;
+
     useEffect(() => {
         if (open) {
             setName(shop.name);
-            setType(shop.type as ("cosmetics" | "stationery"));
+            const known = SHOP_TYPES.includes(shop.type);
+            setType(known ? shop.type : "Other");
+            setCustomType(known ? "" : shop.type);
             setLocation(shop.location || "");
         }
     }, [open, shop]);
@@ -36,9 +61,13 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
             toast.error("Please fill all required fields");
             return;
         }
+        if (type === "Other" && !customType.trim()) {
+            toast.error("Please specify the shop type");
+            return;
+        }
         setLoading(true);
         try {
-            await updateShop(shop.id, { name: name.trim(), type, location: location.trim() });
+            await updateShop(shop.id, { name: name.trim(), type: finalType, location: location.trim() });
             await fetchShops();
             toast.success("Shop updated successfully");
             setOpen(false);
@@ -64,17 +93,26 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
                 <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <div className="space-y-2">
                         <Label htmlFor="edit-shop-name">Shop Name *</Label>
-                        <Input id="edit-shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Beauty Zone" maxLength={100} />
+                        <Input id="edit-shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
                     </div>
                     <div className="space-y-2">
                         <Label>Shop Type *</Label>
-                        <Select value={type} onValueChange={(v: "cosmetics" | "stationery") => setType(v)}>
+                        <Select value={type} onValueChange={setType}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="cosmetics">Cosmetics</SelectItem>
-                                <SelectItem value="stationery">Stationery</SelectItem>
+                                {SHOP_TYPES.map((t) => (
+                                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
+                        {type === "Other" && (
+                            <Input
+                                value={customType}
+                                onChange={(e) => setCustomType(e.target.value)}
+                                placeholder="Specify shop type..."
+                                maxLength={50}
+                            />
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="edit-shop-location">Location *</Label>
