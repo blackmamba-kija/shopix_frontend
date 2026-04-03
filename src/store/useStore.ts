@@ -52,7 +52,7 @@ export const useStore = create<StoreState>((set, get) => ({
   products: [],
   sales: [],
   serviceSales: [],
-  notifications: initialNotifications,
+  notifications: [],
   auditLogs: [],
   user: authHelper.getUser(),
   selectedShopId: "all",

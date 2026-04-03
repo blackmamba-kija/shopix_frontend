@@ -71,19 +71,25 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             <Store className="w-3.5 h-3.5 sm:w-4 h-4 text-primary" />
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight hidden md:inline">Active Shop</span>
           </div>
-          <Select value={selectedShopId} onValueChange={setSelectedShopId}>
-            <SelectTrigger className="w-[140px] sm:w-[180px] h-8 border-none bg-transparent hover:bg-secondary transition-all focus:ring-0 shadow-none text-xs font-bold">
-              <SelectValue placeholder="Select Shop" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" className="text-xs font-bold">{isAdmin ? "All Shops (Admin)" : "All My Shops"}</SelectItem>
-              {shops.map((s) => (
-                <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
-                  {s.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {shops.length === 1 && !isAdmin ? (
+            <div className="px-3 py-1 text-sm font-bold truncate max-w-[140px] sm:max-w-[180px]">
+              {shops[0].name}
+            </div>
+          ) : (
+            <Select value={selectedShopId} onValueChange={setSelectedShopId}>
+              <SelectTrigger className="w-[140px] sm:w-[180px] h-8 border-none bg-transparent hover:bg-secondary transition-all focus:ring-0 shadow-none text-xs font-bold">
+                <SelectValue placeholder="Select Shop" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs font-bold">{isAdmin ? "All Shops (Admin)" : "All My Shops"}</SelectItem>
+                {shops.map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div className="relative hidden lg:block">
