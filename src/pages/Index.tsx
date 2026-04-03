@@ -32,7 +32,6 @@ const Dashboard = () => {
     const diff = new Date(p.expiryDate).getTime() - Date.now();
     return diff < 90 * 24 * 60 * 60 * 1000 && diff > 0;
   });
-  const pendingApprovals = products.filter((p) => p.status === "pending");
 
   const todayDateStr = new Date().toISOString().split("T")[0];
   const todaySales = sales.filter((s) => s.date === todayDateStr);
@@ -60,8 +59,8 @@ const Dashboard = () => {
   const serviceTotal = serviceSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
 
   const revenueSourceData = [
-    { name: "Product Sales", value: productTotal, color: "hsl(221, 83%, 53%)" },
-    { name: "Service Revenue", value: serviceTotal, color: "hsl(262, 83%, 58%)" }
+    { name: "Product Sales", value: productTotal, color: "hsl(330, 81%, 60%)" }, // Pink
+    { name: "Service Revenue", value: serviceTotal, color: "hsl(25, 95%, 53%)" } // Orange
   ];
 
   // 3. Weekly Trends
@@ -124,8 +123,8 @@ const Dashboard = () => {
                   contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
                 />
                 <Legend verticalAlign="top" align="right" iconType="circle" />
-                <Bar name="Product Sales" dataKey="sales" fill="hsl(221, 83%, 53%)" radius={[6, 6, 0, 0]} barSize={24} />
-                <Bar name="Service Revenue" dataKey="services" fill="hsl(262, 83%, 58%)" radius={[6, 6, 0, 0]} barSize={24} />
+                <Bar name="Product Sales" dataKey="sales" fill="hsl(330, 81%, 60%)" radius={[6, 6, 0, 0]} barSize={24} />
+                <Bar name="Service Revenue" dataKey="services" fill="hsl(25, 95%, 53%)" radius={[6, 6, 0, 0]} barSize={24} />
               </BarChart>
             </ResponsiveContainer>
           </div>

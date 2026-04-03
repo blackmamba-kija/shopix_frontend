@@ -66,22 +66,22 @@ export function AppSidebar() {
       {/* Logo Section */}
       <div className={"flex items-center gap-3 h-32 border-b border-sidebar-border/50 transition-all duration-300 " + (collapsed ? "px-1 justify-center" : "px-3")}>
         <div className={cn(
-          "rounded-[2.5rem] bg-white p-1.5 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] flex-shrink-0 border border-white/20 transition-all duration-300 overflow-hidden flex items-center justify-center",
+          "rounded-[2.5rem] bg-white p-1.5 shadow-[0_0_40px_-10px_rgba(244,114,182,0.3)] flex-shrink-0 border border-white/20 transition-all duration-300 overflow-hidden flex items-center justify-center",
           collapsed ? "w-16 h-16" : "w-20 h-20"
         )}>
           <img
-            src="/yuster-logo.png"
-            alt="Yusco Logo"
+            src="/shopix-logo.png"
+            alt="Shopix Logo"
             className="w-full h-full object-contain scale-125"
           />
         </div>
         {!collapsed && (
           <div className="animate-in fade-in slide-in-from-left duration-500">
             <h1 className="text-lg font-black tracking-tight leading-none italic">
-              <span className="bg-gradient-to-br from-blue-400 via-indigo-300 to-blue-500 bg-clip-text text-transparent">YUSCO</span>
+              <span className="bg-gradient-to-br from-rose-400 via-orange-300 to-rose-500 bg-clip-text text-transparent">SHOPIX</span>
             </h1>
             <div className="flex items-center gap-1.5 mt-1">
-              <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+              <div className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
               <p className="text-[9px] text-sidebar-muted font-bold uppercase tracking-[0.15em]">Shop Control</p>
             </div>
           </div>

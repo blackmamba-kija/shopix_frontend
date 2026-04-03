@@ -118,7 +118,7 @@ const ReportsPage = () => {
       // --- Header Style ---
       worksheet.mergeCells("A1:G1");
       const titleCell = worksheet.getCell("A1");
-      titleCell.value = "YUSTER SHOP";
+      titleCell.value = "SHOPIX SHOP";
       titleCell.font = { name: "Arial Black", size: 24, color: { argb: "FF2563EB" }, bold: true };
       titleCell.alignment = { vertical: "middle", horizontal: "center" };
 
@@ -272,7 +272,7 @@ const ReportsPage = () => {
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      saveAs(blob, `Yusco_${type}_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      saveAs(blob, `Shopix_${type}_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
       toast.success("Excel report downloaded successfully");
     } catch (e) {
       console.error(e);
@@ -292,7 +292,7 @@ const ReportsPage = () => {
       // Title
       doc.setFontSize(22);
       doc.setTextColor(37, 99, 235);
-      doc.text("YUSCO SHOP", 105, 20, { align: "center" });
+      doc.text("SHOPIX SHOP", 105, 20, { align: "center" });
 
       doc.setFontSize(14);
       doc.setTextColor(71, 85, 105);
@@ -388,7 +388,7 @@ const ReportsPage = () => {
         }
       });
 
-      doc.save(`Yusco_${type}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Shopix_${type}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success("PDF report downloaded successfully");
     } catch (e) {
       console.error(e);

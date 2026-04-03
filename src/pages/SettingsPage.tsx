@@ -36,11 +36,11 @@ export default function SettingsPage() {
               <form onSubmit={handleSave} className="space-y-4 max-w-lg">
                 <div className="space-y-2">
                   <Label>Company Name</Label>
-                  <Input defaultValue="YUSCO Shops" />
+                  <Input defaultValue="SHOPIX" />
                 </div>
                 <div className="space-y-2">
                   <Label>Contact Email</Label>
-                  <Input type="email" defaultValue="admin@yusco.com" />
+                  <Input type="email" defaultValue="admin@shopix.com" />
                 </div>
                 <div className="flex items-center justify-between pt-2">
                   <div className="space-y-0.5">

@@ -38,7 +38,7 @@ const InventoryPage = () => {
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
   const allProducts = useStore((s) => s.products);
   const allShops = useStore((s) => s.shops);
-  const [statusFilter, setStatusFilter] = useState<"all" | "low" | "expiring" | "pending">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "low" | "expiring">("all");
   const { can, isAdmin, canAccessShop } = usePermissions();
   const deleteProduct = useStore((s) => s.deleteProduct);
   const fetchProducts = useStore((s) => s.fetchProducts);
@@ -72,7 +72,6 @@ const InventoryPage = () => {
         matchesStatus = diff < 90 * 24 * 60 * 60 * 1000 && diff > 0;
       }
     }
-    else if (statusFilter === "pending") matchesStatus = p.status === "pending";
 
     // Text & Shop filters
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -111,7 +110,6 @@ const InventoryPage = () => {
                 { key: "all" as const, label: "All Items", count: products.length },
                 { key: "low" as const, label: "Low Stock", count: products.filter(p => p.quantity <= 10).length },
                 { key: "expiring" as const, label: "Expiring", count: products.filter(p => p.expiryDate && new Date(p.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000 && new Date(p.expiryDate).getTime() - Date.now() > 0).length },
-                { key: "pending" as const, label: "Pending", count: products.filter(p => p.status === "pending").length },
               ]).map((tab) => (
                 <button
                   key={tab.key}
@@ -169,7 +167,6 @@ const InventoryPage = () => {
                   <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Selling Price</th>
                   <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Stock Level</th>
                   <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Expiry</th>
-                  <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Status</th>
                   <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Action</th>
                 </tr>
               </thead>
@@ -215,15 +212,6 @@ const InventoryPage = () => {
                               <span className="text-xs font-bold">{product.expiryDate}</span>
                             </div>
                           ) : <span className="text-xs text-muted-foreground font-medium">—</span>}
-                        </td>
-                        <td className="p-4">
-                          <Badge className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                            product.status === "approved" && "bg-success/10 text-success border-success/30",
-                            product.status === "pending" && "bg-warning/10 text-warning border-warning/30",
-                            product.status === "rejected" && "bg-destructive/10 text-destructive border-destructive/30"
-                          )} variant="outline">
-                            {product.status}
-                          </Badge>
                         </td>
                         <td className="p-4 text-right">
                           <DropdownMenu>

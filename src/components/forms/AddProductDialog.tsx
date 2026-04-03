@@ -48,7 +48,7 @@ export function AddProductDialog() {
         barcode: form.barcode.trim() || undefined,
       });
       await fetchProducts();
-      toast.success("Product added (pending approval)");
+      toast.success("Product added successfully");
       setForm({ name: "", category: "", shopId: "", manufacturer: "", expiryDate: "", buyingCost: "", sellingPrice: "", quantity: "", supplier: "", batchNumber: "", barcode: "" });
       setOpen(false);
     } catch (err) {

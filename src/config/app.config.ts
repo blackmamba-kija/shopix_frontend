@@ -4,7 +4,7 @@
  */
 
 export const APP_CONFIG = {
-  APP_NAME: "YUSCO",
+  APP_NAME: "SHOPIX",
   VERSION: "1.0.0",
   ENVIRONMENT: import.meta.env.MODE,
   DEBUG: import.meta.env.DEV,

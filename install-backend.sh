@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Yusco Shop Backend - Dependency Installation Script
+# Shopix Shop Backend - Dependency Installation Script
 # This script installs all backend dependencies
 
 echo "╔════════════════════════════════════════════════════╗"
-echo "║  Yusco Shop Backend - Installing Dependencies      ║"
+echo "║  Shopix Shop Backend - Installing Dependencies      ║"
 echo "╚════════════════════════════════════════════════════╝"
 echo ""
 
