@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Clock, CheckCircle, XCircle, Search, Filter, Box, DollarSign, ArrowUpRight, RefreshCcw } from "lucide-react";
+import { AlertTriangle, Clock, CheckCircle, XCircle, Search, Filter, Box, DollarSign, ArrowUpRight, RefreshCcw, PackagePlus } from "lucide-react";
 import { useState } from "react";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { usePermissions } from "@/hooks/useAuth";
@@ -33,19 +33,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/hooks/useLanguage";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const InventoryPage = () => {
+  const { t } = useLanguage();
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
   const allProducts = useStore((s) => s.products);
   const allShops = useStore((s) => s.shops);
   const [statusFilter, setStatusFilter] = useState<"all" | "low" | "expiring">("all");
-  const { can, isAdmin, canAccessShop } = usePermissions();
+  const { can, isAdmin } = usePermissions();
   const deleteProduct = useStore((s) => s.deleteProduct);
-  const fetchProducts = useStore((s) => s.fetchProducts);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
-  // New filter states
   const [search, setSearch] = useState("");
-  // Sync with global filter
   const globalShopId = useStore((s) => s.selectedShopId);
   const setSelectedShopId = useStore((s) => s.setSelectedShopId);
   const selectedShop = globalShopId;
@@ -55,14 +56,12 @@ const InventoryPage = () => {
     (selectedShop === "all" || String(p.shopId) === String(selectedShop))
   );
   const shops = (allShops || []).filter(s => s && s.id);
-  const canAddProducts = isAdmin || can("add_products");
-  const canEditProducts = isAdmin || can("edit_products");
+  const canManageProducts = isAdmin || can("add_products") || can("edit_products");
   const canDeleteProducts = isAdmin || can("delete_products");
 
   const filtered = products.filter((p) => {
     if (!p || p.quantity == null) return false;
 
-    // Status filters
     let matchesStatus = true;
     if (statusFilter === "low") matchesStatus = p.quantity <= 10;
     else if (statusFilter === "expiring") {
@@ -73,7 +72,6 @@ const InventoryPage = () => {
       }
     }
 
-    // Text & Shop filters
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.batchNumber && p.batchNumber.toLowerCase().includes(search.toLowerCase()));
 
@@ -86,183 +84,144 @@ const InventoryPage = () => {
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);
 
   return (
-    <AppLayout title="Inventory" subtitle="Manage stock and product catalog">
-      <div className="flex flex-col gap-6">
-        {/* Stats Summary */}
+    <AppLayout title={t("inventory")} subtitle={t("manage your products and track stock levels")}>
+      <div className="flex flex-col gap-6 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Total Items" value={filtered.length.toString()} icon={Box} change="Current filtered stock" changeType="neutral" />
+          <StatCard title={t("total items")} value={filtered.length.toString()} icon={Box} change={t("current filtered stock")} changeType="neutral" />
           {isAdmin && (
             <>
-              <StatCard title="Stock Cost" value={formatTsh(totalStockValue)} icon={DollarSign} change="Investment in stock" changeType="neutral" />
-              <StatCard title="Est. Revenue" value={formatTsh(totalPotentialRevenue)} icon={ArrowUpRight} change="Full sale potential" changeType="positive" />
+              <StatCard title={t("stock cost")} value={formatTsh(totalStockValue)} icon={DollarSign} change={t("investment in stock")} changeType="neutral" />
+              <StatCard title={t("est. revenue")} value={formatTsh(totalPotentialRevenue)} icon={ArrowUpRight} change={t("full sale potential")} changeType="positive" />
             </>
-          )}
-          {!isAdmin && (
-            <StatCard title="Unique SKU Count" value={products.length.toString()} icon={Box} change="Total product variants" changeType="neutral" />
           )}
         </div>
 
         <div className="flex flex-col gap-4">
-          {/* Status Tabs & Action */}
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex gap-2 flex-wrap">
-              {([
-                { key: "all" as const, label: "All Items", count: products.length },
-                { key: "low" as const, label: "Low Stock", count: products.filter(p => p.quantity <= 10).length },
-                { key: "expiring" as const, label: "Expiring", count: products.filter(p => p.expiryDate && new Date(p.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000 && new Date(p.expiryDate).getTime() - Date.now() > 0).length },
-              ]).map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setStatusFilter(tab.key)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border",
-                    statusFilter === tab.key
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
-                      : "bg-background text-muted-foreground border-border hover:border-primary/50 hover:bg-primary/5"
-                  )}
-                >
-                  {tab.label} <span className="opacity-60 ml-1">{tab.count}</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2 items-center flex-wrap">
-              {canAddProducts && <RestockInventoryDialog />}
-              {canAddProducts && <AddProductDialog />}
-            </div>
-          </div>
-
-          {/* New Filter Bar */}
-          <div className="flex flex-wrap items-center gap-3 bg-card border border-border p-3 rounded-xl shadow-sm">
-            <div className="relative w-full sm:w-80">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:w-96 max-w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search name, batch number..." className="pl-9 h-9 border-none bg-primary/5 focus:bg-background transition-all" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder={t("search...")} className="pl-9 h-11 border-slate-200 bg-white/50 focus-visible:bg-white shadow-sm rounded-xl font-medium transition-all focus-visible:ring-primary/20 hover:border-slate-300" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-
-            <Select value={selectedShop} onValueChange={setSelectedShopId}>
-              <SelectTrigger className="w-full sm:w-52 h-9 border-none bg-primary/5">
-                <SelectValue placeholder="All Shops" />
-              </SelectTrigger>
-              <SelectContent>
-                {isAdmin && <SelectItem value="all">All Shops</SelectItem>}
-                {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-
-            {(search || selectedShop !== "all") && (
-              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setSelectedShopId("all"); }} className="h-9 px-3 text-muted-foreground hover:text-foreground">
-                Reset Filters
-              </Button>
-            )}
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+              <Select value={selectedShop} onValueChange={setSelectedShopId}>
+                <SelectTrigger className="w-full sm:w-52 h-11 rounded-xl border-slate-200 bg-white shadow-sm">
+                  <SelectValue placeholder={t("all shops")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {isAdmin && <SelectItem value="all">{t("all shops")}</SelectItem>}
+                  {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              
+              {canManageProducts && (
+                <AddProductDialog trigger={
+                  <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0">
+                    <PackagePlus className="w-4 h-4" /> {t("add product")}
+                  </Button>
+                }/>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-md">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/20">
-                  <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Product Information</th>
-                  <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Location</th>
-                  {isAdmin && <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Buying Cost</th>}
-                  <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Selling Price</th>
-                  <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Stock Level</th>
-                  <th className="text-left p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Expiry</th>
-                  <th className="text-right p-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={isAdmin ? 8 : 7} className="text-center text-muted-foreground py-24">
-                      <div className="flex flex-col items-center gap-3">
-                        <Filter className="w-12 h-12 opacity-20" />
-                        <p className="text-lg font-medium opacity-50">No products match your current search/filters</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((product) => {
-                    const shop = getShop(product.shopId);
-                    const isLowStock = product.quantity <= 10;
-                    const isExpiring = product.expiryDate && new Date(product.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000 && new Date(product.expiryDate).getTime() > Date.now();
+          <Table>
+            <TableHeader className="bg-slate-50/80">
+              <TableRow className="border-slate-200 hover:bg-transparent">
+                <TableHead className="py-4 font-bold text-slate-700 w-[280px]">{t("product name")}</TableHead>
+                <TableHead className="py-4 font-bold text-slate-700">{t("location")}</TableHead>
+                {isAdmin && <TableHead className="py-4 font-bold text-slate-700 text-right">{t("buying cost")}</TableHead>}
+                <TableHead className="py-4 font-bold text-slate-700 text-right">{t("selling price")}</TableHead>
+                <TableHead className="py-4 font-bold text-slate-700 text-center">{t("quantity")}</TableHead>
+                <TableHead className="py-4 font-bold text-slate-700 text-center">{t("status")}</TableHead>
+                <TableHead className="py-4 font-bold text-slate-700 text-right">{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={isAdmin ? 8 : 7} className="text-center text-muted-foreground py-24">
+                    <div className="flex flex-col items-center gap-3">
+                      <Filter className="w-12 h-12 opacity-20" />
+                      <p className="text-lg font-medium opacity-50">{t("no products match your current search/filters")}</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((product) => {
+                  const shop = getShop(product.shopId);
+                  const isLowStock = product.quantity <= 10;
+                  const isExpiring = product.expiryDate && new Date(product.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000 && new Date(product.expiryDate).getTime() > Date.now();
 
-                    return (
-                      <tr key={product.id} className="hover:bg-primary/5 transition-all group">
-                        <td className="p-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">{product.name}</span>
-                            <span className="text-[10px] font-mono text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded w-fit mt-1">{product.batchNumber || "NO-BATCH"}</span>
+                  return (
+                    <TableRow key={product.id} className="hover:bg-primary/5 transition-all group">
+                      <TableCell className="p-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">{product.name}</span>
+                          <span className="text-[10px] font-mono text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded w-fit mt-1">{product.batchNumber || t("no-batch")}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-4"><Badge variant="outline" className="font-semibold px-2 py-0 border-primary/20 bg-primary/5 text-primary">{shop?.name}</Badge></TableCell>
+                      {isAdmin && <TableCell className="p-4 text-right text-muted-foreground font-mono">Tsh{product.buyingCost.toLocaleString()}</TableCell>}
+                      <TableCell className="p-4 text-right">
+                        <span className="font-bold text-lg text-foreground tracking-tight">Tsh{product.sellingPrice.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell className="p-4 text-center">
+                        <div className="flex flex-col items-center">
+                          <span className={cn("font-black text-lg", isLowStock ? "text-destructive animate-pulse" : "text-foreground")}>{product.quantity}</span>
+                          {isLowStock && <span className="text-[9px] font-bold text-destructive uppercase tracking-tighter">{t("low stock")}</span>}
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-4 text-center">
+                        {product.expiryDate ? (
+                          <div className={cn("flex items-center justify-center gap-1.5 px-2 py-1 rounded-md w-fit mx-auto", isExpiring ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground")}>
+                            {isExpiring ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                            <span className="text-xs font-bold">{product.expiryDate}</span>
                           </div>
-                        </td>
-                        <td className="p-4"><Badge variant="outline" className="font-semibold px-2 py-0 border-primary/20 bg-primary/5 text-primary">{shop?.name}</Badge></td>
-                        {isAdmin && <td className="p-4 text-right text-muted-foreground font-mono">Tsh{product.buyingCost.toLocaleString()}</td>}
-                        <td className="p-4 text-right">
-                          <span className="font-bold text-lg text-foreground tracking-tight">Tsh{product.sellingPrice.toLocaleString()}</span>
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex flex-col items-end">
-                            <span className={cn("font-black text-lg", isLowStock ? "text-destructive animate-pulse" : "text-foreground")}>{product.quantity}</span>
-                            {isLowStock && <span className="text-[9px] font-bold text-destructive uppercase tracking-tighter">Low Stock</span>}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          {product.expiryDate ? (
-                            <div className={cn("flex items-center gap-1.5 px-2 py-1 rounded-md w-fit", isExpiring ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground")}>
-                              {isExpiring ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                              <span className="text-xs font-bold">{product.expiryDate}</span>
-                            </div>
-                          ) : <span className="text-xs text-muted-foreground font-medium">—</span>}
-                        </td>
-                        <td className="p-4 text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white rounded-full">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-slate-200">
-                              <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2 py-1.5">Product Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <RestockInventoryDialog
-                                initialProductId={product.id}
-                                trigger={
-                                  <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-primary/5 text-primary rounded-lg cursor-pointer transition-colors">
-                                    <RefreshCcw className="w-4 h-4" />
-                                    <span className="font-bold text-xs uppercase tracking-tight">Quick Restock</span>
-                                  </div>
-                                }
-                              />
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="gap-2 focus:bg-slate-50 focus:text-slate-900 rounded-lg cursor-pointer">
-                                <History className="w-4 h-4" />
-                                <span className="font-bold text-xs text-slate-700">Stock History</span>
-                              </DropdownMenuItem>
-
-                              {canEditProducts && (
-                                <EditProductDialog
-                                  product={product}
-                                  trigger={
-                                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors">
-                                      <Edit className="w-4 h-4" />
-                                      <span className="font-bold text-xs text-slate-700">Edit Details</span>
-                                    </div>
-                                  }
-                                />
-                              )}
-
-                              <DropdownMenuSeparator />
-
-                              {canDeleteProducts && (
+                        ) : <span className="text-xs text-muted-foreground font-medium">—</span>}
+                      </TableCell>
+                      <TableCell className="p-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white rounded-full">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-slate-200">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2 py-1.5">{t("product actions")}</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <RestockInventoryDialog
+                              initialProductId={product.id}
+                              trigger={
+                                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-primary/5 text-primary rounded-lg cursor-pointer transition-colors">
+                                  <RefreshCcw className="w-4 h-4" />
+                                  <span className="font-bold text-xs uppercase tracking-tight">{t("quick restock")}</span>
+                                </div>
+                              }
+                            />
+                            {canManageProducts && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="gap-2 focus:bg-slate-50 focus:text-slate-900 rounded-lg cursor-pointer" onSelect={() => setEditingProduct(product)}>
+                                  <Edit className="w-4 h-4" />
+                                  <span className="font-bold text-xs text-slate-700">{t("edit details")}</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {canDeleteProducts && (
+                              <>
+                                <DropdownMenuSeparator />
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                     <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-destructive/5 text-destructive rounded-lg cursor-pointer transition-colors">
                                       <Trash2 className="w-4 h-4" />
-                                      <span className="font-bold text-xs">Delete Item</span>
+                                      <span className="font-bold text-xs">{t("delete item")}</span>
                                     </div>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
                                       <AlertDialogDescription>
                                         This will permanently delete "{product.name}" from the inventory.
                                         This action cannot be undone.
@@ -286,17 +245,17 @@ const InventoryPage = () => {
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </AppLayout>

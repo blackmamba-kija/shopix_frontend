@@ -11,8 +11,11 @@ import { Plus, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
+interface RecordSaleDialogProps {
+  trigger?: React.ReactNode;
+}
 
-export function RecordSaleDialog() {
+export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [openProductSelect, setOpenProductSelect] = useState(false);
 
@@ -80,9 +83,11 @@ export function RecordSaleDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" /> Record Sale
-        </Button>
+        {trigger || (
+          <Button size="sm" className="gap-1.5">
+            <Plus className="w-4 h-4" /> Record Sale
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>

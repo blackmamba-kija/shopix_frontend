@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon } from "lucide-react";
+import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecordSaleDialog } from "@/components/forms/RecordSaleDialog";
 import { usePermissions } from "@/hooks/useAuth";
@@ -10,11 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const SalesPage = () => {
+  const { t } = useLanguage();
   const allSales = useStore((s) => s.sales);
   const allShops = useStore((s) => s.shops);
-  const { can, isAdmin, canAccessShop } = usePermissions();
+  const { can, isAdmin } = usePermissions();
 
   // Filter states
   const [search, setSearch] = useState("");
@@ -55,18 +58,18 @@ const SalesPage = () => {
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);
 
   return (
-    <AppLayout title="Sales" subtitle="Track and record sales transactions">
+    <AppLayout title={t("sales")} subtitle={t("track daily product sales and transactions")}>
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {isAdmin && (
             <>
-              <StatCard title="Today's Revenue" value={formatTsh(todayRevenue)} icon={DollarSign} change={`${todaySales.length} sales today`} changeType="neutral" />
-              <StatCard title="Today's Profit" value={formatTsh(todayProfit)} icon={TrendingUp} change="Estimated earnings" changeType="positive" />
-              <StatCard title="Filtered Revenue" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.totalCost || 0), 0))} icon={ShoppingCart} change={`${filtered.length} total transactions`} changeType="neutral" />
+              <StatCard title={t("today's revenue")} value={formatTsh(todayRevenue)} icon={DollarSign} change={`${todaySales.length} ${t("sales today")}`} changeType="neutral" />
+              <StatCard title={t("today's profit")} value={formatTsh(todayProfit)} icon={TrendingUp} change={t("estimated earnings")} changeType="positive" />
+              <StatCard title={t("filtered revenue")} value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.totalCost || 0), 0))} icon={ShoppingCart} change={`${filtered.length} ${t("total transactions")}`} changeType="neutral" />
             </>
           )}
           {!isAdmin && (
-            <StatCard title="Total Volume" value={filtered.length.toString()} icon={ShoppingCart} change="Total filtered transactions" changeType="neutral" />
+            <StatCard title={t("total volume")} value={filtered.length.toString()} icon={ShoppingCart} change={t("total filtered transactions")} changeType="neutral" />
           )}
         </div>
 
@@ -74,15 +77,15 @@ const SalesPage = () => {
           <div className="flex flex-wrap items-center gap-3 bg-card border border-border p-3 rounded-xl w-full md:w-auto">
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search product..." className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder={t("search...")} className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
 
             <Select value={selectedShop} onValueChange={setSelectedShopId}>
               <SelectTrigger className="w-full sm:w-44 h-9">
-                <SelectValue placeholder="All Shops" />
+                <SelectValue placeholder={t("all shops")} />
               </SelectTrigger>
               <SelectContent>
-                {isAdmin && <SelectItem value="all">All Shops</SelectItem>}
+                {isAdmin && <SelectItem value="all">{t("all shops")}</SelectItem>}
                 {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -112,75 +115,76 @@ const SalesPage = () => {
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Input placeholder="Min Tsh" type="number" className="w-full sm:w-24 h-9 text-xs" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} />
-              <Input placeholder="Max Tsh" type="number" className="w-full sm:w-24 h-9 text-xs" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} />
+              <Input placeholder={t("min tsh")} type="number" className="w-full sm:w-24 h-9 text-xs" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} />
+              <Input placeholder={t("max tsh")} type="number" className="w-full sm:w-24 h-9 text-xs" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} />
             </div>
 
             {(search || selectedShop !== "all" || dateFrom || dateTo || minAmount || maxAmount) && (
               <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setSelectedShopId("all"); setDateFrom(""); setDateTo(""); setMinAmount(""); setMaxAmount(""); }} className="h-9 px-3">
-                Clear
+                {t("clear")}
               </Button>
             )}
           </div>
-
-          {canRecordSales && <RecordSaleDialog />}
+          <div className="flex items-center">
+            {canRecordSales && <RecordSaleDialog trigger={<Button className="gap-2"><Plus className="w-4 h-4" /> {t("record sale")}</Button>} />}
+          </div>
         </div>
 
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="p-4 border-b border-border bg-secondary/10 flex justify-between items-center">
-            <h3 className="text-sm font-semibold text-foreground tracking-tight">Sales Records</h3>
-            <Badge variant="secondary" className="font-mono">{filtered.length} entries</Badge>
+            <h3 className="text-sm font-semibold text-foreground tracking-tight">{t("sales records")}</h3>
+            <Badge variant="secondary" className="font-mono">{filtered.length} {t("entries")}</Badge>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/30">
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Product</th>
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Shop</th>
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Date</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Qty</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Price</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Total</th>
-                  {isAdmin && <th className="text-right p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Profit</th>}
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-secondary/30">
+                  <TableHead className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("product")}</TableHead>
+                  <TableHead className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("shop")}</TableHead>
+                  <TableHead className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("date")}</TableHead>
+                  <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("qty")}</TableHead>
+                  <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("price")}</TableHead>
+                  <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("total")}</TableHead>
+                  {isAdmin && <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("profit")}</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-20">
+                  <TableRow>
+                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-20">
                       <div className="flex flex-col items-center gap-3 opacity-60">
                         <Filter className="w-10 h-10" />
-                        <p className="text-base font-medium">No sales found matching your criteria</p>
+                        <p className="text-base font-medium">{t("no sales found matching your criteria")}</p>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filtered.map((sale) => {
                     const shop = getShop(sale.shopId);
                     return (
-                      <tr key={sale.id} className="border-b border-border last:border-0 hover:bg-primary/5 transition-colors group">
-                        <td className="p-4 font-semibold text-foreground group-hover:text-primary transition-colors">{sale.productName}</td>
-                        <td className="p-4"><Badge variant="outline" className="font-medium bg-background">{shop?.name}</Badge></td>
-                        <td className="p-4 text-muted-foreground">
+                      <TableRow key={sale.id} className="border-b border-border last:border-0 hover:bg-primary/5 transition-colors group">
+                        <TableCell className="p-4 font-semibold text-foreground group-hover:text-primary transition-colors">{sale.productName}</TableCell>
+                        <TableCell className="p-4"><Badge variant="outline" className="font-medium bg-background">{shop?.name}</Badge></TableCell>
+                        <TableCell className="p-4 text-muted-foreground">
                           <div className="font-medium">{sale.date}</div>
                           <div className="text-[10px] opacity-60 uppercase">{sale.time}</div>
-                        </td>
-                        <td className="p-4 text-right text-foreground font-medium">{sale.quantity}</td>
-                        <td className="p-4 text-right text-muted-foreground font-mono">Tsh{sale.sellingPrice.toLocaleString()}</td>
-                        <td className="p-4 text-right font-bold text-foreground text-lg">Tsh{sale.totalCost.toLocaleString()}</td>
+                        </TableCell>
+                        <TableCell className="p-4 text-right text-foreground font-medium">{sale.quantity}</TableCell>
+                        <TableCell className="p-4 text-right text-muted-foreground font-mono">Tsh{sale.sellingPrice.toLocaleString()}</TableCell>
+                        <TableCell className="p-4 text-right font-bold text-foreground text-lg">Tsh{sale.totalCost.toLocaleString()}</TableCell>
                         {isAdmin && (
-                          <td className="p-4 text-right">
+                          <TableCell className="p-4 text-right">
                             <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-success/10 text-success text-sm font-bold border border-success/20">
                               Tsh{sale.profit.toLocaleString()}
                             </div>
-                          </td>
+                          </TableCell>
                         )}
-                      </tr>
+                      </TableRow>
                     );
                   })
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>

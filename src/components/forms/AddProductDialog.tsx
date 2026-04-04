@@ -8,8 +8,11 @@ import { useStore } from "@/store/useStore";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
+interface AddProductDialogProps {
+  trigger?: React.ReactNode;
+}
 
-export function AddProductDialog() {
+export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const shopsRaw = useStore((s) => s.shops);
   const addProduct = useStore((s) => s.addProduct);
@@ -61,9 +64,11 @@ export function AddProductDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" /> Add Product
-        </Button>
+        {trigger || (
+          <Button size="sm" className="gap-1.5">
+            <Plus className="w-4 h-4" /> Add Product
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
         <DialogHeader>
