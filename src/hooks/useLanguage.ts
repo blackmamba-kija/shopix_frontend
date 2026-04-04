@@ -65,7 +65,25 @@ const dict: Record<string, { en: string; sw: string }> = {
   "total sales": { en: "Total Sales", sw: "Jumla ya Mauzo" },
   "revenue": { en: "Revenue", sw: "Mapato" },
   "manage your products and track stock levels": { en: "Manage your products and track stock levels", sw: "Simamia bidhaa na kiasi kilichopo" },
-  "track daily product sales and transactions": { en: "Track daily product sales and transactions", sw: "Fuatilia mauzo na miamala ya kila siku" }
+  "track daily product sales and transactions": { en: "Track daily product sales and transactions", sw: "Fuatilia mauzo na miamala ya kila siku" },
+  "manage borrowing and installments": { en: "Manage borrowing and installments", sw: "Simamia mikopo na malipo ya awamu" },
+  "search borrower...": { en: "Search Borrower...", sw: "Tafuta Mkopaji..." },
+  "issue debt": { en: "Issue Debt", sw: "Toa Mkopo" },
+  "new borrowing": { en: "New Borrowing", sw: "Kukopa Kupya" },
+  "borrower name": { en: "Borrower Name", sw: "Jina la Mkopaji" },
+  "phone number": { en: "Phone Number", sw: "Namba ya Simu" },
+  "optional": { en: "Optional", sw: "Sio Lazima" },
+  "initial paid amount": { en: "Amount Paid (Initial)", sw: "Kiasi Alicholipia Awali" },
+  "due date": { en: "Due Date", sw: "Tarehe ya Mwisho" },
+  "create debt": { en: "Create Debt", sw: "Tengeneza Mkopo" },
+  "loading debts...": { en: "Loading debts...", sw: "Inapakia mikopo..." },
+  "no borrowings found": { en: "No borrowings found", sw: "Hakuna mikopo iliyopatikana" },
+  "issued": { en: "Issued", sw: "Imetolewa" },
+  "due": { en: "Due", sw: "Mwisho" },
+  "total": { en: "Total", sw: "Jumla" },
+  "paid": { en: "Paid", sw: "Imelipwa" },
+  "pay installment": { en: "Pay Installment", sw: "Lipa Awamu" },
+  "shop": { en: "Shop", sw: "Duka" },
 };
 
 export const useLanguage = create<LanguageState>((set, get) => ({

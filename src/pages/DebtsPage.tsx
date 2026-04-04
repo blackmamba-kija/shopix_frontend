@@ -3,7 +3,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { usePermissions } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
-import { formatTsh } from "@/utils/helpers/currency.helper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,13 +79,13 @@ export default function DebtsPage() {
     const filtered = debts.filter(d => d.customerName.toLowerCase().includes(search.toLowerCase()));
 
     return (
-        <AppLayout title={t("debts")} subtitle="Manage borrowing and installments">
+        <AppLayout title={t("debts")} subtitle={t("manage borrowing and installments")}>
             <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                     <div className="relative w-80">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search Borrower..."
+                            placeholder={t("search borrower...")}
                             className="pl-9 h-9 border bg-card"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -95,11 +94,11 @@ export default function DebtsPage() {
                     
                     <Dialog open={openAdd} onOpenChange={setOpenAdd}>
                         <DialogTrigger asChild>
-                            <Button className="gap-2"><Plus className="w-4 h-4"/> Issue Debt</Button>
+                            <Button className="gap-2"><Plus className="w-4 h-4"/> {t("issue debt")}</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>New Borrowing</DialogTitle>
+                                <DialogTitle>{t("new borrowing")}</DialogTitle>
                             </DialogHeader>
                             <form onSubmit={handleAddDebt} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
@@ -163,9 +162,9 @@ export default function DebtsPage() {
 
                 <div className="grid grid-cols-1 gap-4">
                     {loading ? (
-                        <p className="text-center text-muted-foreground p-8">Loading debts...</p>
+                        <p className="text-center text-muted-foreground p-8">{t("loading debts...")}</p>
                     ) : filtered.length === 0 ? (
-                        <p className="text-center text-muted-foreground p-8">No borrowings found</p>
+                        <p className="text-center text-muted-foreground p-8">{t("no borrowings found")}</p>
                     ) : (
                         filtered.map(debt => (
                             <div key={debt.id} className="bg-card p-4 rounded-xl shadow-sm border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -176,8 +175,8 @@ export default function DebtsPage() {
                                     <div>
                                         <h3 className="font-bold text-lg">{debt.customerName} {debt.phone && <span className="text-sm font-normal text-muted-foreground ml-2">({debt.phone})</span>}</h3>
                                         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5"/> Issued: {new Date(debt.createdAt).toLocaleDateString()}</span>
-                                            {debt.dueDate && <span className="flex items-center gap-1 text-destructive"><Calendar className="w-3.5 h-3.5"/> Due: {new Date(debt.dueDate).toLocaleDateString()}</span>}
+                                            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5"/> {t("issued")}: {new Date(debt.createdAt).toLocaleDateString()}</span>
+                                            {debt.dueDate && <span className="flex items-center gap-1 text-destructive"><Calendar className="w-3.5 h-3.5"/> {t("due")}: {new Date(debt.dueDate).toLocaleDateString()}</span>}
                                         </div>
                                         {debt.product && <p className="text-xs font-mono mt-1 bg-secondary w-fit px-1.5 rounded">{debt.product.name} x {debt.quantity}</p>}
                                     </div>
@@ -185,13 +184,13 @@ export default function DebtsPage() {
                                 
                                 <div className="flex flex-col md:items-end gap-1">
                                     <div className="text-right flex items-center justify-end gap-2 text-sm font-bold">
-                                        <span>Total:</span> <span className="text-lg">Tsh {debt.totalAmount.toLocaleString()}</span>
+                                        <span>{t("total")}:</span> <span className="text-lg">Tsh {debt.totalAmount.toLocaleString()}</span>
                                     </div>
                                     <div className="text-right flex items-center justify-end gap-2 text-sm font-medium text-green-600">
-                                        <span>Paid:</span> <span>Tsh {debt.amountPaid.toLocaleString()}</span>
+                                        <span>{t("paid")}:</span> <span>Tsh {debt.amountPaid.toLocaleString()}</span>
                                     </div>
                                     <div className="text-right flex items-center justify-end gap-2 text-sm font-black text-rose-600">
-                                        <span>Balance:</span> <span>Tsh {(debt.totalAmount - debt.amountPaid).toLocaleString()}</span>
+                                        <span>{t("balance")}:</span> <span>Tsh {(debt.totalAmount - debt.amountPaid).toLocaleString()}</span>
                                     </div>
                                     <div className="mt-1 flex items-center justify-end">
                                         <Badge variant="outline" className={
@@ -211,7 +210,7 @@ export default function DebtsPage() {
                                             e.currentTarget.reset();
                                         }}>
                                             <Input name="amount" type="number" step="0.01" min="1" max={debt.totalAmount - debt.amountPaid} placeholder="Tsh..." className="w-24 h-9" required />
-                                            <Button type="submit" size="sm" className="h-9">Pay Installment</Button>
+                                            <Button type="submit" size="sm" className="h-9">{t("pay installment")}</Button>
                                         </form>
                                     </div>
                                 )}
