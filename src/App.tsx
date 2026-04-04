@@ -25,6 +25,7 @@ import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import OperationalOverview from "./pages/OperationalOverview";
+import DebtsPage from "./pages/DebtsPage";
 import NotFound from "./pages/NotFound";
 
 // Permissions
@@ -60,6 +61,7 @@ const protectedRoutes = [
   { path: "/shops", element: <ShopsPage />, permission: "view_shops" },
   { path: "/inventory", element: <InventoryPage />, permission: "view_products" },
   { path: "/sales", element: <SalesPage />, permission: "view_sales" },
+  { path: "/debts", element: <DebtsPage />, permission: "view_sales" },
   { path: "/services", element: <ServicesPage />, permission: "view_services" },
   { path: "/reports", element: <ReportsPage />, permission: "view_reports" },
   { path: "/notifications", element: <NotificationsPage />, permission: null },

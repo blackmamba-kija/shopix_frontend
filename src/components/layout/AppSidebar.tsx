@@ -5,6 +5,7 @@ import {
   Package,
   ShoppingCart,
   FileText,
+  CreditCard,
   Settings,
   Bell,
   Printer,
@@ -19,12 +20,14 @@ import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/useAuth";
 import { authHelper } from "@/utils/helpers/auth.helper";
 import { useStore } from "@/store/useStore";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/", permission: null },
   { icon: Store, label: "Shops", path: "/shops", permission: "view_shops" },
   { icon: Package, label: "Inventory", path: "/inventory", permission: "view_products" },
   { icon: ShoppingCart, label: "Sales", path: "/sales", permission: "view_sales" },
+  { icon: CreditCard, label: "Debts", path: "/debts", permission: "view_sales" },
   { icon: Printer, label: "Services", path: "/services", permission: "view_services" },
   { icon: FileText, label: "Reports", path: "/reports", permission: "view_reports" },
   { icon: Bell, label: "Notifications", path: "/notifications", permission: null },
@@ -43,6 +46,7 @@ export function AppSidebar() {
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
   const updateUser = useStore((s) => s.updateUser);
   const { can, isAdmin, user } = usePermissions();
+  const { t } = useLanguage();
 
   // Filter nav items: admins see everything, others see what they have permission for
   const visibleItems = navItems.filter(item =>
@@ -107,7 +111,7 @@ export function AppSidebar() {
               )}
             >
               <item.icon className={cn("w-[18px] h-[18px] shrink-0", isActive && "text-sidebar-primary")} />
-              <span className={cn("truncate", collapsed && "lg:hidden")}>{item.label}</span>
+              <span className={cn("truncate", collapsed && "lg:hidden")}>{t(item.label)}</span>
             </Link>
           );
         })}
@@ -125,7 +129,7 @@ export function AppSidebar() {
         className="mx-2 mb-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-sidebar-muted hover:text-destructive hover:bg-destructive/10 transition-colors"
       >
         <LogOut className="w-4 h-4 shrink-0" />
-        {!collapsed && <span>Logout</span>}
+        {!collapsed && <span>{t("Logout")}</span>}
       </button>
 
       {/* Collapse toggle (Desktop only) */}

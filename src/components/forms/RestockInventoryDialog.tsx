@@ -23,6 +23,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProductId, setSelectedProductId] = useState(initialProductId || "");
+    const [action, setAction] = useState<"add" | "remove" | "set">("add");
     const [restockQuantity, setRestockQuantity] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -66,11 +67,17 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
         }
 
         setLoading(true);
+        let newQuantity = selectedProduct!.quantity;
+        const inputQty = parseInt(restockQuantity);
+        if (action === "add") newQuantity += inputQty;
+        else if (action === "remove") newQuantity = Math.max(0, newQuantity - inputQty);
+        else if (action === "set") newQuantity = inputQty;
+
         try {
             const { productsApi } = await import("@/api/products.api");
 
             const updatedData = {
-                quantity: selectedProduct!.quantity + parseInt(restockQuantity),
+                quantity: newQuantity,
                 buyingCost: newBuyingCost ? parseFloat(newBuyingCost) : selectedProduct!.buyingCost,
                 sellingPrice: newSellingPrice ? parseFloat(newSellingPrice) : selectedProduct!.sellingPrice,
                 batchNumber: newBatchNumber || selectedProduct!.batchNumber,
@@ -80,7 +87,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
             await productsApi.update(selectedProductId, updatedData);
             await fetchProducts();
 
-            toast.success(`Successfully restocked ${selectedProduct?.name}`);
+            toast.success(`Successfully adjusted stock for ${selectedProduct?.name}`);
             resetForm();
             setOpen(false);
         } catch (err) {
@@ -107,7 +114,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
             <DialogTrigger asChild>
                 {trigger || (
                     <Button variant="outline" size="sm" className="gap-1.5 border-primary/30 hover:bg-primary/5 text-primary">
-                        <RefreshCcw className="w-4 h-4" /> Restock Items
+                        <RefreshCcw className="w-4 h-4" /> Adjust Stock
                     </Button>
                 )}
             </DialogTrigger>
@@ -118,8 +125,8 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                             <PackagePlus className="w-5 h-5 text-slate-900" />
                         </div>
                         <div>
-                            <DialogTitle className="text-xl font-bold">Restock Inventory</DialogTitle>
-                            <p className="text-xs text-muted-foreground mt-0.5">Increase stock levels for existing products</p>
+                            <DialogTitle className="text-xl font-bold">Adjust Inventory</DialogTitle>
+                            <p className="text-xs text-muted-foreground mt-0.5">Add, remove, or set exact stock levels</p>
                         </div>
                     </div>
                 </DialogHeader>
@@ -197,7 +204,16 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">Adding Quantity</Label>
+                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">Action Type</Label>
+                                    <div className="flex bg-slate-100 p-1 rounded-xl h-11">
+                                        <button type="button" onClick={() => setAction("add")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "add" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Add</button>
+                                        <button type="button" onClick={() => setAction("remove")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "remove" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Remove</button>
+                                        <button type="button" onClick={() => setAction("set")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "set" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Set</button>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">Quantity</Label>
                                     <Input
                                         type="number"
                                         min="1"
@@ -206,8 +222,11 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                                         placeholder="e.g. 50"
                                         className="h-11 border-slate-300 focus:ring-2 focus:ring-slate-950/20 rounded-xl font-black text-lg bg-white text-slate-900"
                                     />
-                                    <p className="text-[10px] font-bold text-slate-600 ml-1">Total after: {(selectedProduct?.quantity || 0) + (parseInt(restockQuantity) || 0)} units</p>
+                                    <p className="text-[10px] font-bold text-slate-600 ml-1">Total after: {action === "set" ? parseInt(restockQuantity) || 0 : (selectedProduct?.quantity || 0) + (action === "add" ? (parseInt(restockQuantity) || 0) : -(parseInt(restockQuantity) || 0))} units</p>
                                 </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 gap-4">
 
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-black uppercase tracking-wider text-slate-900">New Batch Number</Label>
@@ -260,7 +279,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                                     disabled={loading}
                                     className="flex-2 h-11 rounded-xl bg-slate-900 group relative overflow-hidden transition-all hover:pr-8"
                                 >
-                                    <span className="relative z-10">{loading ? "Updating..." : "Confirm Restock"}</span>
+                                    <span className="relative z-10">{loading ? "Updating..." : "Confirm Update"}</span>
                                     {!loading && <PackagePlus className="w-4 h-4 absolute right-[-20px] group-hover:right-3 transition-all opacity-0 group-hover:opacity-100" />}
                                 </Button>
                             </div>

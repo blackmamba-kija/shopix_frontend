@@ -8,6 +8,7 @@ import { useStore } from "@/store/useStore";
 import { usePermissions } from "@/hooks/useAuth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
   const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
   const updateUser = useStore((s) => s.updateUser);
+  const { language, setLanguage, t } = useLanguage();
 
   const shops = useMemo(() => filterShops(shopsRaw), [filterShops, shopsRaw]);
 
@@ -69,7 +71,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         <div className="flex items-center gap-1 sm:gap-2 bg-secondary/30 sm:bg-secondary/50 p-0.5 sm:p-1 rounded-xl border border-border/50">
           <div className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 border-r border-border/50">
             <Store className="w-3.5 h-3.5 sm:w-4 h-4 text-primary" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight hidden md:inline">Active Shop</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight hidden md:inline">{t("Active Shop")}</span>
           </div>
           {shops.length === 1 && !isAdmin ? (
             <div className="px-3 py-1 text-sm font-bold truncate max-w-[140px] sm:max-w-[180px]">
@@ -78,10 +80,10 @@ export function TopBar({ title, subtitle }: TopBarProps) {
           ) : (
             <Select value={selectedShopId} onValueChange={setSelectedShopId}>
               <SelectTrigger className="w-[140px] sm:w-[180px] h-8 border-none bg-transparent hover:bg-secondary transition-all focus:ring-0 shadow-none text-xs font-bold">
-                <SelectValue placeholder="Select Shop" />
+                <SelectValue placeholder={t("Select Shop")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-xs font-bold">{isAdmin ? "All Shops (Admin)" : "All My Shops"}</SelectItem>
+                <SelectItem value="all" className="text-xs font-bold">{isAdmin ? t("All Shops (Admin)") : t("All My Shops")}</SelectItem>
                 {shops.map((s) => (
                   <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
                     {s.name}
@@ -98,6 +100,18 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             placeholder="Search..."
             className="pl-9 w-40 h-9 bg-secondary/50 border-none text-xs focus-visible:ring-1 focus-visible:ring-primary/20"
           />
+        </div>
+
+        <div className="hidden sm:block">
+          <Select value={language} onValueChange={(v: any) => setLanguage(v)}>
+             <SelectTrigger className="w-[80px] h-9 border-none bg-secondary/50 font-bold text-xs uppercase cursor-pointer">
+                <SelectValue placeholder="EN" />
+             </SelectTrigger>
+             <SelectContent>
+                <SelectItem value="en" className="text-xs font-bold">EN</SelectItem>
+                <SelectItem value="sw" className="text-xs font-bold">SW</SelectItem>
+             </SelectContent>
+          </Select>
         </div>
 
         <div className="relative">

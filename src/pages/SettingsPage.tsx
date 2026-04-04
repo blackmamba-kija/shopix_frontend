@@ -107,19 +107,98 @@ export default function SettingsPage() {
 
           <TabsContent value="shops" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <p className="text-muted-foreground">Shop settings and preferences configurations.</p>
+              <h3 className="text-lg font-bold mb-4">Shop Policies & Configuration</h3>
+              <form onSubmit={handleSave} className="space-y-6 max-w-lg">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Require Approval for New Products</Label>
+                    <p className="text-sm text-muted-foreground">Admins must approve products before they go live.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Allow Negative Inventory</Label>
+                    <p className="text-sm text-muted-foreground">Permit recording sales even if stock is zero.</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Enable Waitlists / Pre-orders</Label>
+                    <p className="text-sm text-muted-foreground">Customers can request items out of stock.</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="pt-4 border-t border-border flex justify-end">
+                  <Button type="submit">Save Shop Policies</Button>
+                </div>
+              </form>
             </div>
           </TabsContent>
 
           <TabsContent value="currency" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <p className="text-muted-foreground">Modify tax rates, invoice formatting, and base currency.</p>
+              <h3 className="text-lg font-bold mb-4">Billing & Financial Settings</h3>
+              <form onSubmit={handleSave} className="space-y-4 max-w-lg">
+                <div className="space-y-2">
+                   <Label>Base Currency</Label>
+                   <Select defaultValue="tsh">
+                       <SelectTrigger><SelectValue placeholder="Base Currency"/></SelectTrigger>
+                       <SelectContent>
+                           <SelectItem value="tsh">Tanzanian Shilling (TZS)</SelectItem>
+                           <SelectItem value="usd">US Dollar (USD)</SelectItem>
+                           <SelectItem value="kes">Kenyan Shilling (KES)</SelectItem>
+                       </SelectContent>
+                   </Select>
+                </div>
+                <div className="space-y-2">
+                   <Label>Default VAT / Tax Rate (%)</Label>
+                   <Input type="number" defaultValue="18" min="0" max="100"/>
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Generate Invoices Automatically</Label>
+                    <p className="text-sm text-muted-foreground">Create PDF receipts for every sale.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="pt-4 border-t border-border flex justify-end">
+                  <Button type="submit">Apply Financial Settings</Button>
+                </div>
+              </form>
             </div>
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <p className="text-muted-foreground">Manage your email alerts and system notifications.</p>
+              <h3 className="text-lg font-bold mb-4">Notification Preferences</h3>
+              <form onSubmit={handleSave} className="space-y-6 max-w-lg">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Low Stock Alerts</Label>
+                    <p className="text-sm text-muted-foreground">Get notified when product stock falls below 10.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">Daily Sales Summary</Label>
+                    <p className="text-sm text-muted-foreground">Receive an email recap of daily transactions.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-foreground">New Device Login Alerts</Label>
+                    <p className="text-sm text-muted-foreground">Security alerts for unfamiliar IP logins.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="pt-4 border-t border-border flex justify-end">
+                  <Button type="submit">Save Preferences</Button>
+                </div>
+              </form>
             </div>
           </TabsContent>
         </Tabs>
