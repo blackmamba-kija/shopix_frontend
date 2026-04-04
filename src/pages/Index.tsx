@@ -3,6 +3,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { DollarSign, ShoppingCart, TrendingUp, Package, AlertTriangle, Clock, Activity, BarChart3, PieChart as PieChartIcon, Layers, CheckCircle } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { usePermissions } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, PieChart, Pie, Cell, Legend
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const allShops = useStore((s) => s.shops);
   const selectedShopId = useStore((s) => s.selectedShopId);
   const { user, isAdmin, canAccessShop } = usePermissions();
+  const { t } = useLanguage();
 
   const products = (allProducts || []).filter(p =>
     p && p.shopId && (selectedShopId === "all" || String(p.shopId) === String(selectedShopId))
@@ -49,9 +51,9 @@ const Dashboard = () => {
   const healthyStock = products.filter(p => p.quantity > 10).length;
 
   const inventoryHealthData = [
-    { name: "Healthy", value: healthyStock, color: "hsl(142, 71%, 45%)" },
-    { name: "Low", value: lowStock, color: "hsl(38, 92%, 50%)" },
-    { name: "Out", value: outOfStock, color: "hsl(0, 84%, 60%)" }
+    { name: t("healthy"), value: healthyStock, color: "hsl(142, 71%, 45%)" },
+    { name: t("low"), value: lowStock, color: "hsl(38, 92%, 50%)" },
+    { name: t("out"), value: outOfStock, color: "hsl(0, 84%, 60%)" }
   ];
 
   // 2. Sales vs Services (All Time)
@@ -59,8 +61,8 @@ const Dashboard = () => {
   const serviceTotal = serviceSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
 
   const revenueSourceData = [
-    { name: "Product Sales", value: productTotal, color: "hsl(330, 81%, 60%)" }, // Pink
-    { name: "Service Revenue", value: serviceTotal, color: "hsl(25, 95%, 53%)" } // Orange
+    { name: t("product sales"), value: productTotal, color: "hsl(330, 81%, 60%)" }, // Pink
+    { name: t("service revenue"), value: serviceTotal, color: "hsl(25, 95%, 53%)" } // Orange
   ];
 
   // 3. Weekly Trends
@@ -84,21 +86,21 @@ const Dashboard = () => {
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
 
   return (
-    <AppLayout title="Dashboard" subtitle={`Performance Overview for ${user?.name || 'Admin'}`}>
+    <AppLayout title={t("dashboard")} subtitle={`${t("performance overview for")} ${user?.name || 'Admin'}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {isAdmin && (
           <>
-            <StatCard title="Total Revenue" value={formatTsh(totalRevenue)} icon={DollarSign} change="Today's combined" changeType="positive" />
-            <StatCard title="Inventory Value" value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} products`} changeType="neutral" />
-            <StatCard title="Est. Profit" value={formatTsh(totalProfit)} icon={TrendingUp} change="Today's estimate" changeType="positive" />
+            <StatCard title={t("total revenue")} value={formatTsh(totalRevenue)} icon={DollarSign} change={t("today's combined")} changeType="positive" />
+            <StatCard title={t("inventory value")} value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} ${t("products")}`} changeType="neutral" />
+            <StatCard title={t("est. profit")} value={formatTsh(totalProfit)} icon={TrendingUp} change={t("today's estimate")} changeType="positive" />
           </>
         )}
-        <StatCard title="Critical Alerts" value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change="Items needing attention" changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} />
+        <StatCard title={t("critical alerts")} value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change={t("items needing attention")} changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} />
         {!isAdmin && (
           <>
-            <StatCard title="Today's Sales" value={todaySales.length.toString()} icon={ShoppingCart} change="Product sales count" changeType="neutral" />
-            <StatCard title="Today's Services" value={todayServices.length.toString()} icon={Activity} change="Service count" changeType="neutral" />
-            <StatCard title="Active Inventory" value={products.length.toString()} icon={Package} change="Unique products" changeType="neutral" />
+            <StatCard title={t("today's sales")} value={todaySales.length.toString()} icon={ShoppingCart} change={t("product sales count")} changeType="neutral" />
+            <StatCard title={t("today's services")} value={todayServices.length.toString()} icon={Activity} change={t("service count")} changeType="neutral" />
+            <StatCard title={t("active inventory")} value={products.length.toString()} icon={Package} change={t("unique products")} changeType="neutral" />
           </>
         )}
       </div>
@@ -110,7 +112,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
-                <h3 className="text-sm font-bold text-foreground">Weekly Performance (Sales vs Services)</h3>
+                <h3 className="text-sm font-bold text-foreground">{t("weekly performance (sales vs services)")}</h3>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
@@ -133,7 +135,7 @@ const Dashboard = () => {
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <PieChartIcon className="w-5 h-5 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">Revenue Source (All Time)</h3>
+              <h3 className="text-sm font-bold text-foreground">{t("revenue source (all time)")}</h3>
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -157,11 +159,11 @@ const Dashboard = () => {
             </ResponsiveContainer>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-muted-foreground">Products</span>
+                <span className="text-muted-foreground">{t("products")}</span>
                 <span className="text-foreground">{((productTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
               </div>
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-muted-foreground">Services</span>
+                <span className="text-muted-foreground">{t("services")}</span>
                 <span className="text-foreground">{((serviceTotal / (productTotal + serviceTotal || 1)) * 100).toFixed(1)}%</span>
               </div>
             </div>
@@ -174,14 +176,14 @@ const Dashboard = () => {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="w-5 h-5 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">Inventory Health</h3>
+            <h3 className="text-sm font-bold text-foreground">{t("inventory health")}</h3>
           </div>
           <div className="space-y-6">
             {inventoryHealthData.map((item) => (
               <div key={item.name} className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider">
-                  <span className="text-muted-foreground">{item.name} Stock</span>
-                  <span className="text-foreground">{item.value} items</span>
+                  <span className="text-muted-foreground">{item.name} {t("stock")}</span>
+                  <span className="text-foreground">{item.value} {t("items")}</span>
                 </div>
                 <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
                   <div
@@ -197,7 +199,7 @@ const Dashboard = () => {
           </div>
           <div className="mt-8 p-4 bg-primary/5 border border-primary/10 rounded-xl">
             <p className="text-[11px] text-primary font-semibold leading-relaxed">
-              * Low stock threshold is set to 10 units. Consider restocking items in the "Low" and "Out" categories immediately.
+              * {t("low stock threshold warning")}
             </p>
           </div>
         </div>
@@ -206,31 +208,31 @@ const Dashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm h-full">
-              <h3 className="text-sm font-bold text-foreground mb-4">Urgent Alerts</h3>
+              <h3 className="text-sm font-bold text-foreground mb-4">{t("urgent alerts")}</h3>
               <div className="space-y-3">
                 {lowStockProducts.slice(0, 3).map(p => (
                   <div key={p.id} className="flex items-center gap-3 p-3 bg-warning/10 border border-warning/20 rounded-xl">
                     <AlertTriangle className="w-4 h-4 text-warning" />
                     <div className="flex-1 overflow-hidden">
                       <p className="text-xs font-bold text-foreground truncate">{p.name}</p>
-                      <p className="text-[10px] text-muted-foreground">Only {p.quantity} remaining</p>
+                      <p className="text-[10px] text-muted-foreground">{t("only")} {p.quantity} {t("remaining")}</p>
                     </div>
                   </div>
                 ))}
                 {expiringProducts.length === 0 && lowStockProducts.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-6 opacity-40">
                     <CheckCircle className="w-8 h-8 text-success mb-2" />
-                    <p className="text-xs font-medium">All systems normal</p>
+                    <p className="text-xs font-medium">{t("all systems normal")}</p>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm h-full">
-              <h3 className="text-sm font-bold text-foreground mb-4">Today's Top Items</h3>
+              <h3 className="text-sm font-bold text-foreground mb-4">{t("today's top items")}</h3>
               <div className="space-y-3">
                 {sales.length === 0 && serviceSales.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-10 text-center">No transactions yet today</p>
+                  <p className="text-xs text-muted-foreground py-10 text-center">{t("no transactions yet today")}</p>
                 ) : (
                   ([...sales, ...serviceSales] as any[])
                     .sort((a, b) => Number(b.totalCost || b.total || 0) - Number(a.totalCost || a.total || 0))

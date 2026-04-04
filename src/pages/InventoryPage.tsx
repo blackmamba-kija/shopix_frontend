@@ -127,15 +127,15 @@ const InventoryPage = () => {
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-md">
           <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-slate-200 hover:bg-transparent">
-                <TableHead className="py-4 font-bold text-slate-700 w-[280px]">{t("product name")}</TableHead>
-                <TableHead className="py-4 font-bold text-slate-700">{t("location")}</TableHead>
-                {isAdmin && <TableHead className="py-4 font-bold text-slate-700 text-right">{t("buying cost")}</TableHead>}
-                <TableHead className="py-4 font-bold text-slate-700 text-right">{t("selling price")}</TableHead>
-                <TableHead className="py-4 font-bold text-slate-700 text-center">{t("quantity")}</TableHead>
-                <TableHead className="py-4 font-bold text-slate-700 text-center">{t("status")}</TableHead>
-                <TableHead className="py-4 font-bold text-slate-700 text-right">{t("actions")}</TableHead>
+            <TableHeader className="bg-secondary/30">
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="py-4 font-bold text-muted-foreground w-[280px]">{t("product name")}</TableHead>
+                <TableHead className="py-4 font-bold text-muted-foreground">{t("location")}</TableHead>
+                {isAdmin && <TableHead className="py-4 font-bold text-muted-foreground text-right">{t("buying cost")}</TableHead>}
+                <TableHead className="py-4 font-bold text-muted-foreground text-right">{t("selling price")}</TableHead>
+                <TableHead className="py-4 font-bold text-muted-foreground text-center">{t("quantity")}</TableHead>
+                <TableHead className="py-4 font-bold text-muted-foreground text-center">{t("status")}</TableHead>
+                <TableHead className="py-4 font-bold text-muted-foreground text-right">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-border">
@@ -182,73 +182,74 @@ const InventoryPage = () => {
                         ) : <span className="text-xs text-muted-foreground font-medium">—</span>}
                       </TableCell>
                       <TableCell className="p-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white rounded-full">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-slate-200">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-2 py-1.5">{t("product actions")}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <RestockInventoryDialog
-                              initialProductId={product.id}
-                              trigger={
-                                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-primary/5 text-primary rounded-lg cursor-pointer transition-colors">
-                                  <RefreshCcw className="w-4 h-4" />
-                                  <span className="font-bold text-xs uppercase tracking-tight">{t("quick restock")}</span>
-                                </div>
-                              }
-                            />
-                            {canManageProducts && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="gap-2 focus:bg-slate-50 focus:text-slate-900 rounded-lg cursor-pointer" onSelect={() => setEditingProduct(product)}>
-                                  <Edit className="w-4 h-4" />
-                                  <span className="font-bold text-xs text-slate-700">{t("edit details")}</span>
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {canDeleteProducts && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-destructive/5 text-destructive rounded-lg cursor-pointer transition-colors">
-                                      <Trash2 className="w-4 h-4" />
-                                      <span className="font-bold text-xs">{t("delete item")}</span>
-                                    </div>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This will permanently delete "{product.name}" from the inventory.
-                                        This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        onClick={async () => {
-                                          try {
-                                            await deleteProduct(product.id);
-                                            toast.success("Product deleted successfully");
-                                          } catch (err) {
-                                            toast.error("Failed to delete product");
-                                          }
-                                        }}
-                                      >
-                                        Delete Product
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex justify-end gap-2 items-center">
+                          <RestockInventoryDialog
+                            initialProductId={product.id}
+                            trigger={
+                              <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary">
+                                <RefreshCcw className="w-3.5 h-3.5" />
+                                <span className="font-bold text-xs">{t("restock")}</span>
+                              </Button>
+                            }
+                          />
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-secondary rounded-full">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-md border-border">
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-2 py-1.5">{t("product actions")}</DropdownMenuLabel>
+                              {canManageProducts && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="gap-2 focus:bg-secondary focus:text-foreground rounded-lg cursor-pointer" onSelect={() => setEditingProduct(product)}>
+                                    <Edit className="w-4 h-4" />
+                                    <span className="font-bold text-xs">{t("edit details")}</span>
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {canDeleteProducts && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-destructive/10 text-destructive rounded-lg cursor-pointer transition-colors w-full">
+                                        <Trash2 className="w-4 h-4" />
+                                        <span className="font-bold text-xs">{t("delete item")}</span>
+                                      </div>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete "{product.name}" from the inventory.
+                                          This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          onClick={async () => {
+                                            try {
+                                              await deleteProduct(product.id);
+                                              toast.success("Product deleted successfully");
+                                            } catch (err) {
+                                              toast.error("Failed to delete product");
+                                            }
+                                          }}
+                                        >
+                                          Delete Product
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
