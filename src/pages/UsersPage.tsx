@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usersApi, UserRecord, ALL_PERMISSIONS } from "@/api/users.api";
 import { shopsApi } from "@/api/shops.api";
@@ -14,16 +15,26 @@ import { Shop } from "@/types/models";
 import { toast } from "sonner";
 import {
     Users, Plus, Trash2, Edit2, ShieldCheck, ShieldAlert,
-    Eye, Search, RefreshCw, Store, Lock
+    Eye, Search, RefreshCw, Store, Lock, Mail, Key
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /* ─── helpers ──────────────────────────────────────────── */
 const roleColors: Record<string, string> = {
-    admin: "text-red-600  border-red-200  bg-red-50  dark:bg-red-950  dark:border-red-800",
-    seller: "text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800",
-    viewer: "text-gray-600 border-gray-200 bg-gray-50 dark:bg-gray-900 dark:border-gray-700",
+    admin: "text-rose-600  border-rose-200  bg-rose-50  dark:bg-rose-950/30  dark:border-rose-800",
+    seller: "text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800",
+    viewer: "text-slate-600 border-slate-200 bg-slate-50 dark:bg-slate-900/30 dark:border-slate-700",
 };
 const RoleIcon = ({ role }: { role: string }) => {
     if (role === "admin") return <ShieldCheck className="w-3.5 h-3.5 mr-1" />;
@@ -55,25 +66,26 @@ function PermissionsPanel({
         onShopsChange(assignedShops.includes(id) ? assignedShops.filter(s => s !== id) : [...assignedShops, id]);
 
     return (
-        <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
+        <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {/* Permissions */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> {t("permissions")}
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
+                    <Lock className="w-3 h-3 text-primary" /> {t("permissions")}
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-5">
                     {Object.entries(permGroups).map(([group, items]) => (
-                        <div key={group}>
-                            <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase mb-1">{group}</p>
-                            <div className="grid grid-cols-2 gap-1.5">
+                        <div key={group} className="bg-secondary/20 p-4 rounded-xl border border-border/40">
+                            <p className="text-[10px] font-black text-primary uppercase mb-3 italic tracking-wider">{group}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {items.map(p => (
-                                    <label key={p.key} className="flex items-center gap-2 cursor-pointer select-none">
+                                    <label key={p.key} className="flex items-center gap-3 cursor-pointer group select-none">
                                         <Checkbox
                                             id={p.key}
                                             checked={selected.includes(p.key)}
                                             onCheckedChange={() => toggle(p.key)}
+                                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                         />
-                                        <span className="text-xs text-foreground">{p.label}</span>
+                                        <span className="text-xs font-bold text-foreground/80 group-hover:text-primary transition-colors">{p.label}</span>
                                     </label>
                                 ))}
                             </div>
@@ -84,19 +96,20 @@ function PermissionsPanel({
 
             {/* Shop assignment */}
             {shops.length > 0 && (
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                        <Store className="w-3 h-3" /> {t("assign shops")}
+                <div className="pt-2 border-t border-border/40">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
+                        <Store className="w-3 h-3 text-primary" /> {t("assign shops")}
                     </p>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-secondary/20 p-4 rounded-xl border border-border/40">
                         {shops.map(s => (
-                            <label key={s.id} className="flex items-center gap-2 cursor-pointer select-none">
+                            <label key={s.id} className="flex items-center gap-3 cursor-pointer group select-none">
                                 <Checkbox
                                     id={`shop-${s.id}`}
                                     checked={assignedShops.includes(Number(s.id))}
                                     onCheckedChange={() => toggleShop(Number(s.id))}
+                                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                 />
-                                <span className="text-xs text-foreground truncate">{s.name}</span>
+                                <span className="text-xs font-bold text-foreground/80 group-hover:text-primary transition-colors truncate">{s.name}</span>
                             </label>
                         ))}
                     </div>
@@ -148,47 +161,57 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
     return (
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
             <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5"><Plus className="w-4 h-4" /> {t("add user")}</Button>
+                <Button className="h-11 rounded-xl shadow-md gap-2 px-6 font-black hover:scale-[1.02] transition-transform">
+                    <Plus className="w-5 h-5" /> {t("add user")}
+                </Button>
             </DialogTrigger>
-            <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
-                <DialogHeader><DialogTitle>{t("create new user")}</DialogTitle></DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("full name")} *</Label>
-                            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="John Doe" />
+            <DialogContent aria-describedby={undefined} className="sm:max-w-2xl rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+                <div className="bg-primary/5 p-6 border-b border-border/40">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-black italic tracking-tight flex items-center gap-3">
+                            <Users className="w-6 h-6 text-primary" /> {t("create new user")}
+                        </DialogTitle>
+                    </DialogHeader>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("full name")} *</Label>
+                            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="John Doe" className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("email")} *</Label>
-                            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@example.com" />
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("email")} *</Label>
+                            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@example.com" className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("password")} *</Label>
-                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder={t("min 6 chars")} />
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("password")} *</Label>
+                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="******" className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("role")} *</Label>
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("role")} *</Label>
                             <Select value={form.role} onValueChange={(v: UserRecord["role"]) => setForm(f => ({ ...f, role: v }))}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="admin">{t("admin - full access")}</SelectItem>
-                                    <SelectItem value="seller">{t("seller - sales & inventory")}</SelectItem>
-                                    <SelectItem value="viewer">{t("viewer - read only")}</SelectItem>
+                                <SelectTrigger className="bg-secondary/40 h-12 border-none rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                                <SelectContent className="rounded-xl border-none shadow-xl">
+                                    <SelectItem value="admin" className="font-bold">{t("admin - full access")}</SelectItem>
+                                    <SelectItem value="seller" className="font-bold">{t("seller - sales & inventory")}</SelectItem>
+                                    <SelectItem value="viewer" className="font-bold">{t("viewer - read only")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    <div className="border border-border rounded-lg p-3 bg-secondary/30">
+                    <div className="bg-secondary/10 rounded-2xl p-1 border border-border/40">
                         <PermissionsPanel
                             selected={permissions} onChange={setPermissions}
                             shops={shops} assignedShops={assignedShops} onShopsChange={setAssignedShops}
                         />
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); }} disabled={loading}>{t("cancel")}</Button>
-                        <Button type="submit" disabled={loading}>{loading ? t("creating...") : t("create new user")}</Button>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); }} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl font-black uppercase tracking-wider shadow-lg shadow-primary/20">
+                            {loading ? t("creating...") : t("create new user")}
+                        </Button>
                     </div>
                 </form>
             </DialogContent>
@@ -240,49 +263,57 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
-                    <Edit2 className="w-4 h-4 mr-1.5" />{t("edit details")}
+                <Button variant="ghost" size="sm" className="h-9 px-4 text-primary hover:text-primary hover:bg-primary/10 rounded-xl font-bold">
+                    <Edit2 className="w-4 h-4 mr-2" />{t("edit")}
                 </Button>
             </DialogTrigger>
-            <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
-                <DialogHeader><DialogTitle>{t("edit user")} – {user.name}</DialogTitle></DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("full name")}</Label>
-                            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            <DialogContent aria-describedby={undefined} className="sm:max-w-2xl rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+                <div className="bg-primary/5 p-6 border-b border-border/40">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-black italic tracking-tight flex items-center gap-3">
+                            <Edit2 className="w-6 h-6 text-primary" /> {t("edit user")} – {user.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("full name")}</Label>
+                            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("email")}</Label>
-                            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("email")}</Label>
+                            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("new password")} <span className="text-muted-foreground text-[10px]">({t("blank = unchanged")})</span></Label>
-                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder={t("new password")} />
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("new password")} <span className="text-muted-foreground text-[8px] italic">({t("blank = unchanged")})</span></Label>
+                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="******" className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                         </div>
-                        <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>{t("role")}</Label>
+                        <div className="space-y-2 flex flex-col">
+                            <Label className="font-bold text-[10px] uppercase text-muted-foreground ml-1">{t("role")}</Label>
                             <Select value={form.role} onValueChange={(v: UserRecord["role"]) => setForm(f => ({ ...f, role: v }))}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="admin">{t("admin - full access")}</SelectItem>
-                                    <SelectItem value="seller">{t("seller - sales & inventory")}</SelectItem>
-                                    <SelectItem value="viewer">{t("viewer - read only")}</SelectItem>
+                                <SelectTrigger className="bg-secondary/40 h-12 border-none rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                                <SelectContent className="rounded-xl border-none shadow-xl">
+                                    <SelectItem value="admin" className="font-bold">{t("admin - full access")}</SelectItem>
+                                    <SelectItem value="seller" className="font-bold">{t("seller - sales & inventory")}</SelectItem>
+                                    <SelectItem value="viewer" className="font-bold">{t("viewer - read only")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    <div className="border border-border rounded-lg p-3 bg-secondary/30">
+                    <div className="bg-secondary/10 rounded-2xl p-1 border border-border/40">
                         <PermissionsPanel
                             selected={permissions} onChange={setPermissions}
                             shops={shops} assignedShops={assignedShops} onShopsChange={setAssignedShops}
                         />
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
-                        <Button type="submit" disabled={loading}>{loading ? t("saving...") : t("save changes")}</Button>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl font-black uppercase tracking-wider shadow-lg shadow-primary/20">
+                            {loading ? t("saving...") : t("save changes")}
+                        </Button>
                     </div>
                 </form>
             </DialogContent>
@@ -292,11 +323,13 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
 
 /* ─── UsersPage ─────────────────────────────────────────── */
 export default function UsersPage() {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<UserRecord[]>([]);
     const [shops, setShops] = useState<Shop[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState<"all" | UserRecord["role"]>("all");
+    const [deletingUser, setDeletingUser] = useState<UserRecord | null>(null);
 
     const load = async () => {
         setLoading(true);
@@ -309,11 +342,10 @@ export default function UsersPage() {
 
     useEffect(() => { load(); }, []);
 
-    const { t } = useLanguage();
-    const handleDelete = async (user: UserRecord) => {
-        if (!window.confirm(`${t("delete")} "${user.name}"?`)) return;
+    const handleDelete = async () => {
+        if (!deletingUser) return;
         try {
-            await usersApi.remove(user.id);
+            await usersApi.remove(deletingUser.id);
 
             // Log action
             const actor = useStore.getState().user;
@@ -322,10 +354,11 @@ export default function UsersPage() {
                 userName: actor?.name || "System",
                 action: "DELETE_USER",
                 module: "Users",
-                details: `Deleted user ${user.name} (${user.email})`
+                details: `Deleted user ${deletingUser.name} (${deletingUser.email})`
             });
 
             toast.success(t("user deleted"));
+            setDeletingUser(null);
             load();
         }
         catch { toast.error(t("failed to delete user")); }
@@ -346,125 +379,134 @@ export default function UsersPage() {
 
     return (
         <AppLayout title={t("user management")} subtitle={t("manage users, permissions & shop access")}>
-            <div className="space-y-5">
+            <div className="space-y-8">
                 {/* Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                     {[
-                        { label: t("total users"), count: counts.all, color: "text-foreground", bg: "bg-secondary/50" },
-                        { label: t("admins"), count: counts.admin, color: "text-red-600", bg: "bg-red-50  dark:bg-red-950/30" },
-                        { label: t("sellers"), count: counts.seller, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-                        { label: t("viewers"), count: counts.viewer, color: "text-gray-600", bg: "bg-gray-50 dark:bg-gray-900/30" },
+                        { label: t("total users"), count: counts.all, color: "text-foreground", bg: "bg-card", icon: Users },
+                        { label: t("admins"), count: counts.admin, color: "text-rose-600", bg: "bg-card", icon: ShieldCheck },
+                        { label: t("sellers"), count: counts.seller, color: "text-blue-600", bg: "bg-card", icon: ShieldAlert },
+                        { label: t("viewers"), count: counts.viewer, color: "text-slate-600", bg: "bg-card", icon: Eye },
                     ].map(s => (
-                        <div key={s.label} className={cn("rounded-xl p-4 border border-border", s.bg)}>
-                            <p className={cn("text-2xl font-bold", s.color)}>{s.count}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5 uppercase tracking-tighter font-bold">{s.label}</p>
-                        </div>
+                        <Card key={s.label} className={cn("border-none shadow-xl relative overflow-hidden group", s.bg)}>
+                             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 blur-xl group-hover:bg-primary/10 transition-colors" />
+                             <CardContent className="p-6 relative z-10">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className={cn("text-3xl font-black tracking-tighter", s.color)}>{s.count}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest font-black">{s.label}</p>
+                                    </div>
+                                    <div className="p-3 bg-secondary/50 rounded-xl">
+                                        <s.icon className={cn("w-5 h-5", s.color)} />
+                                    </div>
+                                </div>
+                             </CardContent>
+                        </Card>
                     ))}
                 </div>
 
                 {/* Toolbar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-                    <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-center gap-6 justify-between border-b border-border/40 pb-6">
+                    <div className="flex gap-2 p-1.5 bg-secondary/50 rounded-2xl">
                         {(["all", "admin", "seller", "viewer"] as const).map(r => (
                             <button key={r} onClick={() => setRoleFilter(r)}
-                                className={cn("px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors",
-                                    roleFilter === r ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent")}>
-                                {r === "all" ? t("all") : t(r)} ({counts[r]})
+                                className={cn("px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+                                    roleFilter === r ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-background")}>
+                                {r === "all" ? t("all") : t(r)} <span className="ml-1 opacity-50">{counts[r]}</span>
                             </button>
                         ))}
                     </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-none">
-                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder={t("search users...")} value={search} onChange={e => setSearch(e.target.value)} className="pl-8 text-sm h-9 w-full sm:w-56" />
+                            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder={t("search users...")} value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-12 bg-card border-none shadow-sm rounded-xl font-bold w-full sm:w-64" />
                         </div>
-                        <Button variant="outline" size="sm" onClick={load} className="shrink-0"><RefreshCw className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" onClick={load} className="w-12 h-12 rounded-xl bg-card shadow-sm hover:text-primary"><RefreshCw className="w-4 h-4" /></Button>
                         <AddUserDialog shops={shops} onSuccess={load} />
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-card border border-border/40 rounded-3xl overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-border bg-secondary/50">
-                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("user")}</th>
-                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("email")}</th>
-                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("role")}</th>
-                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("permissions")}</th>
-                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("assigned shops")}</th>
-                                    <th className="text-right p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("actions")}</th>
+                                <tr className="border-b border-border/40 bg-secondary/20">
+                                    <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground pl-8">{t("user")}</th>
+                                    <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("role")}</th>
+                                    <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("permissions")}</th>
+                                    <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("assigned shops")}</th>
+                                    <th className="text-right p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground pr-8">{t("actions")}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border/40">
                                 {loading ? (
-                                    <tr><td colSpan={6} className="text-center py-12">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
-                                            <span className="text-sm text-muted-foreground">{t("loading users...")}</span>
+                                    <tr><td colSpan={5} className="py-24 text-center">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <RefreshCw className="w-10 h-10 animate-spin text-primary/30" />
+                                            <span className="text-sm font-black italic text-muted-foreground">{t("loading users...")}</span>
                                         </div>
                                     </td></tr>
                                 ) : filtered.length === 0 ? (
-                                    <tr><td colSpan={6} className="text-center py-12">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <Users className="w-8 h-8 text-muted-foreground/30" />
-                                            <span className="text-sm text-muted-foreground">{search ? t("no users match your search.") : t("no users yet.")}</span>
+                                    <tr><td colSpan={5} className="py-24 text-center">
+                                        <div className="flex flex-col items-center gap-6 opacity-30">
+                                            <Users className="w-20 h-20" />
+                                            <span className="text-xl font-black italic">{search ? t("no users match your search.") : t("no users yet.")}</span>
                                         </div>
                                     </td></tr>
                                 ) : filtered.map(user => {
                                     const userShops = shops.filter(s => (user.assigned_shops || []).includes(Number(s.id)));
                                     return (
-                                        <tr key={user.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                                        <tr key={user.id} className="hover:bg-primary/5 transition-colors group">
+                                            <td className="p-6 pl-8">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-lg font-black text-primary shrink-0 group-hover:scale-110 transition-transform">
                                                         {user.name.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div>
-                                                        <p className="font-medium text-foreground">{user.name}</p>
-                                                        <p className="text-[10px] text-muted-foreground">
-                                                            {new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                                                        </p>
+                                                    <div className="overflow-hidden">
+                                                        <p className="font-black text-base text-foreground tracking-tight truncate">{user.name}</p>
+                                                        <div className="flex items-center gap-2 mt-0.5 text-muted-foreground">
+                                                            <Mail className="w-3 h-3" />
+                                                            <p className="text-[10px] font-bold truncate">{user.email}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="p-3 text-muted-foreground text-xs">{user.email}</td>
-                                            <td className="p-3">
-                                                <Badge variant="outline" className={cn("text-xs capitalize flex w-fit items-center font-bold px-2 py-0.5", roleColors[user.role])}>
+                                            <td className="p-6">
+                                                <Badge variant="outline" className={cn("text-[10px] uppercase font-black tracking-widest px-3 py-1 flex w-fit items-center border-none shadow-sm", roleColors[user.role])}>
                                                     <RoleIcon role={user.role} />{t(user.role)}
                                                 </Badge>
                                             </td>
-                                            <td className="p-3">
+                                            <td className="p-6">
                                                 {(user.permissions || []).length === 0 ? (
-                                                    <span className="text-xs text-muted-foreground">{t("none")}</span>
+                                                    <span className="text-[11px] font-black uppercase text-muted-foreground/30 italic">{t("none")}</span>
                                                 ) : (
-                                                    <div className="flex flex-wrap gap-1">
+                                                    <div className="flex flex-wrap gap-1.5 max-w-[200px]">
                                                         {(user.permissions || []).slice(0, 3).map(p => (
-                                                            <Badge key={p} variant="secondary" className="text-[10px] px-1.5 py-0">{p.replace(/_/g, " ")}</Badge>
+                                                            <Badge key={p} variant="secondary" className="text-[9px] font-black uppercase tracking-wider py-0.5 px-2 bg-secondary text-secondary-foreground/70">{p.replace(/_/g, " ")}</Badge>
                                                         ))}
                                                         {(user.permissions || []).length > 3 && (
-                                                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+{(user.permissions || []).length - 3}</Badge>
+                                                            <Badge variant="secondary" className="text-[9px] font-black uppercase px-2 py-0.5">+{(user.permissions || []).length - 3}</Badge>
                                                         )}
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="p-3">
+                                            <td className="p-6">
                                                 {userShops.length === 0 ? (
-                                                    <span className="text-xs text-muted-foreground">{t("all shops")}</span>
+                                                    <span className="text-[11px] font-black uppercase text-rose-500/50 bg-rose-50 px-2 py-1 rounded-lg">{t("all shops")}</span>
                                                 ) : (
-                                                    <div className="flex flex-wrap gap-1">
+                                                    <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                                                         {userShops.map(s => (
-                                                            <Badge key={s.id} variant="outline" className="text-[10px] px-1.5 py-0">{s.name}</Badge>
+                                                            <Badge key={s.id} variant="outline" className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border-border/60 text-muted-foreground">{s.name}</Badge>
                                                         ))}
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="p-3">
-                                                <div className="flex items-center justify-end gap-1">
+                                            <td className="p-6 pr-8">
+                                                <div className="flex items-center justify-end gap-2 opactiy-0 group-hover:opacity-100 transition-opacity">
                                                     <EditUserDialog user={user} shops={shops} onSuccess={load} />
-                                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(user)}>
-                                                        <Trash2 className="w-4 h-4 mr-1.5" />{t("delete")}
+                                                    <Button variant="ghost" size="sm" className="h-9 px-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl font-bold" onClick={() => setDeletingUser(user)}>
+                                                        <Trash2 className="w-4 h-4 mr-2" />{t("delete")}
                                                     </Button>
                                                 </div>
                                             </td>
@@ -476,6 +518,27 @@ export default function UsersPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
+                <AlertDialogContent className="rounded-2xl border-none shadow-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-black italic">{t("delete user?")}</AlertDialogTitle>
+                        <AlertDialogDescription className="text-base font-medium">
+                            {t("this action cannot be undone.")} {t("user will lose all access to the system.")}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-2 pt-4">
+                        <AlertDialogCancel className="h-11 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="h-11 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 font-black uppercase tracking-wider shadow-lg shadow-destructive/20"
+                            onClick={handleDelete}
+                        >
+                            {t("delete")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }

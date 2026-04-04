@@ -348,6 +348,9 @@ const dict: Record<string, { en: string; sw: string }> = {
   "failed to delete user": { en: "Failed to delete user", sw: "Imeshindwa kufuta mtumiaji" },
   "none": { en: "None", sw: "Hakuna" },
   "user": { en: "User", sw: "Mtumiaji" },
+  "delete": { en: "Delete", sw: "Futa" },
+  "all associated products and sales will be removed.": { en: "All associated products and sales will be removed.", sw: "Bidhaa na mauzo yote yanayohusiana yatafutwa pia." },
+  "no shops match your current search/filters": { en: "No shops match your current search/filters", sw: "Hakuna maduka yanayoendana na utafutaji wako" },
 };
 
 export const useLanguage = create<LanguageState>((set, get) => ({
@@ -357,6 +360,7 @@ export const useLanguage = create<LanguageState>((set, get) => ({
     set({ language: lang });
   },
   t: (key: string) => {
+    if (!key) return "";
     const k = key.toLowerCase();
     const lang = get().language;
     return dict[k]?.[lang] || key;

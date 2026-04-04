@@ -26,8 +26,6 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     const [loading, setLoading] = useState(false);
     const { t } = useLanguage();
 
-
-
     useEffect(() => {
         if (open) {
             setName(shop.name);
@@ -39,21 +37,21 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim() || !location.trim()) {
-            toast.error("Please fill all required fields");
+            toast.error(t("please fill all required fields"));
             return;
         }
         if (!type.trim()) {
-            toast.error("Please specify the shop type");
+            toast.error(t("please specify the shop type"));
             return;
         }
         setLoading(true);
         try {
             await updateShop(shop.id, { name: name.trim(), type: type.trim(), location: location.trim() });
             await fetchShops();
-            toast.success("Shop updated successfully");
+            toast.success(t("success"));
             setOpen(false);
         } catch (err) {
-            toast.error("Failed to update shop");
+            toast.error(t("error"));
         } finally {
             setLoading(false);
         }
@@ -62,31 +60,31 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
-                    <Edit2 className="w-4 h-4 mr-1.5" />
+                <Button variant="ghost" size="sm" className="h-9 px-4 text-primary hover:text-primary hover:bg-primary/10 rounded-xl font-bold">
+                    <Edit2 className="w-4 h-4 mr-2" />
                     {t("edit")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
+            <DialogContent className="sm:max-w-md rounded-2xl border-none shadow-2xl" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>{t("edit shop details")}</DialogTitle>
+                    <DialogTitle className="text-2xl font-black italic tracking-tight">{t("edit shop details")}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-shop-name">{t("shop name")} *</Label>
-                        <Input id="edit-shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
+                <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+                    <div className="space-y-2 flex flex-col">
+                        <Label htmlFor="edit-shop-name" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("shop name")} *</Label>
+                        <Input id="edit-shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("e.g. city electronics")} maxLength={100} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                     </div>
-                    <div className="space-y-2">
-                        <Label>{t("shop type")} *</Label>
-                        <Input id="edit-shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Pharmacy" maxLength={100} />
+                    <div className="space-y-2 flex flex-col">
+                        <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("shop type")} *</Label>
+                        <Input id="edit-shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder={t("e.g. pharmacy")} maxLength={100} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-shop-location">{t("location")} *</Label>
-                        <Input id="edit-shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Mall Road, Block C" maxLength={200} />
+                    <div className="space-y-2 flex flex-col">
+                        <Label htmlFor="edit-shop-location" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("location")} *</Label>
+                        <Input id="edit-shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("e.g. mall road, block c")} maxLength={200} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                     </div>
-                    <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
-                        <Button type="submit" disabled={loading}>{loading ? t("saving...") : t("save changes")}</Button>
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading} className="h-12 px-8 rounded-xl font-black uppercase tracking-wider shadow-lg shadow-primary/20">{loading ? t("saving...") : t("save changes")}</Button>
                     </div>
                 </form>
             </DialogContent>
