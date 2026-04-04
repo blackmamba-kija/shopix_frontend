@@ -14,10 +14,14 @@ import { useLanguage } from "@/hooks/useLanguage";
 interface EditProductDialogProps {
     product: Product;
     trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function EditProductDialog({ product, trigger }: EditProductDialogProps) {
-    const [open, setOpen] = useState(false);
+export function EditProductDialog({ product, trigger, open: controlledOpen, onOpenChange: setControlledOpen }: EditProductDialogProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setOpen = setControlledOpen !== undefined ? setControlledOpen : setInternalOpen;
     const shopsRaw = useStore((s) => s.shops);
     const updateProduct = useStore((s) => s.updateProduct);
     const fetchProducts = useStore((s) => s.fetchProducts);

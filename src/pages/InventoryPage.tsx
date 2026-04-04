@@ -45,6 +45,7 @@ const InventoryPage = () => {
   const { can, isAdmin } = usePermissions();
   const deleteProduct = useStore((s) => s.deleteProduct);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [deletingProduct, setDeletingProduct] = useState<any>(null);
 
   const [search, setSearch] = useState("");
   const globalShopId = useStore((s) => s.selectedShopId);
@@ -214,43 +215,15 @@ const InventoryPage = () => {
                                   </DropdownMenuItem>
                                 </>
                               )}
-                              {canDeleteProducts && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-destructive/10 text-destructive rounded-lg cursor-pointer transition-colors w-full">
-                                        <Trash2 className="w-4 h-4" />
-                                        <span className="font-bold text-xs">{t("delete item")}</span>
-                                      </div>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          {t("this will permanently delete this item.")}
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                          onClick={async () => {
-                                            try {
-                                              await deleteProduct(product.id);
-                                              toast.success(t("product deleted successfully"));
-                                            } catch (err) {
-                                              toast.error(t("failed to delete product"));
-                                            }
-                                          }}
-                                        >
-                                          {t("delete product")}
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </>
-                              )}
+                                {canDeleteProducts && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="gap-2 focus:bg-destructive/10 text-destructive rounded-lg cursor-pointer transition-colors" onSelect={() => setDeletingProduct(product)}>
+                                      <Trash2 className="w-4 h-4" />
+                                      <span className="font-bold text-xs">{t("delete item")}</span>
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -263,6 +236,43 @@ const InventoryPage = () => {
           </Table>
         </div>
       </div>
+
+      {editingProduct && (
+        <EditProductDialog
+          product={editingProduct}
+          open={!!editingProduct}
+          onOpenChange={(open) => !open && setEditingProduct(null)}
+        />
+      )}
+
+      <AlertDialog open={!!deletingProduct} onOpenChange={(open) => !open && setDeletingProduct(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("this will permanently delete this item.")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                if (!deletingProduct) return;
+                try {
+                  await deleteProduct(deletingProduct.id);
+                  toast.success(t("product deleted successfully"));
+                  setDeletingProduct(null);
+                } catch (err) {
+                  toast.error(t("failed to delete product"));
+                }
+              }}
+            >
+              {t("delete product")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };

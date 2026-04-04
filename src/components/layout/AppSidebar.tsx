@@ -15,6 +15,7 @@ import {
   LogOut,
   Shield,
   TrendingUp,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/useAuth";
@@ -34,6 +35,7 @@ const navItems = [
   { icon: Users, label: "Users", path: "/users", permission: "view_users" },
   { icon: Shield, label: "Audit Logs", path: "/audit-logs", permission: "view_audit_logs" },
   { icon: TrendingUp, label: "Daily Summary", path: "/operational-summary", permission: "view_summary" },
+  { icon: HelpCircle, label: "Guide", path: "/guide", permission: null },
   { icon: Settings, label: "Settings", path: "/settings", permission: null },
 ];
 
