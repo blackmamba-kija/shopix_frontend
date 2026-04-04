@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // External Libraries
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
 // Config
 import { ROUTER_FUTURE_FLAGS } from "@/config/app.config";
@@ -74,6 +74,20 @@ const protectedRoutes = [
 ];
 
 const App = () => {
+  const setOnlineStatus = useStore((s) => s.setOnlineStatus);
+
+  useEffect(() => {
+    const handleOnline = () => setOnlineStatus(true);
+    const handleOffline = () => setOnlineStatus(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [setOnlineStatus]);
 
   return (
     <QueryClientProvider client={queryClient}>

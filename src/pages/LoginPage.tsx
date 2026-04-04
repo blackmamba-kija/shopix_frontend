@@ -15,11 +15,18 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const updateUser = useStore((s) => s.updateUser);
-
+  const { updateUser, isOnline, user: cachedUser } = useStore();
+  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!isOnline && cachedUser && cachedUser.email === email) {
+      toast({ title: "Offline Entry", description: "Identity verified locally." });
+      navigate("/");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await authApi.login({ email, password });
