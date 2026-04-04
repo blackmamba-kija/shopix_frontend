@@ -25,6 +25,18 @@ const dict: Record<string, { en: string; sw: string }> = {
   debts: { en: "Debts / Borrowing", sw: "Madeni / Kukopa" },
   "all shops (admin)": { en: "All Shops (Admin)", sw: "Maduka Yote (Admin)" },
   "all my shops": { en: "All My Shops", sw: "Maduka Yangu Yote" },
+  product: { en: "Product", sw: "Bidhaa" },
+  price: { en: "Price", sw: "Bei" },
+  quantity: { en: "Quantity", sw: "Idadi" },
+  "total amount": { en: "Total Amount", sw: "Jumla" },
+  "amount paid": { en: "Amount Paid", sw: "Kiasi Kilicholipwa" },
+  balance: { en: "Balance", sw: "Baki" },
+  customer: { en: "Customer", sw: "Mteja" },
+  save: { en: "Save", sw: "Hifadhi" },
+  cancel: { en: "Cancel", sw: "Ghairi" },
+  action: { en: "Action", sw: "Kitendo" },
+  "add new": { en: "Add New", sw: "Ongeza Mpya" },
+  "search...": { en: "Search...", sw: "Tafuta..." }
 };
 
 export const useLanguage = create<LanguageState>((set, get) => ({

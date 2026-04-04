@@ -34,6 +34,7 @@ class ApiClient {
     endpoint: string,
     method: string = "GET",
     body?: any,
+    extraHeaders?: Record<string, string>
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -42,7 +43,7 @@ class ApiClient {
       const url = `${this.baseUrl}${endpoint}`;
       const response = await fetch(url, {
         method,
-        headers: this.getHeaders(),
+        headers: { ...this.getHeaders(), ...extraHeaders },
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
@@ -77,11 +78,12 @@ class ApiClient {
   }
 
   put<T>(endpoint: string, body: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, "PUT", body);
+    // Send as POST with method override to prevent LiteSpeed/cPanel from stripping PUT JSON bodies
+    return this.request<T>(endpoint, "POST", body, { "X-HTTP-Method-Override": "PUT" });
   }
 
   delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, "DELETE");
+    return this.request<T>(endpoint, "POST", undefined, { "X-HTTP-Method-Override": "DELETE" });
   }
 }
 

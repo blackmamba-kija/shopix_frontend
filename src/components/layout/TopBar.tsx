@@ -102,9 +102,9 @@ export function TopBar({ title, subtitle }: TopBarProps) {
           />
         </div>
 
-        <div className="hidden sm:block">
+        <div className="block">
           <Select value={language} onValueChange={(v: any) => setLanguage(v)}>
-             <SelectTrigger className="w-[80px] h-9 border-none bg-secondary/50 font-bold text-xs uppercase cursor-pointer">
+             <SelectTrigger className="w-[60px] sm:w-[80px] h-9 border-none bg-secondary/50 font-bold text-xs uppercase cursor-pointer">
                 <SelectValue placeholder="EN" />
              </SelectTrigger>
              <SelectContent>

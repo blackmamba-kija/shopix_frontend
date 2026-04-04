@@ -104,17 +104,17 @@ export default function DebtsPage() {
                             <form onSubmit={handleAddDebt} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Borrower Name *</Label>
+                                        <Label>{t("Borrower Name")} *</Label>
                                         <Input value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Phone Number</Label>
+                                        <Label>{t("Phone Number")}</Label>
                                         <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Shop *</Label>
+                                        <Label>{t("Shop")} *</Label>
                                         <Select value={form.shop_id} onValueChange={v => setForm({...form, shop_id: v})}>
                                             <SelectTrigger><SelectValue placeholder="Select Shop"/></SelectTrigger>
                                             <SelectContent>
@@ -123,7 +123,7 @@ export default function DebtsPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Product (Optional)</Label>
+                                        <Label>{t("Product")} ({t("Optional")})</Label>
                                         <Select value={form.product_id} onValueChange={v => setForm({...form, product_id: v})}>
                                             <SelectTrigger><SelectValue placeholder="None"/></SelectTrigger>
                                             <SelectContent>
@@ -137,25 +137,25 @@ export default function DebtsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Quantity</Label>
+                                        <Label>{t("Quantity")}</Label>
                                         <Input type="number" min="1" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Total Amount *</Label>
+                                        <Label>{t("Total Amount")} *</Label>
                                         <Input type="number" step="0.01" value={form.total_amount} onChange={e => setForm({...form, total_amount: e.target.value})} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Initial Paid Amount</Label>
+                                        <Label>{t("Initial Paid Amount")}</Label>
                                         <Input type="number" step="0.01" value={form.initial_payment} onChange={e => setForm({...form, initial_payment: e.target.value})} placeholder="0.00" />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>Due Date</Label>
+                                        <Label>{t("Due Date")}</Label>
                                         <Input type="date" value={form.due_date} onChange={e => setForm({...form, due_date: e.target.value})} />
                                     </div>
                                 </div>
-                                <Button type="submit" className="w-full">Create Debt</Button>
+                                <Button type="submit" className="w-full">{t("Create Debt")}</Button>
                             </form>
                         </DialogContent>
                     </Dialog>
