@@ -23,6 +23,7 @@ import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const ReportsPage = () => {
   const { user, isAdmin, canAccessShop, filterShops } = usePermissions();
@@ -31,6 +32,7 @@ const ReportsPage = () => {
   const allServiceSales = useStore((s) => s.serviceSales);
   const allProducts = useStore((s) => s.products);
   const shops = filterShops(allShops);
+  const { t } = useLanguage();
 
   const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
@@ -45,32 +47,32 @@ const ReportsPage = () => {
   const reportTypes = [
     {
       id: "sales",
-      name: "Daily Sales Report",
-      desc: "Detailed breakdown of product sales by date and shop.",
+      name: t("daily sales report"),
+      desc: t("detailed breakdown of product sales by date and shop."),
       icon: TrendingUp,
       color: "text-blue-500",
       bg: "bg-blue-500/10"
     },
     {
       id: "services",
-      name: "Services Report",
-      desc: "Summary of all services (printing, photocopying, etc).",
+      name: t("services report"),
+      desc: t("summary of all services (printing, photocopying, etc)."),
       icon: FileText,
       color: "text-purple-500",
       bg: "bg-purple-500/10"
     },
     {
       id: "inventory",
-      name: "Stock Health Report",
-      desc: "Inventory levels, low stock alerts, and expiring items.",
+      name: t("stock health report"),
+      desc: t("inventory levels, low stock alerts, and expiring items."),
       icon: Package,
       color: "text-orange-500",
       bg: "bg-orange-500/10"
     },
     {
       id: "financial",
-      name: "Profit & Loss",
-      desc: "Analysis of revenue, costs, and net margins.",
+      name: t("profit & loss"),
+      desc: t("analysis of revenue, costs, and net margins."),
       icon: BarChart3,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10"
@@ -399,7 +401,7 @@ const ReportsPage = () => {
   };
 
   return (
-    <AppLayout title="Reports & Analytics" subtitle="Comprehensive business insights and formatted exports">
+    <AppLayout title={t("reports & analytics")} subtitle={t("comprehensive business insights and formatted exports")}>
       <div className="flex flex-col gap-6">
 
         {/* Filter Toolbar */}
@@ -417,7 +419,7 @@ const ReportsPage = () => {
                 onChange={(e) => setDateFrom(e.target.value)}
               />
             </div>
-            <span className="text-muted-foreground text-xs font-bold uppercase">to</span>
+            <span className="text-muted-foreground text-xs font-bold uppercase">{t("to")}</span>
             <div className="flex items-center gap-2 group cursor-pointer" onClick={() => (dateToRef.current as any)?.showPicker?.()}>
               <Input
                 ref={dateToRef}
@@ -435,10 +437,10 @@ const ReportsPage = () => {
             </Badge>
             <Select value={selectedShop} onValueChange={setSelectedShop}>
               <SelectTrigger className="w-48 h-9 text-xs font-bold">
-                <SelectValue placeholder="Select Shop" />
+                <SelectValue placeholder={t("select shop")} />
               </SelectTrigger>
               <SelectContent>
-                {isAdmin && <SelectItem value="all">All Available Shops</SelectItem>}
+                {isAdmin && <SelectItem value="all">{t("all available shops")}</SelectItem>}
                 {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -468,7 +470,7 @@ const ReportsPage = () => {
                     disabled={isGenerating !== null}
                   >
                     <Download className="w-3.5 h-3.5" />
-                    {isGenerating === report.id + "_excel" ? "Generating..." : "Excel AI"}
+                    {isGenerating === report.id + "_excel" ? t("generating...") : t("excel ai")}
                   </Button>
                   <Button
                     size="sm"
@@ -478,7 +480,7 @@ const ReportsPage = () => {
                     disabled={isGenerating !== null}
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    {isGenerating === report.id + "_pdf" ? "Creating..." : "PDF Print"}
+                    {isGenerating === report.id + "_pdf" ? t("creating...") : t("pdf print")}
                   </Button>
                 </div>
               </div>
@@ -488,13 +490,13 @@ const ReportsPage = () => {
                 {report.id === "sales" && (
                   <>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Period Revenue</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("period revenue")}</span>
                       <span className="text-sm font-black text-foreground">
                         {formatTsh((getData("sales") as any[]).reduce((sum, s) => sum + Number(s.totalCost || 0), 0))}
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Total Profit</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("total profit")}</span>
                       <span className="text-sm font-black text-emerald-600">
                         {formatTsh((getData("sales") as any[]).reduce((sum, s) => sum + Number(s.profit || 0), 0))}
                       </span>
@@ -504,15 +506,15 @@ const ReportsPage = () => {
                 {report.id === "services" && (
                   <>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Services Cash</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("services cash")}</span>
                       <span className="text-sm font-black text-foreground">
                         {formatTsh((getData("services") as any[]).reduce((sum, s) => sum + Number(s.total || 0), 0))}
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Transactions</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("transactions")}</span>
                       <span className="text-sm font-black text-primary">
-                        {(getData("services") as any[]).length} Completed
+                        {(getData("services") as any[]).length} {t("completed")}
                       </span>
                     </div>
                   </>
@@ -520,17 +522,17 @@ const ReportsPage = () => {
                 {report.id === "inventory" && (
                   <>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Asset Value</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("asset value")}</span>
                       <span className="text-sm font-black text-foreground">
                         {formatTsh((getData("inventory") as any[]).reduce((sum, p) => sum + (p.quantity * p.buyingCost), 0))}
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">Health Alert</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">{t("health alert")}</span>
                       <div className="flex items-center gap-1">
                         <AlertCircle className="w-3 h-3 text-orange-500" />
                         <span className="text-sm font-black text-orange-600">
-                          {(getData("inventory") as any[]).filter(p => p.quantity <= 10).length} Critical
+                          {(getData("inventory") as any[]).filter(p => p.quantity <= 10).length} {t("critical")}
                         </span>
                       </div>
                     </div>

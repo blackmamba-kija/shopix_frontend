@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const OperationalOverview = () => {
     const sales = useStore((s) => s.sales);
@@ -20,6 +21,7 @@ const OperationalOverview = () => {
     const shops = useStore((s) => s.shops);
     const selectedShopId = useStore((s) => s.selectedShopId);
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     const today = format(new Date(), "yyyy-MM-dd");
 
@@ -36,7 +38,7 @@ const OperationalOverview = () => {
     const lowStockCount = filteredProducts.filter(p => p.quantity < 10).length;
 
     return (
-        <AppLayout title="Operational Summary" subtitle="Daily business metrics and stock visibility">
+        <AppLayout title={t("operational summary")} subtitle={t("daily business metrics and stock visibility")}>
             <div className="space-y-6">
                 {/* Status Header */}
                 <div className="flex items-center justify-between bg-blue-600/10 border border-blue-600/20 p-4 rounded-xl">
@@ -45,11 +47,11 @@ const OperationalOverview = () => {
                             <Calendar className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">Operational Status</p>
-                            <p className="text-xs text-blue-500 dark:text-blue-300 font-medium font-sans">Monitoring data for {format(new Date(), "MMMM dd, yyyy")}</p>
+                            <p className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{t("operational status")}</p>
+                            <p className="text-xs text-blue-500 dark:text-blue-300 font-medium font-sans">{t("monitoring data for")} {format(new Date(), "MMMM dd, yyyy")}</p>
                         </div>
                     </div>
-                    <Badge className="bg-blue-600 hover:bg-blue-700 font-bold px-3 py-1">LIVE DATA</Badge>
+                    <Badge className="bg-blue-600 hover:bg-blue-700 font-bold px-3 py-1">{t("live data")}</Badge>
                 </div>
 
                 {/* Global Summary Cards */}
@@ -61,12 +63,12 @@ const OperationalOverview = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-blue-500/10 transition-colors" />
                         <CardContent className="p-6">
                             <TrendingUp className="w-8 h-8 text-blue-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Today's Revenue</p>
+                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("today's revenue")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
                                 {totalRevenue.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-blue-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                View Sales details &rarr;
+                                {t("view sales details")} &rarr;
                             </p>
                         </CardContent>
                     </Card>
@@ -78,12 +80,12 @@ const OperationalOverview = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-emerald-500/10 transition-colors" />
                         <CardContent className="p-6">
                             <DollarSign className="w-8 h-8 text-emerald-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Today's Profit</p>
+                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("today's profit")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
                                 {totalProfit.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-emerald-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                View profit analysis &rarr;
+                                {t("view profit analysis")} &rarr;
                             </p>
                         </CardContent>
                     </Card>
@@ -95,12 +97,12 @@ const OperationalOverview = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-indigo-500/10 transition-colors" />
                         <CardContent className="p-6">
                             <Layers className="w-8 h-8 text-indigo-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Current Stock (Total)</p>
+                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("current stock (total)")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {totalStock.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Units</span>
+                                {totalStock.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">{t("units")}</span>
                             </h3>
                             <p className="text-[10px] text-indigo-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                Manage inventory &rarr;
+                                {t("manage inventory")} &rarr;
                             </p>
                         </CardContent>
                     </Card>
@@ -113,12 +115,12 @@ const OperationalOverview = () => {
                         <CardContent className="p-1.5 h-full">
                             <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4.5 text-foreground h-full flex flex-col justify-center">
                                 <Package className="w-6 h-6 text-primary mb-2" />
-                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em]">Inventory Cost</p>
+                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em]">{t("inventory cost")}</p>
                                 <h3 className="text-xl font-black mt-1 tracking-tight">
                                     {totalValue.toLocaleString()} <span className="text-[10px] font-medium text-muted-foreground">Tsh</span>
                                 </h3>
                                 <p className="text-[9px] text-primary font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    Full Asset Valuation &rarr;
+                                    {t("full asset valuation")} &rarr;
                                 </p>
                             </div>
                         </CardContent>
@@ -130,14 +132,14 @@ const OperationalOverview = () => {
                     <Card className="lg:col-span-2 border-none shadow-md overflow-hidden bg-card">
                         <CardHeader className="bg-muted/30 border-b border-border">
                             <CardTitle className="text-base font-bold flex items-center gap-2">
-                                <Package className="w-4 h-4 text-primary" /> Stock Health Overview
+                                <Package className="w-4 h-4 text-primary" /> {t("stock health overview")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                             <div className="space-y-8">
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
-                                        <p className="text-xs font-bold text-muted-foreground uppercase">Stock Utilization Rate</p>
+                                        <p className="text-xs font-bold text-muted-foreground uppercase">{t("stock utilization rate")}</p>
                                         <span className="text-xs font-bold text-foreground">72%</span>
                                     </div>
                                     <Progress value={72} className="h-2 bg-muted" />
@@ -148,7 +150,7 @@ const OperationalOverview = () => {
                                         className="p-4 bg-muted/20 rounded-xl border border-border cursor-pointer hover:bg-muted/30 transition-colors"
                                         onClick={() => navigate("/inventory")}
                                     >
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Items Monitored</p>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{t("items monitored")}</p>
                                         <p className="text-xl font-black text-foreground">{filteredProducts.length}</p>
                                     </div>
                                     <div
@@ -157,7 +159,7 @@ const OperationalOverview = () => {
                                     >
                                         <div className="flex items-center gap-2 mb-1">
                                             <AlertCircle className={`w-3 h-3 ${lowStockCount > 0 ? 'text-amber-600' : 'text-green-600'}`} />
-                                            <p className={`text-[10px] font-bold uppercase tracking-wider ${lowStockCount > 0 ? 'text-amber-500' : 'text-green-500'}`}>Low Stock Alerts</p>
+                                            <p className={`text-[10px] font-bold uppercase tracking-wider ${lowStockCount > 0 ? 'text-amber-500' : 'text-green-500'}`}>{t("low stock alerts")}</p>
                                         </div>
                                         <p className={`text-xl font-black ${lowStockCount > 0 ? 'text-amber-700' : 'text-green-700'}`}>{lowStockCount}</p>
                                     </div>
@@ -169,7 +171,7 @@ const OperationalOverview = () => {
                     <Card className="border-none shadow-md overflow-hidden bg-card">
                         <CardHeader className="bg-muted/30 border-b border-border">
                             <CardTitle className="text-base font-bold flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-emerald-600" /> Performance
+                                <TrendingUp className="w-4 h-4 text-emerald-600" /> {t("performance")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 flex flex-col items-center justify-center h-full">
@@ -199,11 +201,11 @@ const OperationalOverview = () => {
                                 </svg>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                                     <p className="text-2xl font-black text-foreground">85%</p>
-                                    <p className="text-[8px] font-bold text-muted-foreground uppercase">Target</p>
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase">{t("target")}</p>
                                 </div>
                             </div>
                             <p className="text-[11px] text-muted-foreground text-center mt-6 font-medium max-w-[200px]">
-                                Currently performing at 85% of today's expected operational volume.
+                                {t("currently performing at 85% of today's expected operational volume.")}
                             </p>
                         </CardContent>
                     </Card>
