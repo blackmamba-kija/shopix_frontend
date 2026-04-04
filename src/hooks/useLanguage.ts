@@ -6,6 +6,7 @@ interface LanguageState {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  formatTsh: (v: number) => string;
 }
 
 const dict: Record<string, { en: string; sw: string }> = {
@@ -327,5 +328,6 @@ export const useLanguage = create<LanguageState>((set, get) => ({
     const k = key.toLowerCase();
     const lang = get().language;
     return dict[k]?.[lang] || key;
-  }
+  },
+  formatTsh: (v: number) => `Tsh ${v?.toLocaleString() || 0}`
 }));
