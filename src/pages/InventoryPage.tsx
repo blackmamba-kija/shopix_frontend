@@ -100,12 +100,12 @@ const InventoryPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:w-96 max-w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder={t("search...")} className="pl-9 h-11 border-slate-200 bg-white/50 focus-visible:bg-white shadow-sm rounded-xl font-medium transition-all focus-visible:ring-primary/20 hover:border-slate-300" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder={t("search...")} className="pl-9 h-11 border-border bg-card shadow-sm rounded-xl font-medium transition-all focus-visible:ring-primary/20 hover:border-border/80" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
               <Select value={selectedShop} onValueChange={setSelectedShopId}>
-                <SelectTrigger className="w-full sm:w-52 h-11 rounded-xl border-slate-200 bg-white shadow-sm">
+                <SelectTrigger className="w-full sm:w-52 h-11 rounded-xl border-border bg-card shadow-sm">
                   <SelectValue placeholder={t("all shops")} />
                 </SelectTrigger>
                 <SelectContent>

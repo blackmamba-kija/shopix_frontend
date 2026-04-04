@@ -9,6 +9,7 @@ import { Edit } from "lucide-react";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
 import { Product } from "@/types/models";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface EditProductDialogProps {
     product: Product;
@@ -23,6 +24,7 @@ export function EditProductDialog({ product, trigger }: EditProductDialogProps) 
     const { filterShops } = usePermissions();
     const shops = filterShops(shopsRaw);
     const [loading, setLoading] = useState(false);
+    const { t } = useLanguage();
 
     const [form, setForm] = useState({
         name: product.name,
@@ -95,30 +97,30 @@ export function EditProductDialog({ product, trigger }: EditProductDialogProps) 
                 {trigger || (
                     <Button variant="ghost" size="sm" className="gap-2 focus:bg-slate-100 rounded-lg cursor-pointer">
                         <Edit className="w-4 h-4" />
-                        <span className="font-bold text-xs text-slate-700">Edit Details</span>
+                        <span className="font-bold text-xs text-slate-700">{t("edit details")}</span>
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>Edit Product: {product.name}</DialogTitle>
+                    <DialogTitle>{t("edit details")}: {product.name}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-3 mt-2">
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                            <Label>Product Name *</Label>
-                            <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Product name" maxLength={150} />
+                            <Label>{t("product name")} *</Label>
+                            <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder={t("product name")} maxLength={150} />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Category</Label>
+                            <Label>{t("category")}</Label>
                             <Input value={form.category} onChange={(e) => update("category", e.target.value)} placeholder="e.g. Foundation" maxLength={50} />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                            <Label>Shop *</Label>
+                            <Label>{t("shop")} *</Label>
                             <Select value={form.shopId} onValueChange={(v) => update("shopId", v)}>
-                                <SelectTrigger><SelectValue placeholder="Select shop" /></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder={t("select shop")} /></SelectTrigger>
                                 <SelectContent>
                                     {shops.filter((s) => s.status === "active").map((s) => (
                                         <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
@@ -127,47 +129,47 @@ export function EditProductDialog({ product, trigger }: EditProductDialogProps) 
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Manufacturer</Label>
-                            <Input value={form.manufacturer} onChange={(e) => update("manufacturer", e.target.value)} placeholder="Manufacturer" maxLength={100} />
+                            <Label>{t("manufacturer")}</Label>
+                            <Input value={form.manufacturer} onChange={(e) => update("manufacturer", e.target.value)} placeholder={t("manufacturer")} maxLength={100} />
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                         <div className="space-y-1.5">
-                            <Label>Buying Cost *</Label>
+                            <Label>{t("buying cost")} *</Label>
                             <Input type="number" min="0" step="0.01" value={form.buyingCost} onChange={(e) => update("buyingCost", e.target.value)} placeholder="0.00" />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Selling Price *</Label>
+                            <Label>{t("selling price")} *</Label>
                             <Input type="number" min="0" step="0.01" value={form.sellingPrice} onChange={(e) => update("sellingPrice", e.target.value)} placeholder="0.00" />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Quantity *</Label>
+                            <Label>{t("quantity")} *</Label>
                             <Input type="number" min="0" value={form.quantity} onChange={(e) => update("quantity", e.target.value)} placeholder="0" />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                            <Label>Supplier</Label>
-                            <Input value={form.supplier} onChange={(e) => update("supplier", e.target.value)} placeholder="Supplier name" maxLength={100} />
+                            <Label>{t("supplier")}</Label>
+                            <Input value={form.supplier} onChange={(e) => update("supplier", e.target.value)} placeholder={t("supplier")} maxLength={100} />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Batch Number</Label>
+                            <Label>{t("batch number")}</Label>
                             <Input value={form.batchNumber} onChange={(e) => update("batchNumber", e.target.value)} placeholder="Batch #" maxLength={50} />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                            <Label>Expiry Date</Label>
+                            <Label>{t("expiry date")}</Label>
                             <Input type="date" value={form.expiryDate} onChange={(e) => update("expiryDate", e.target.value)} />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Barcode (optional)</Label>
+                            <Label>{t("barcode")} ({t("optional")})</Label>
                             <Input value={form.barcode} onChange={(e) => update("barcode", e.target.value)} placeholder="Barcode" maxLength={50} />
                         </div>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
-                        <Button type="submit" disabled={loading}>{loading ? "Updating..." : "Update Product"}</Button>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading}>{loading ? t("updating...") : t("edit details")}</Button>
                     </div>
                 </form>
             </DialogContent>

@@ -8,6 +8,7 @@ import { RefreshCcw, Search, PackagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface RestockInventoryDialogProps {
     initialProductId?: string;
@@ -20,6 +21,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
     const fetchProducts = useStore((s) => s.fetchProducts);
     const shops = useStore((s) => s.shops);
     const { canAccessShop } = usePermissions();
+    const { t } = useLanguage();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProductId, setSelectedProductId] = useState(initialProductId || "");
@@ -114,86 +116,86 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
             <DialogTrigger asChild>
                 {trigger || (
                     <Button variant="outline" size="sm" className="gap-1.5 border-primary/30 hover:bg-primary/5 text-primary">
-                        <RefreshCcw className="w-4 h-4" /> Adjust Stock
+                        <RefreshCcw className="w-4 h-4" /> {t("adjust stock")}
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-card text-foreground">
                 <DialogHeader>
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 shadow-sm">
-                            <PackagePlus className="w-5 h-5 text-slate-900" />
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center border border-border shadow-sm">
+                            <PackagePlus className="w-5 h-5 text-foreground" />
                         </div>
                         <div>
-                            <DialogTitle className="text-xl font-bold">Adjust Inventory</DialogTitle>
-                            <p className="text-xs text-muted-foreground mt-0.5">Add, remove, or set exact stock levels</p>
+                            <DialogTitle className="text-xl font-bold">{t("adjust inventory")}</DialogTitle>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t("add, remove, or set exact stock levels")}</p>
                         </div>
                     </div>
                 </DialogHeader>
 
                 <form onSubmit={handleRestock} className="space-y-4 mt-4">
                     <div className="space-y-2">
-                        <Label className="text-sm font-bold">Product to Restock</Label>
+                        <Label className="text-sm font-bold">{t("product to restock")}</Label>
                         {!selectedProductId ? (
                             <div className="relative group">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 group-focus-within:text-primary transition-colors" />
                                 <Input
-                                    placeholder="Type product name or batch number..."
-                                    className="pl-9 h-11 bg-white border-slate-300 focus:bg-white focus:ring-2 focus:ring-slate-950/10 transition-all rounded-xl text-slate-900 font-bold"
+                                    placeholder={t("type product name or batch number...")}
+                                    className="pl-9 h-11 bg-background border-border focus:ring-2 focus:ring-primary/20 transition-all rounded-xl text-foreground font-bold"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
 
                                 {searchTerm.length >= 2 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-300">
                                         {filteredProducts.length > 0 ? (
                                             filteredProducts.map(p => (
                                                 <button
                                                     key={p.id}
                                                     type="button"
-                                                    className="w-full text-left p-3 hover:bg-slate-50 transition-colors flex items-center justify-between border-b border-slate-50 last:border-none"
+                                                    className="w-full text-left p-3 hover:bg-secondary transition-colors flex items-center justify-between border-b border-border/50 last:border-none"
                                                     onClick={() => handleProductSelect(p.id)}
                                                 >
                                                     <div>
-                                                        <p className="text-sm font-bold text-slate-900">{p.name}</p>
+                                                        <p className="text-sm font-bold text-foreground">{p.name}</p>
                                                         <div className="flex items-center gap-2 mt-0.5">
-                                                            <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded font-mono uppercase text-slate-500">{p.batchNumber || "No Batch"}</span>
-                                                            <span className="text-[10px] text-slate-400">•</span>
-                                                            <span className="text-[10px] text-slate-400 font-medium">Shop: {shops.find(s => s.id === p.shopId)?.name}</span>
+                                                            <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded font-mono uppercase text-muted-foreground">{p.batchNumber || t("no batch")}</span>
+                                                            <span className="text-[10px] text-muted-foreground">•</span>
+                                                            <span className="text-[10px] text-muted-foreground font-medium">{t("shop")}: {shops.find(s => s.id === p.shopId)?.name}</span>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="text-xs font-black text-primary uppercase tracking-widest">{p.quantity} In Stock</p>
+                                                        <p className="text-xs font-black text-primary uppercase tracking-widest">{p.quantity} {t("in stock")}</p>
                                                     </div>
                                                 </button>
                                             ))
                                         ) : (
                                             <div className="p-8 text-center">
-                                                <p className="text-sm text-muted-foreground">No matching products found</p>
+                                                <p className="text-sm text-muted-foreground">{t("no matching products found")}</p>
                                             </div>
                                         )}
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="p-4 bg-white border-2 border-slate-900 rounded-2xl flex items-center justify-between animate-in zoom-in duration-300 shadow-sm">
+                            <div className="p-4 bg-background border-2 border-border rounded-2xl flex items-center justify-between animate-in zoom-in duration-300 shadow-sm">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200">
-                                        <RefreshCcw className="w-5 h-5 text-slate-900" />
+                                    <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-border">
+                                        <RefreshCcw className="w-5 h-5 text-foreground" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-black text-slate-900">{selectedProduct?.name}</p>
-                                        <p className="text-[10px] text-slate-600 font-bold bg-slate-100 w-fit px-1.5 border border-slate-200 rounded mt-0.5 uppercase tracking-tighter">{selectedProduct?.batchNumber}</p>
+                                        <p className="text-sm font-black text-foreground">{selectedProduct?.name}</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold bg-secondary w-fit px-1.5 border border-border rounded mt-0.5 uppercase tracking-tighter">{selectedProduct?.batchNumber}</p>
                                     </div>
                                 </div>
                                 {!initialProductId && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-8 text-[10px] font-bold uppercase tracking-widest hover:bg-white"
+                                        className="h-8 text-[10px] font-bold uppercase tracking-widest hover:bg-secondary text-foreground"
                                         onClick={() => { setSelectedProductId(""); resetForm(); }}
                                     >
-                                        Change
+                                        {t("change")}
                                     </Button>
                                 )}
                             </div>
@@ -204,82 +206,82 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">Action Type</Label>
-                                    <div className="flex bg-slate-100 p-1 rounded-xl h-11">
-                                        <button type="button" onClick={() => setAction("add")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "add" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Add</button>
-                                        <button type="button" onClick={() => setAction("remove")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "remove" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Remove</button>
-                                        <button type="button" onClick={() => setAction("set")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "set" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}>Set</button>
+                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">{t("action type")}</Label>
+                                    <div className="flex bg-secondary p-1 rounded-xl h-11">
+                                        <button type="button" onClick={() => setAction("add")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "add" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{t("add action")}</button>
+                                        <button type="button" onClick={() => setAction("remove")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "remove" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{t("remove action")}</button>
+                                        <button type="button" onClick={() => setAction("set")} className={`flex-1 text-xs font-bold rounded-lg transition-colors ${action === "set" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{t("set action")}</button>
                                     </div>
                                 </div>
                                 
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">Quantity</Label>
+                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">{t("quantity")}</Label>
                                     <Input
                                         type="number"
                                         min="1"
                                         value={restockQuantity}
                                         onChange={(e) => setRestockQuantity(e.target.value)}
-                                        placeholder="e.g. 50"
-                                        className="h-11 border-slate-300 focus:ring-2 focus:ring-slate-950/20 rounded-xl font-black text-lg bg-white text-slate-900"
+                                        placeholder={t("e.g. 50")}
+                                        className="h-11 border-border focus:ring-2 focus:ring-primary/20 rounded-xl font-black text-lg bg-background text-foreground"
                                     />
-                                    <p className="text-[10px] font-bold text-slate-600 ml-1">Total after: {action === "set" ? parseInt(restockQuantity) || 0 : (selectedProduct?.quantity || 0) + (action === "add" ? (parseInt(restockQuantity) || 0) : -(parseInt(restockQuantity) || 0))} units</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground ml-1">{t("total after")}: {action === "set" ? parseInt(restockQuantity) || 0 : (selectedProduct?.quantity || 0) + (action === "add" ? (parseInt(restockQuantity) || 0) : -(parseInt(restockQuantity) || 0))} {t("units")}</p>
                                 </div>
                             </div>
                             
                             <div className="grid grid-cols-1 gap-4">
 
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-black uppercase tracking-wider text-slate-900">New Batch Number</Label>
+                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">{t("new batch number")}</Label>
                                     <Input
                                         value={newBatchNumber}
                                         onChange={(e) => setNewBatchNumber(e.target.value)}
-                                        placeholder="Batch #"
-                                        className="h-11 border-slate-300 focus:ring-2 focus:ring-slate-950/20 rounded-xl font-bold bg-white text-slate-900"
+                                        placeholder={t("batch number")}
+                                        className="h-11 border-border focus:ring-2 focus:ring-primary/20 rounded-xl font-bold bg-background text-foreground"
                                     />
                                 </div>
                             </div>
 
-                            <div className="bg-slate-100 p-4 rounded-2xl space-y-4 border border-slate-200 shadow-inner">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Financial Updates (Optional)</p>
+                            <div className="bg-secondary/50 p-4 rounded-2xl space-y-4 border border-border/50 shadow-inner">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{t("financial updates (optional)")}</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-black text-slate-700 uppercase tracking-tighter">Buying Cost (Tsh)</Label>
+                                        <Label className="text-xs font-black text-muted-foreground uppercase tracking-tighter">{t("buying cost")} (Tsh)</Label>
                                         <Input
                                             type="number"
                                             value={newBuyingCost}
                                             onChange={(e) => setNewBuyingCost(e.target.value)}
-                                            className="h-10 bg-white border-slate-300 font-bold text-slate-900"
+                                            className="h-10 bg-background border-border font-bold text-foreground"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-black text-slate-700 uppercase tracking-tighter">Selling Price (Tsh)</Label>
+                                        <Label className="text-xs font-black text-muted-foreground uppercase tracking-tighter">{t("selling price")} (Tsh)</Label>
                                         <Input
                                             type="number"
                                             value={newSellingPrice}
                                             onChange={(e) => setNewSellingPrice(e.target.value)}
-                                            className="h-10 bg-white border-slate-300 font-bold text-slate-900"
+                                            className="h-10 bg-background border-border font-bold text-foreground"
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-black text-slate-700 uppercase tracking-tighter">New Expiry Date</Label>
+                                    <Label className="text-xs font-black text-muted-foreground uppercase tracking-tighter">{t("new expiry date")}</Label>
                                     <Input
                                         type="date"
                                         value={newExpiryDate}
                                         onChange={(e) => setNewExpiryDate(e.target.value)}
-                                        className="h-10 bg-white border-slate-300 font-bold text-slate-900"
+                                        className="h-10 bg-background border-border font-bold text-foreground"
                                     />
                                 </div>
                             </div>
 
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="ghost" className="flex-1 rounded-xl h-11" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
+                                <Button type="button" variant="ghost" className="flex-1 rounded-xl h-11 border border-border" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-2 h-11 rounded-xl bg-slate-900 group relative overflow-hidden transition-all hover:pr-8"
+                                    className="flex-2 h-11 rounded-xl bg-primary text-primary-foreground group relative overflow-hidden transition-all hover:pr-8"
                                 >
-                                    <span className="relative z-10">{loading ? "Updating..." : "Confirm Update"}</span>
+                                    <span className="relative z-10">{loading ? t("updating...") : t("confirm update")}</span>
                                     {!loading && <PackagePlus className="w-4 h-4 absolute right-[-20px] group-hover:right-3 transition-all opacity-0 group-hover:opacity-100" />}
                                 </Button>
                             </div>

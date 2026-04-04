@@ -8,6 +8,7 @@ import { useStore } from "@/store/useStore";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function AddServiceSaleDialog() {
   const [open, setOpen] = useState(false);
@@ -17,6 +18,7 @@ export function AddServiceSaleDialog() {
   const { filterShops } = usePermissions();
   const shops = filterShops(shopsRaw);
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const [serviceName, setServiceName] = useState("");
   const [shopId, setShopId] = useState("");
@@ -57,22 +59,22 @@ export function AddServiceSaleDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" /> Add Service Sale
+          <Plus className="w-4 h-4" /> {t("add service sale")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Record Service Sale</DialogTitle>
+          <DialogTitle>{t("record service sale")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label>Service Name *</Label>
+            <Label>{t("service name")} *</Label>
             <Input value={serviceName} onChange={(e) => setServiceName(e.target.value)} placeholder="e.g. Color Printing (A4)" maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label>Shop *</Label>
+            <Label>{t("shop")} *</Label>
             <Select value={shopId} onValueChange={(v) => setShopId(v)}>
-              <SelectTrigger><SelectValue placeholder="Select shop" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("select shop")} /></SelectTrigger>
               <SelectContent>
                 {shops.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
@@ -82,23 +84,23 @@ export function AddServiceSaleDialog() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Quantity *</Label>
+              <Label>{t("quantity")} *</Label>
               <Input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0" />
             </div>
             <div className="space-y-2">
-              <Label>Price per Unit *</Label>
+              <Label>{t("price per unit")} *</Label>
               <Input type="number" min="0" step="0.01" value={pricePerUnit} onChange={(e) => setPricePerUnit(e.target.value)} placeholder="0.00" />
             </div>
           </div>
           {total && (
             <div className="bg-secondary rounded-lg p-3 flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total</span>
+              <span className="text-sm text-muted-foreground">{t("total")}</span>
               <span className="text-lg font-bold text-foreground">Tsh{parseFloat(total).toLocaleString()}</span>
             </div>
           )}
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
-            <Button type="submit" disabled={loading}>{loading ? "Recording..." : "Record Service"}</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
+            <Button type="submit" disabled={loading}>{loading ? t("recording...") : t("record service")}</Button>
           </div>
         </form>
       </DialogContent>

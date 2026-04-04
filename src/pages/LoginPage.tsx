@@ -88,7 +88,7 @@ const LoginPage = () => {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-orange-500 to-red-500">Retail Control.</span>
             </h2>
             <p className="text-xl text-slate-400 max-w-lg leading-relaxed font-medium">
-              A premium, data-driven ecosystem designed for high-performance cosmetics, stationery, and multi-sector retail groups.
+              A premium, data-driven ecosystem designed for high-performance multi-sector retail and business management.
             </p>
           </div>
 

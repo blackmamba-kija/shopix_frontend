@@ -11,6 +11,7 @@ import { Plus, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 interface RecordSaleDialogProps {
   trigger?: React.ReactNode;
 }
@@ -29,6 +30,7 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
   const { filterShops } = usePermissions();
   const shops = filterShops(shopsRaw);
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const [shopId, setShopId] = useState("");
   const [productId, setProductId] = useState("");
@@ -61,7 +63,7 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
     }
     const qty = parseInt(quantity);
     if (selectedProduct && qty > selectedProduct.quantity) {
-      toast.error(`Only ${selectedProduct.quantity} units available in inventory`);
+      toast.error(`${t("only")} ${selectedProduct.quantity} ${t("remaining")} ${t("units")} ${t("in inventory")}`);
       return;
     }
     setLoading(true);
@@ -85,20 +87,20 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
       <DialogTrigger asChild>
         {trigger || (
           <Button size="sm" className="gap-1.5">
-            <Plus className="w-4 h-4" /> Record Sale
+            <Plus className="w-4 h-4" /> {t("record sale")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Record New Sale</DialogTitle>
+          <DialogTitle>{t("record new sale")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label className="text-foreground font-semibold">Shop *</Label>
+            <Label className="text-foreground font-semibold">{t("shop")} *</Label>
             <Select value={shopId} onValueChange={(v) => { setShopId(v); setProductId(""); }}>
               <SelectTrigger className="w-full bg-background border-border hover:border-primary/50 transition-colors">
-                <SelectValue placeholder="Select shop" />
+                <SelectValue placeholder={t("select shop")} />
               </SelectTrigger>
               <SelectContent>
                 {shops.filter((s) => s.status === "active" || !s.status).map((s) => (
@@ -109,7 +111,7 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground font-semibold">Product *</Label>
+            <Label className="text-foreground font-semibold">{t("product")} *</Label>
             <Popover open={openProductSelect} onOpenChange={setOpenProductSelect}>
               <PopoverTrigger asChild>
                 <Button
@@ -125,16 +127,16 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
                   <span className="truncate">
                     {productId
                       ? availableProducts.find((p) => String(p.id) === String(productId))?.name
-                      : shopId ? "Select product" : "Select a shop first"}
+                      : shopId ? t("select product") : t("select a shop first")}
                   </span>
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start">
                 <Command>
-                  <CommandInput placeholder="Search inventory..." className="h-9" />
+                  <CommandInput placeholder={t("search...")} className="h-9" />
                   <CommandList>
-                    <CommandEmpty>No product found in this shop's inventory.</CommandEmpty>
+                    <CommandEmpty>{t("no product found in this shop's inventory.")}</CommandEmpty>
                     <CommandGroup>
                       {availableProducts.map((p) => (
                         <CommandItem
@@ -146,12 +148,12 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
                           }}
                           className="flex items-center justify-between cursor-pointer"
                         >
-                          <div className="flex flex-col overflow-hidden">
-                            <span className="font-medium truncate">{p.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              Tsh{p.sellingPrice.toLocaleString()} · {p.quantity} in stock
-                            </span>
-                          </div>
+                            <div className="flex flex-col overflow-hidden">
+                              <span className="font-medium truncate">{p.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                Tsh{p.sellingPrice.toLocaleString()} · {p.quantity} {t("in stock")}
+                              </span>
+                            </div>
                           <Check
                             className={cn(
                               "h-4 w-4 shrink-0",
@@ -168,14 +170,14 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground font-semibold">Quantity *</Label>
+            <Label className="text-foreground font-semibold">{t("quantity")} *</Label>
             <Input
               type="number"
               min="1"
               max={selectedProduct?.quantity || 999}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Enter quantity"
+              placeholder={t("enter quantity")}
               className="bg-background border-border hover:border-primary/50 transition-colors focus-visible:ring-primary/20"
             />
           </div>
@@ -183,15 +185,15 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
           {selectedProduct && quantity && parseInt(quantity) > 0 && (
             <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Unit Price</span>
+                <span className="text-muted-foreground">{t("unit price")}</span>
                 <span className="font-medium text-foreground">Tsh{selectedProduct.sellingPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center text-lg font-bold pt-1 border-t border-primary/10">
-                <span className="text-foreground">Total</span>
+                <span className="text-foreground">{t("total")}</span>
                 <span className="text-primary">Tsh{(selectedProduct.sellingPrice * parseInt(quantity)).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center text-xs text-success-foreground bg-success/10 px-2 py-1 rounded-md">
-                <span className="font-medium">Estimated Profit</span>
+                <span className="font-medium">{t("est. profit")}</span>
                 <span className="font-bold">Tsh{((selectedProduct.sellingPrice - selectedProduct.buyingCost) * parseInt(quantity)).toLocaleString()}</span>
               </div>
             </div>
@@ -205,14 +207,14 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
               disabled={loading}
               className="flex-1 rounded-xl h-11 border-border bg-background hover:bg-secondary transition-all"
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
               disabled={loading}
               className="flex-1 rounded-xl h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
             >
-              {loading ? "Recording..." : "Record Sale"}
+              {loading ? t("recording...") : t("record sale")}
             </Button>
           </div>
         </form>

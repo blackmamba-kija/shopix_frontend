@@ -8,6 +8,7 @@ import { useStore } from "@/store/useStore";
 import { Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { Shop } from "@/types/models";
+import { useLanguage } from "@/hooks/useLanguage";
 
 
 
@@ -23,6 +24,7 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     const updateShop = useStore((s) => s.updateShop);
     const fetchShops = useStore((s) => s.fetchShops);
     const [loading, setLoading] = useState(false);
+    const { t } = useLanguage();
 
 
 
@@ -62,29 +64,29 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
             <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
                     <Edit2 className="w-4 h-4 mr-1.5" />
-                    Edit
+                    {t("edit")}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>Edit Shop Details</DialogTitle>
+                    <DialogTitle>{t("edit shop details")}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <div className="space-y-2">
-                        <Label htmlFor="edit-shop-name">Shop Name *</Label>
+                        <Label htmlFor="edit-shop-name">{t("shop name")} *</Label>
                         <Input id="edit-shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
                     </div>
                     <div className="space-y-2">
-                        <Label>Shop Type *</Label>
+                        <Label>{t("shop type")} *</Label>
                         <Input id="edit-shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Pharmacy" maxLength={100} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="edit-shop-location">Location *</Label>
+                        <Label htmlFor="edit-shop-location">{t("location")} *</Label>
                         <Input id="edit-shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Mall Road, Block C" maxLength={200} />
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
-                        <Button type="submit" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</Button>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading}>{loading ? t("saving...") : t("save changes")}</Button>
                     </div>
                 </form>
             </DialogContent>

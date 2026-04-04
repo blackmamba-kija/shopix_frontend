@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore } from "@/store/useStore";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 
 
@@ -18,6 +19,7 @@ export function AddShopDialog() {
   const addShop = useStore((s) => s.addShop);
   const fetchShops = useStore((s) => s.fetchShops);
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
 
 
@@ -51,29 +53,29 @@ export function AddShopDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" /> Add Shop
+          <Plus className="w-4 h-4" /> {t("new shop")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Create New Shop</DialogTitle>
+          <DialogTitle>{t("create new shop")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label htmlFor="shop-name">Shop Name *</Label>
+            <Label htmlFor="shop-name">{t("shop name")} *</Label>
             <Input id="shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label>Shop Type *</Label>
+            <Label>{t("shop type")} *</Label>
             <Input id="shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Pharmacy" maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="shop-location">Location *</Label>
+            <Label htmlFor="shop-location">{t("location")} *</Label>
             <Input id="shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Mall Road, Block C" maxLength={200} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
-            <Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create Shop"}</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
+            <Button type="submit" disabled={loading}>{loading ? t("creating...") : t("create shop")}</Button>
           </div>
         </form>
       </DialogContent>
