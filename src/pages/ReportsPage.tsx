@@ -132,7 +132,7 @@ const ReportsPage = () => {
 
       worksheet.mergeCells("A3:G3");
       const infoCell = worksheet.getCell("A3");
-      infoCell.value = `Shop: ${activeShopName} | Date Range: ${dateFrom || "N/A"} to ${dateTo || "N/A"}`;
+      infoCell.value = `${t("shop")}: ${activeShopName} | ${t("date")}: ${dateFrom || "N/A"} ${t("to")} ${dateTo || "N/A"}`;
       infoCell.font = { italic: true, size: 11, color: { argb: "FF64748B" } };
       infoCell.alignment = { vertical: "middle", horizontal: "center" };
 
@@ -143,13 +143,13 @@ const ReportsPage = () => {
       // --- Columns Configuration ---
       if (type === "sales") {
         const columns = [
-          { header: "Date", key: "date", width: 12 },
-          { header: "Store", key: "shopName", width: 20 },
-          { header: "Product Item", key: "productName", width: 35 },
-          { header: "Qty", key: "quantity", width: 8 },
-          { header: "Price", key: "sellingPrice", width: 15 },
-          { header: "Subtotal", key: "totalCost", width: 15 },
-          { header: "Profit", key: "profit", width: 15 },
+          { header: t("date"), key: "date", width: 12 },
+          { header: t("shop"), key: "shopName", width: 20 },
+          { header: t("product"), key: "productName", width: 35 },
+          { header: t("quantity"), key: "quantity", width: 8 },
+          { header: t("price"), key: "sellingPrice", width: 15 },
+          { header: t("total cost"), key: "totalCost", width: 15 },
+          { header: t("profit"), key: "profit", width: 15 },
         ];
         worksheet.columns = columns;
         worksheet.getRow(5).values = columns.map(c => c.header);
@@ -170,7 +170,7 @@ const ReportsPage = () => {
 
         // Add TOTAL Row
         const totalRow = worksheet.addRow({
-          date: "TOTAL",
+          date: t("total"),
           quantity: totalQty,
           totalCost: totalRev,
           profit: totalProf
@@ -275,10 +275,10 @@ const ReportsPage = () => {
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       saveAs(blob, `Shopix_${type}_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-      toast.success("Excel report downloaded successfully");
+      toast.success(t("success"));
     } catch (e) {
       console.error(e);
-      toast.error("Failed to generate Excel report");
+      toast.error(t("error"));
     } finally {
       setIsGenerating(null);
     }
@@ -414,7 +414,7 @@ const ReportsPage = () => {
               <Input
                 ref={dateFromRef}
                 type="date"
-                className="w-36 h-9 text-xs cursor-pointer focus:bg-background transition-all"
+                className="w-36 h-9 text-xs cursor-pointer focus:bg-background transition-all font-bold bg-secondary/50 border-none"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
               />
@@ -424,7 +424,7 @@ const ReportsPage = () => {
               <Input
                 ref={dateToRef}
                 type="date"
-                className="w-36 h-9 text-xs cursor-pointer focus:bg-background transition-all"
+                className="w-36 h-9 text-xs cursor-pointer focus:bg-background transition-all font-bold bg-secondary/50 border-none"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
               />
@@ -436,7 +436,7 @@ const ReportsPage = () => {
               <StoreIcon className="w-4 h-4" />
             </Badge>
             <Select value={selectedShop} onValueChange={setSelectedShop}>
-              <SelectTrigger className="w-48 h-9 text-xs font-bold">
+              <SelectTrigger className="w-48 h-9 text-xs font-bold bg-secondary/50 border-none">
                 <SelectValue placeholder={t("select shop")} />
               </SelectTrigger>
               <SelectContent>

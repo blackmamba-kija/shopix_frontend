@@ -64,7 +64,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
     const handleRestock = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedProductId || !restockQuantity || parseInt(restockQuantity) <= 0) {
-            toast.error("Please select a product and enter a valid quantity");
+            toast.error(t("please fill all required fields"));
             return;
         }
 
@@ -89,11 +89,11 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
             await productsApi.update(selectedProductId, updatedData);
             await fetchProducts();
 
-            toast.success(`Successfully adjusted stock for ${selectedProduct?.name}`);
+            toast.success(t("success"));
             resetForm();
             setOpen(false);
         } catch (err) {
-            toast.error("Failed to restock inventory");
+            toast.error(t("error"));
         } finally {
             setLoading(false);
         }

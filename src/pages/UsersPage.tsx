@@ -17,6 +17,7 @@ import {
     Eye, Search, RefreshCw, Store, Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/useLanguage";
 
 /* ─── helpers ──────────────────────────────────────────── */
 const roleColors: Record<string, string> = {
@@ -46,6 +47,7 @@ function PermissionsPanel({
     assignedShops: number[];
     onShopsChange: (v: number[]) => void;
 }) {
+    const { t } = useLanguage();
     const toggle = (key: string) =>
         onChange(selected.includes(key) ? selected.filter(k => k !== key) : [...selected, key]);
 
@@ -57,7 +59,7 @@ function PermissionsPanel({
             {/* Permissions */}
             <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> Permissions
+                    <Lock className="w-3 h-3" /> {t("permissions")}
                 </p>
                 <div className="space-y-3">
                     {Object.entries(permGroups).map(([group, items]) => (
@@ -84,7 +86,7 @@ function PermissionsPanel({
             {shops.length > 0 && (
                 <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                        <Store className="w-3 h-3" /> Assign Shops
+                        <Store className="w-3 h-3" /> {t("assign shops")}
                     </p>
                     <div className="grid grid-cols-2 gap-1.5">
                         {shops.map(s => (
@@ -108,6 +110,7 @@ function PermissionsPanel({
 function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => void }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { t } = useLanguage();
     const [form, setForm] = useState({ name: "", email: "", password: "", role: "seller" as UserRecord["role"] });
     const [permissions, setPermissions] = useState<string[]>([]);
     const [assignedShops, setAssignedShops] = useState<number[]>([]);
@@ -120,7 +123,7 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!form.name || !form.email || !form.password) { toast.error("Please fill all required fields"); return; }
+        if (!form.name || !form.email || !form.password) { toast.error(t("please fill all required fields")); return; }
         setLoading(true);
         try {
             await usersApi.create({ ...form, permissions, assigned_shops: assignedShops });
@@ -135,42 +138,42 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
                 details: `Created user ${form.name} (${form.email})`
             });
 
-            toast.success(`User "${form.name}" created`);
+            toast.success(t("user created"));
             reset(); setOpen(false); onSuccess();
         } catch (err: any) {
-            toast.error(err.message || "Failed to create user");
+            toast.error(err.message || t("error"));
         } finally { setLoading(false); }
     };
 
     return (
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
             <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5"><Plus className="w-4 h-4" /> Add User</Button>
+                <Button size="sm" className="gap-1.5"><Plus className="w-4 h-4" /> {t("add user")}</Button>
             </DialogTrigger>
             <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
-                <DialogHeader><DialogTitle>Create New User</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>{t("create new user")}</DialogTitle></DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Full Name *</Label>
+                            <Label>{t("full name")} *</Label>
                             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="John Doe" />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Email *</Label>
+                            <Label>{t("email")} *</Label>
                             <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@example.com" />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Password *</Label>
-                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Min 6 chars" />
+                            <Label>{t("password")} *</Label>
+                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder={t("min 6 chars")} />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Role *</Label>
+                            <Label>{t("role")} *</Label>
                             <Select value={form.role} onValueChange={(v: UserRecord["role"]) => setForm(f => ({ ...f, role: v }))}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">Admin – Full access</SelectItem>
-                                    <SelectItem value="seller">Seller – Sales & inventory</SelectItem>
-                                    <SelectItem value="viewer">Viewer – Read only</SelectItem>
+                                    <SelectItem value="admin">{t("admin - full access")}</SelectItem>
+                                    <SelectItem value="seller">{t("seller - sales & inventory")}</SelectItem>
+                                    <SelectItem value="viewer">{t("viewer - read only")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -184,8 +187,8 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); }} disabled={loading}>Cancel</Button>
-                        <Button type="submit" disabled={loading}>{loading ? "Creating…" : "Create User"}</Button>
+                        <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); }} disabled={loading}>{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading}>{loading ? t("creating...") : t("create new user")}</Button>
                     </div>
                 </form>
             </DialogContent>
@@ -197,6 +200,7 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
 function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: Shop[]; onSuccess: () => void }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { t } = useLanguage();
     const [form, setForm] = useState({ name: user.name, email: user.email, role: user.role, password: "" });
     const [permissions, setPermissions] = useState<string[]>(user.permissions ?? []);
     const [assignedShops, setAssignedShops] = useState<number[]>(user.assigned_shops?.map(Number) ?? []);
@@ -227,9 +231,9 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
                 details: `Updated user ${form.name} (${form.email})`
             });
 
-            toast.success("User updated successfully");
+            toast.success(t("success"));
             setOpen(false); onSuccess();
-        } catch { toast.error("Failed to update user"); }
+        } catch { toast.error(t("error")); }
         finally { setLoading(false); }
     };
 
@@ -237,33 +241,33 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
-                    <Edit2 className="w-4 h-4 mr-1.5" />Edit
+                    <Edit2 className="w-4 h-4 mr-1.5" />{t("edit details")}
                 </Button>
             </DialogTrigger>
             <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
-                <DialogHeader><DialogTitle>Edit User – {user.name}</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>{t("edit user")} – {user.name}</DialogTitle></DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Full Name</Label>
+                            <Label>{t("full name")}</Label>
                             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Email</Label>
+                            <Label>{t("email")}</Label>
                             <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>New Password <span className="text-muted-foreground text-[10px]">(blank = unchanged)</span></Label>
-                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Enter new password" />
+                            <Label>{t("new password")} <span className="text-muted-foreground text-[10px]">({t("blank = unchanged")})</span></Label>
+                            <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder={t("new password")} />
                         </div>
                         <div className="space-y-2 col-span-2 sm:col-span-1">
-                            <Label>Role</Label>
+                            <Label>{t("role")}</Label>
                             <Select value={form.role} onValueChange={(v: UserRecord["role"]) => setForm(f => ({ ...f, role: v }))}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">Admin – Full access</SelectItem>
-                                    <SelectItem value="seller">Seller – Sales & inventory</SelectItem>
-                                    <SelectItem value="viewer">Viewer – Read only</SelectItem>
+                                    <SelectItem value="admin">{t("admin - full access")}</SelectItem>
+                                    <SelectItem value="seller">{t("seller - sales & inventory")}</SelectItem>
+                                    <SelectItem value="viewer">{t("viewer - read only")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -277,8 +281,8 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
-                        <Button type="submit" disabled={loading}>{loading ? "Saving…" : "Save Changes"}</Button>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
+                        <Button type="submit" disabled={loading}>{loading ? t("saving...") : t("save changes")}</Button>
                     </div>
                 </form>
             </DialogContent>
@@ -299,14 +303,15 @@ export default function UsersPage() {
         try {
             const [u, s] = await Promise.all([usersApi.getAll(), shopsApi.getAll()]);
             setUsers(u); setShops(s);
-        } catch { toast.error("Failed to load data"); }
+        } catch { toast.error(t("failed to load data")); }
         finally { setLoading(false); }
     };
 
     useEffect(() => { load(); }, []);
 
+    const { t } = useLanguage();
     const handleDelete = async (user: UserRecord) => {
-        if (!window.confirm(`Delete "${user.name}"? This cannot be undone.`)) return;
+        if (!window.confirm(`${t("delete")} "${user.name}"?`)) return;
         try {
             await usersApi.remove(user.id);
 
@@ -320,10 +325,10 @@ export default function UsersPage() {
                 details: `Deleted user ${user.name} (${user.email})`
             });
 
-            toast.success("User deleted");
+            toast.success(t("user deleted"));
             load();
         }
-        catch { toast.error("Failed to delete user"); }
+        catch { toast.error(t("failed to delete user")); }
     };
 
     const filtered = users.filter(u => {
@@ -340,19 +345,19 @@ export default function UsersPage() {
     };
 
     return (
-        <AppLayout title="User Management" subtitle="Manage users, permissions & shop access">
+        <AppLayout title={t("user management")} subtitle={t("manage users, permissions & shop access")}>
             <div className="space-y-5">
                 {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                        { label: "Total Users", count: counts.all, color: "text-foreground", bg: "bg-secondary/50" },
-                        { label: "Admins", count: counts.admin, color: "text-red-600", bg: "bg-red-50  dark:bg-red-950/30" },
-                        { label: "Sellers", count: counts.seller, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-                        { label: "Viewers", count: counts.viewer, color: "text-gray-600", bg: "bg-gray-50 dark:bg-gray-900/30" },
+                        { label: t("total users"), count: counts.all, color: "text-foreground", bg: "bg-secondary/50" },
+                        { label: t("admins"), count: counts.admin, color: "text-red-600", bg: "bg-red-50  dark:bg-red-950/30" },
+                        { label: t("sellers"), count: counts.seller, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+                        { label: t("viewers"), count: counts.viewer, color: "text-gray-600", bg: "bg-gray-50 dark:bg-gray-900/30" },
                     ].map(s => (
                         <div key={s.label} className={cn("rounded-xl p-4 border border-border", s.bg)}>
                             <p className={cn("text-2xl font-bold", s.color)}>{s.count}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 uppercase tracking-tighter font-bold">{s.label}</p>
                         </div>
                     ))}
                 </div>
@@ -362,16 +367,16 @@ export default function UsersPage() {
                     <div className="flex gap-2 flex-wrap">
                         {(["all", "admin", "seller", "viewer"] as const).map(r => (
                             <button key={r} onClick={() => setRoleFilter(r)}
-                                className={cn("px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors",
+                                className={cn("px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors",
                                     roleFilter === r ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent")}>
-                                {r === "all" ? "All" : r} ({counts[r]})
+                                {r === "all" ? t("all") : t(r)} ({counts[r]})
                             </button>
                         ))}
                     </div>
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-none">
                             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder="Search users…" value={search} onChange={e => setSearch(e.target.value)} className="pl-8 text-sm h-9 w-full sm:w-56" />
+                            <Input placeholder={t("search users...")} value={search} onChange={e => setSearch(e.target.value)} className="pl-8 text-sm h-9 w-full sm:w-56" />
                         </div>
                         <Button variant="outline" size="sm" onClick={load} className="shrink-0"><RefreshCw className="w-3.5 h-3.5" /></Button>
                         <AddUserDialog shops={shops} onSuccess={load} />
@@ -384,12 +389,12 @@ export default function UsersPage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-border bg-secondary/50">
-                                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">User</th>
-                                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Email</th>
-                                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Role</th>
-                                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Permissions</th>
-                                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Assigned Shops</th>
-                                    <th className="text-right p-3 text-xs font-semibold text-muted-foreground">Actions</th>
+                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("user")}</th>
+                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("email")}</th>
+                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("role")}</th>
+                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("permissions")}</th>
+                                    <th className="text-left p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("assigned shops")}</th>
+                                    <th className="text-right p-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("actions")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -397,14 +402,14 @@ export default function UsersPage() {
                                     <tr><td colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-2">
                                             <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
-                                            <span className="text-sm text-muted-foreground">Loading users…</span>
+                                            <span className="text-sm text-muted-foreground">{t("loading users...")}</span>
                                         </div>
                                     </td></tr>
                                 ) : filtered.length === 0 ? (
                                     <tr><td colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-2">
                                             <Users className="w-8 h-8 text-muted-foreground/30" />
-                                            <span className="text-sm text-muted-foreground">{search ? "No users match your search." : "No users yet."}</span>
+                                            <span className="text-sm text-muted-foreground">{search ? t("no users match your search.") : t("no users yet.")}</span>
                                         </div>
                                     </td></tr>
                                 ) : filtered.map(user => {
@@ -426,13 +431,13 @@ export default function UsersPage() {
                                             </td>
                                             <td className="p-3 text-muted-foreground text-xs">{user.email}</td>
                                             <td className="p-3">
-                                                <Badge variant="outline" className={cn("text-xs capitalize flex w-fit items-center", roleColors[user.role])}>
-                                                    <RoleIcon role={user.role} />{user.role}
+                                                <Badge variant="outline" className={cn("text-xs capitalize flex w-fit items-center font-bold px-2 py-0.5", roleColors[user.role])}>
+                                                    <RoleIcon role={user.role} />{t(user.role)}
                                                 </Badge>
                                             </td>
                                             <td className="p-3">
                                                 {(user.permissions || []).length === 0 ? (
-                                                    <span className="text-xs text-muted-foreground">None</span>
+                                                    <span className="text-xs text-muted-foreground">{t("none")}</span>
                                                 ) : (
                                                     <div className="flex flex-wrap gap-1">
                                                         {(user.permissions || []).slice(0, 3).map(p => (
@@ -446,7 +451,7 @@ export default function UsersPage() {
                                             </td>
                                             <td className="p-3">
                                                 {userShops.length === 0 ? (
-                                                    <span className="text-xs text-muted-foreground">All shops</span>
+                                                    <span className="text-xs text-muted-foreground">{t("all shops")}</span>
                                                 ) : (
                                                     <div className="flex flex-wrap gap-1">
                                                         {userShops.map(s => (
@@ -459,7 +464,7 @@ export default function UsersPage() {
                                                 <div className="flex items-center justify-end gap-1">
                                                     <EditUserDialog user={user} shops={shops} onSuccess={load} />
                                                     <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(user)}>
-                                                        <Trash2 className="w-4 h-4 mr-1.5" />Delete
+                                                        <Trash2 className="w-4 h-4 mr-1.5" />{t("delete")}
                                                     </Button>
                                                 </div>
                                             </td>

@@ -58,7 +58,7 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!shopId || !productId || !quantity) {
-      toast.error("Please fill all required fields");
+      toast.error(t("please fill all required fields"));
       return;
     }
     const qty = parseInt(quantity);
@@ -70,13 +70,13 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
     try {
       await addSale({ productId, shopId, quantity: qty });
       await fetchSales();
-      toast.success("Sale recorded successfully");
+      toast.success(t("sale recorded successfully"));
       setShopId("");
       setProductId("");
       setQuantity("");
       setOpen(false);
     } catch (err) {
-      toast.error("Failed to record sale");
+      toast.error(t("failed to record sale"));
     } finally {
       setLoading(false);
     }

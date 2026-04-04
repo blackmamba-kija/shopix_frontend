@@ -34,7 +34,7 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.shopId || !form.buyingCost || !form.sellingPrice || !form.quantity) {
-      toast.error("Please fill all required fields");
+      toast.error(t("please fill all required fields"));
       return;
     }
     setLoading(true);
@@ -53,11 +53,11 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
         barcode: form.barcode.trim() || undefined,
       });
       await fetchProducts();
-      toast.success("Product added successfully");
+      toast.success(t("success"));
       setForm({ name: "", category: "", shopId: "", manufacturer: "", expiryDate: "", buyingCost: "", sellingPrice: "", quantity: "", supplier: "", batchNumber: "", barcode: "" });
       setOpen(false);
     } catch (err) {
-      toast.error("Failed to add product");
+      toast.error(t("error"));
     } finally {
       setLoading(false);
     }
@@ -76,22 +76,22 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
         <DialogHeader>
           <DialogTitle>{t("add new product")}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3 mt-2">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("product name")} *</Label>
-              <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder={t("product name")} maxLength={150} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("product name")} *</Label>
+              <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder={t("product name")} maxLength={150} className="bg-secondary/30 h-10 border-none" />
             </div>
-            <div className="space-y-1.5">
-              <Label>{t("category")}</Label>
-              <Input value={form.category} onChange={(e) => update("category", e.target.value)} placeholder="e.g. Foundation" maxLength={50} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("category")}</Label>
+              <Input value={form.category} onChange={(e) => update("category", e.target.value)} placeholder={t("e.g. foundation")} maxLength={50} className="bg-secondary/30 h-10 border-none" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("shop")} *</Label>
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("shop")} *</Label>
               <Select value={form.shopId} onValueChange={(v) => update("shopId", v)}>
-                <SelectTrigger><SelectValue placeholder={t("select shop")} /></SelectTrigger>
+                <SelectTrigger className="bg-secondary/30 h-10 border-none"><SelectValue placeholder={t("select shop")} /></SelectTrigger>
                 <SelectContent>
                   {shops.filter((s) => s.status === "active").map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
@@ -99,48 +99,48 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>{t("manufacturer")}</Label>
-              <Input value={form.manufacturer} onChange={(e) => update("manufacturer", e.target.value)} placeholder={t("manufacturer")} maxLength={100} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("manufacturer")}</Label>
+              <Input value={form.manufacturer} onChange={(e) => update("manufacturer", e.target.value)} placeholder={t("manufacturer")} maxLength={100} className="bg-secondary/30 h-10 border-none" />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("buying cost")} *</Label>
-              <Input type="number" min="0" step="0.01" value={form.buyingCost} onChange={(e) => update("buyingCost", e.target.value)} placeholder="0.00" />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("buying cost")} *</Label>
+              <Input type="number" min="0" step="0.01" value={form.buyingCost} onChange={(e) => update("buyingCost", e.target.value)} placeholder="0.00" className="bg-secondary/30 h-10 border-none" />
             </div>
-            <div className="space-y-1.5">
-              <Label>{t("selling price")} *</Label>
-              <Input type="number" min="0" step="0.01" value={form.sellingPrice} onChange={(e) => update("sellingPrice", e.target.value)} placeholder="0.00" />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("selling price")} *</Label>
+              <Input type="number" min="0" step="0.01" value={form.sellingPrice} onChange={(e) => update("sellingPrice", e.target.value)} placeholder="0.00" className="bg-secondary/30 h-10 border-none" />
             </div>
-            <div className="space-y-1.5">
-              <Label>{t("quantity")} *</Label>
-              <Input type="number" min="1" value={form.quantity} onChange={(e) => update("quantity", e.target.value)} placeholder="0" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("supplier")}</Label>
-              <Input value={form.supplier} onChange={(e) => update("supplier", e.target.value)} placeholder={t("supplier")} maxLength={100} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("batch number")}</Label>
-              <Input value={form.batchNumber} onChange={(e) => update("batchNumber", e.target.value)} placeholder="Batch #" maxLength={50} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("quantity")} *</Label>
+              <Input type="number" min="1" value={form.quantity} onChange={(e) => update("quantity", e.target.value)} placeholder="0" className="bg-secondary/30 h-10 border-none" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("expiry date")}</Label>
-              <Input type="date" value={form.expiryDate} onChange={(e) => update("expiryDate", e.target.value)} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("supplier")}</Label>
+              <Input value={form.supplier} onChange={(e) => update("supplier", e.target.value)} placeholder={t("supplier")} maxLength={100} className="bg-secondary/30 h-10 border-none" />
             </div>
-            <div className="space-y-1.5">
-              <Label>{t("barcode")} ({t("optional")})</Label>
-              <Input value={form.barcode} onChange={(e) => update("barcode", e.target.value)} placeholder="Barcode" maxLength={50} />
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("batch number")}</Label>
+              <Input value={form.batchNumber} onChange={(e) => update("batchNumber", e.target.value)} placeholder={t("batch number")} maxLength={50} className="bg-secondary/30 h-10 border-none" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("expiry date")}</Label>
+              <Input type="date" value={form.expiryDate} onChange={(e) => update("expiryDate", e.target.value)} className="bg-secondary/30 h-10 border-none" />
+            </div>
+            <div className="space-y-1.5 flex flex-col">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">{t("barcode")} ({t("optional")})</Label>
+              <Input value={form.barcode} onChange={(e) => update("barcode", e.target.value)} placeholder={t("barcode")} maxLength={50} className="bg-secondary/30 h-10 border-none" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>
-            <Button type="submit" disabled={loading}>{loading ? t("adding...") : t("add product")}</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-11 px-6">{t("cancel")}</Button>
+            <Button type="submit" disabled={loading} className="h-11 px-6 font-bold uppercase tracking-wider">{loading ? t("adding...") : t("create product")}</Button>
           </div>
         </form>
       </DialogContent>

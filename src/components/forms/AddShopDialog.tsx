@@ -26,24 +26,24 @@ export function AddShopDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !location.trim()) {
-      toast.error("Please fill all required fields");
+      toast.error(t("please fill all required fields"));
       return;
     }
     if (!type.trim()) {
-      toast.error("Please specify the shop type");
+      toast.error(t("please specify the shop type"));
       return;
     }
     setLoading(true);
     try {
       await addShop({ name: name.trim(), type: type.trim(), location: location.trim(), status: "active" });
       await fetchShops();
-      toast.success("Shop created successfully");
+      toast.success(t("shop created successfully"));
       setName("");
       setLocation("");
       setType("");
       setOpen(false);
     } catch (err) {
-      toast.error("Failed to create shop");
+      toast.error(t("failed to create shop"));
     } finally {
       setLoading(false);
     }
@@ -63,15 +63,15 @@ export function AddShopDialog() {
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
             <Label htmlFor="shop-name">{t("shop name")} *</Label>
-            <Input id="shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. City Electronics" maxLength={100} />
+            <Input id="shop-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("e.g. city electronics")} maxLength={100} />
           </div>
           <div className="space-y-2">
             <Label>{t("shop type")} *</Label>
-            <Input id="shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Pharmacy" maxLength={100} />
+            <Input id="shop-type" value={type} onChange={(e) => setType(e.target.value)} placeholder={t("e.g. pharmacy")} maxLength={100} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="shop-location">{t("location")} *</Label>
-            <Input id="shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Mall Road, Block C" maxLength={200} />
+            <Input id="shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("e.g. mall road, block c")} maxLength={200} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>{t("cancel")}</Button>

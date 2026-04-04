@@ -28,6 +28,7 @@ export default function DebtsPage() {
         customer_name: "", phone: "", shop_id: shops[0]?.id || "", product_id: "none",
         quantity: "1", total_amount: "", initial_payment: "", due_date: ""
     });
+    const { formatTsh } = useLanguage();
 
     const fetchDebts = async () => {
         setLoading(true);
@@ -35,7 +36,7 @@ export default function DebtsPage() {
             const data = await debtsApi.getAll();
             setDebts(data);
         } catch (e) {
-            toast.error("Failed to load debts");
+            toast.error(t("error"));
         } finally {
             setLoading(false);
         }
@@ -48,7 +49,7 @@ export default function DebtsPage() {
     const handleAddDebt = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.customer_name || !form.shop_id || !form.total_amount) {
-            toast.error("Please fill required fields (Name, Shop, Total Amount)");
+            toast.error(t("please fill all required fields"));
             return;
         }
 
@@ -57,11 +58,11 @@ export default function DebtsPage() {
                 ...form,
                 product_id: form.product_id === "none" ? null : form.product_id,
             });
-            toast.success("Debt created successfully");
+            toast.success(t("success"));
             setOpenAdd(false);
             fetchDebts();
         } catch (error) {
-            toast.error("Failed to create debt");
+            toast.error(t("error"));
         }
     };
 
@@ -69,10 +70,10 @@ export default function DebtsPage() {
         if (!amount || parseFloat(amount) <= 0) return;
         try {
             await debtsApi.pay(id, parseFloat(amount));
-            toast.success("Payment recorded");
+            toast.success(t("success"));
             fetchDebts();
         } catch (error) {
-            toast.error("Failed to make payment");
+            toast.error(t("error"));
         }
     };
 
@@ -86,7 +87,7 @@ export default function DebtsPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                             placeholder={t("search borrower...")}
-                            className="pl-9 h-9 border bg-card"
+                            className="pl-9 h-11 border-none bg-secondary/50 shadow-sm rounded-xl font-bold"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -94,7 +95,7 @@ export default function DebtsPage() {
                     
                     <Dialog open={openAdd} onOpenChange={setOpenAdd}>
                         <DialogTrigger asChild>
-                            <Button className="gap-2"><Plus className="w-4 h-4"/> {t("issue debt")}</Button>
+                            <Button className="h-11 rounded-xl shadow-md gap-2 px-5 font-bold"><Plus className="w-4 h-4"/> {t("issue debt")}</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -103,30 +104,30 @@ export default function DebtsPage() {
                             <form onSubmit={handleAddDebt} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Borrower Name")} *</Label>
-                                        <Input value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("borrower name")} *</Label>
+                                        <Input value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})} className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Phone Number")}</Label>
-                                        <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("phone number")}</Label>
+                                        <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Shop")} *</Label>
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("shop")} *</Label>
                                         <Select value={form.shop_id} onValueChange={v => setForm({...form, shop_id: v})}>
-                                            <SelectTrigger><SelectValue placeholder="Select Shop"/></SelectTrigger>
+                                            <SelectTrigger className="bg-secondary/30 h-10 border-none"><SelectValue placeholder={t("select shop")}/></SelectTrigger>
                                             <SelectContent>
                                                 {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Product")} ({t("Optional")})</Label>
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("product")} ({t("optional")})</Label>
                                         <Select value={form.product_id} onValueChange={v => setForm({...form, product_id: v})}>
-                                            <SelectTrigger><SelectValue placeholder="None"/></SelectTrigger>
+                                            <SelectTrigger className="bg-secondary/30 h-10 border-none"><SelectValue placeholder={t("none")}/></SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="none">None</SelectItem>
+                                                <SelectItem value="none">{t("none")}</SelectItem>
                                                 {products.filter(p => !form.shop_id || p.shopId == form.shop_id).map(p => (
                                                     <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
                                                 ))}
@@ -136,25 +137,25 @@ export default function DebtsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Quantity")}</Label>
-                                        <Input type="number" min="1" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("quantity")}</Label>
+                                        <Input type="number" min="1" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Total Amount")} *</Label>
-                                        <Input type="number" step="0.01" value={form.total_amount} onChange={e => setForm({...form, total_amount: e.target.value})} />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("total amount")} *</Label>
+                                        <Input type="number" step="0.01" value={form.total_amount} onChange={e => setForm({...form, total_amount: e.target.value})} className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Initial Paid Amount")}</Label>
-                                        <Input type="number" step="0.01" value={form.initial_payment} onChange={e => setForm({...form, initial_payment: e.target.value})} placeholder="0.00" />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("initial paid amount")}</Label>
+                                        <Input type="number" step="0.01" value={form.initial_payment} onChange={e => setForm({...form, initial_payment: e.target.value})} placeholder="0.00" className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                     <div className="space-y-1.5 flex flex-col">
-                                        <Label>{t("Due Date")}</Label>
-                                        <Input type="date" value={form.due_date} onChange={e => setForm({...form, due_date: e.target.value})} />
+                                        <Label className="font-bold text-xs uppercase text-muted-foreground">{t("due date")}</Label>
+                                        <Input type="date" value={form.due_date} onChange={e => setForm({...form, due_date: e.target.value})} className="bg-secondary/30 h-10 border-none" />
                                     </div>
                                 </div>
-                                <Button type="submit" className="w-full">{t("Create Debt")}</Button>
+                                <Button type="submit" className="w-full h-11 font-bold uppercase">{t("create debt")}</Button>
                             </form>
                         </DialogContent>
                     </Dialog>
@@ -184,13 +185,13 @@ export default function DebtsPage() {
                                 
                                 <div className="flex flex-col md:items-end gap-1">
                                     <div className="text-right flex items-center justify-end gap-2 text-sm font-bold">
-                                        <span>{t("total")}:</span> <span className="text-lg">Tsh {debt.totalAmount.toLocaleString()}</span>
+                                        <span className="text-[10px] uppercase text-muted-foreground">{t("total")}:</span> <span className="text-lg">{formatTsh(debt.totalAmount)}</span>
                                     </div>
-                                    <div className="text-right flex items-center justify-end gap-2 text-sm font-medium text-green-600">
-                                        <span>{t("paid")}:</span> <span>Tsh {debt.amountPaid.toLocaleString()}</span>
+                                    <div className="text-right flex items-center justify-end gap-2 text-sm font-bold text-emerald-600">
+                                        <span className="text-[10px] uppercase opacity-70">{t("paid")}:</span> <span>{formatTsh(debt.amountPaid)}</span>
                                     </div>
                                     <div className="text-right flex items-center justify-end gap-2 text-sm font-black text-rose-600">
-                                        <span>{t("balance")}:</span> <span>Tsh {(debt.totalAmount - debt.amountPaid).toLocaleString()}</span>
+                                        <span className="text-[10px] uppercase opacity-70">{t("balance")}:</span> <span>{formatTsh(debt.totalAmount - debt.amountPaid)}</span>
                                     </div>
                                     <div className="mt-1 flex items-center justify-end">
                                         <Badge variant="outline" className={

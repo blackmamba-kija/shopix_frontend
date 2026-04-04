@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useRef } from "react";
 
 const ServicesPage = () => {
-  const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
+  const { formatTsh, t } = useLanguage();
   const allServiceSales = useStore((s) => s.serviceSales);
   const allShops = useStore((s) => s.shops);
   const { can, isAdmin, canAccessShop } = usePermissions();
@@ -53,19 +54,19 @@ const ServicesPage = () => {
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);
 
   return (
-    <AppLayout title="Service Sales" subtitle="Printing, photocopy, and custom services">
+    <AppLayout title={t("service sales")} subtitle={t("printing, photocopy, and custom services")}>
       <div className="flex flex-col gap-6">
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Today's Services" value={todayItems.length.toString()} icon={History} change="Records added today" changeType="neutral" />
+          <StatCard title={t("today's services")} value={todayItems.length.toString()} icon={History} change={t("records added today")} changeType="neutral" />
           {isAdmin && (
             <>
-              <StatCard title="Today's Earnings" value={formatTsh(todayRevenue)} icon={DollarSign} change="Cash collected today" changeType="positive" />
-              <StatCard title="Filtered Total" value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.total || 0), 0))} icon={TrendingUp} change={`${filtered.length} entries matching filters`} changeType="neutral" />
+              <StatCard title={t("today's earnings")} value={formatTsh(todayRevenue)} icon={DollarSign} change={t("cash collected today")} changeType="positive" />
+              <StatCard title={t("filtered total")} value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.total || 0), 0))} icon={TrendingUp} change={`${filtered.length} entries matching filters`} changeType="neutral" />
             </>
           )}
           {!isAdmin && (
-            <StatCard title="Active Volume" value={filtered.length.toString()} icon={TrendingUp} change="Total filtered entries" changeType="neutral" />
+            <StatCard title={t("active volume")} value={filtered.length.toString()} icon={TrendingUp} change={t("total filtered entries")} changeType="neutral" />
           )}
         </div>
 
@@ -74,15 +75,15 @@ const ServicesPage = () => {
           <div className="flex flex-wrap items-center gap-3 bg-card border border-border p-3 rounded-xl w-full md:w-auto">
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search service..." className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder={t("search...")} className="pl-9 h-9 bg-secondary/50 border-none font-bold" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
 
             <Select value={selectedShop} onValueChange={setSelectedShopId}>
-              <SelectTrigger className="w-full sm:w-44 h-9">
-                <SelectValue placeholder="All Shops" />
+              <SelectTrigger className="w-full sm:w-44 h-9 bg-secondary/50 border-none font-bold">
+                <SelectValue placeholder={t("all shops")} />
               </SelectTrigger>
               <SelectContent>
-                {isAdmin && <SelectItem value="all">All Shops (Admin View)</SelectItem>}
+                {isAdmin && <SelectItem value="all">{t("all shops")}</SelectItem>}
                 {shops.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -93,18 +94,18 @@ const ServicesPage = () => {
                 <Input
                   ref={dateFromRef}
                   type="date"
-                  className="pl-9 h-9 text-xs cursor-pointer hover:bg-primary/5 transition-colors"
+                  className="pl-9 h-9 text-xs cursor-pointer hover:bg-primary/5 transition-colors bg-secondary/50 border-none font-bold"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
                 />
               </div>
-              <span className="text-muted-foreground">to</span>
+              <span className="text-muted-foreground font-bold uppercase text-[10px]">{t("to")}</span>
               <div className="relative flex-1 sm:w-36 group cursor-pointer" onClick={() => (dateToRef.current as any)?.showPicker?.()}>
                 <CalendarIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary transition-colors group-hover:text-primary-foreground pointer-events-none" />
                 <Input
                   ref={dateToRef}
                   type="date"
-                  className="pl-9 h-9 text-xs cursor-pointer hover:bg-primary/5 transition-colors"
+                  className="pl-9 h-9 text-xs cursor-pointer hover:bg-primary/5 transition-colors bg-secondary/50 border-none font-bold"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
                 />
@@ -112,13 +113,13 @@ const ServicesPage = () => {
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Input placeholder="Min Tsh" type="number" className="w-full sm:w-24 h-9 text-xs" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} />
-              <Input placeholder="Max Tsh" type="number" className="w-full sm:w-24 h-9 text-xs" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} />
+              <Input placeholder="Min" type="number" className="w-full sm:w-24 h-9 text-xs bg-secondary/50 border-none font-bold" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} />
+              <Input placeholder="Max" type="number" className="w-full sm:w-24 h-9 text-xs bg-secondary/50 border-none font-bold" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} />
             </div>
 
             {(search || selectedShop !== "all" || dateFrom || dateTo || minAmount || maxAmount) && (
-              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setSelectedShopId("all"); setDateFrom(""); setDateTo(""); setMinAmount(""); setMaxAmount(""); }} className="h-9 px-3">
-                Clear
+              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setSelectedShopId("all"); setDateFrom(""); setDateTo(""); setMinAmount(""); setMaxAmount(""); }} className="h-9 px-3 font-bold uppercase transition-all hover:bg-destructive/10 hover:text-destructive">
+                {t("clear")}
               </Button>
             )}
           </div>
@@ -131,12 +132,12 @@ const ServicesPage = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-secondary/30">
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Service</th>
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Shop</th>
-                  <th className="text-left p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Date & Time</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Qty</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Unit Price</th>
-                  <th className="text-right p-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">Total</th>
+                  <th className="text-left p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("service")}</th>
+                  <th className="text-left p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("shop")}</th>
+                  <th className="text-left p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("date & time")}</th>
+                  <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("qty")}</th>
+                  <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("unit price")}</th>
+                  <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("total")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,7 +146,7 @@ const ServicesPage = () => {
                     <td colSpan={6} className="text-center text-muted-foreground py-16">
                       <div className="flex flex-col items-center gap-2">
                         <Filter className="w-8 h-8 opacity-20" />
-                        <p>No service sales match your current filters.</p>
+                        <p>{t("no service sales match your current filters.")}</p>
                       </div>
                     </td>
                   </tr>
@@ -168,9 +169,9 @@ const ServicesPage = () => {
                           <div className="text-[10px] opacity-70">{s.time}</div>
                         </td>
                         <td className="p-4 text-right text-foreground font-medium">{s.quantity}</td>
-                        <td className="p-4 text-right text-muted-foreground font-mono">Tsh{s.pricePerUnit.toLocaleString()}</td>
+                        <td className="p-4 text-right text-muted-foreground font-mono">{formatTsh(s.pricePerUnit)}</td>
                         <td className="p-4 text-right">
-                          <span className="font-bold text-lg text-foreground">Tsh{s.total.toLocaleString()}</span>
+                          <span className="font-bold text-lg text-foreground">{formatTsh(s.total)}</span>
                         </td>
                       </tr>
                     );

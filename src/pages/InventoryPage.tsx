@@ -100,12 +100,17 @@ const InventoryPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:w-96 max-w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder={t("search...")} className="pl-9 h-11 border-border bg-card shadow-sm rounded-xl font-medium transition-all focus-visible:ring-primary/20 hover:border-border/80" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input 
+                placeholder={t("search...")} 
+                className="pl-9 h-11 border-border bg-secondary/50 shadow-sm rounded-xl font-bold transition-all focus-visible:ring-primary/20 hover:border-border/80" 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+              />
             </div>
             
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
               <Select value={selectedShop} onValueChange={setSelectedShopId}>
-                <SelectTrigger className="w-full sm:w-52 h-11 rounded-xl border-border bg-card shadow-sm">
+                <SelectTrigger className="w-full sm:w-52 h-11 rounded-xl border-border bg-secondary/50 shadow-sm font-bold">
                   <SelectValue placeholder={t("all shops")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -116,7 +121,7 @@ const InventoryPage = () => {
               
               {canManageProducts && (
                 <AddProductDialog trigger={
-                  <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0">
+                  <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
                     <PackagePlus className="w-4 h-4" /> {t("add product")}
                   </Button>
                 }/>
@@ -223,24 +228,23 @@ const InventoryPage = () => {
                                       <AlertDialogHeader>
                                         <AlertDialogTitle>{t("are you absolutely sure?")}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                          This will permanently delete "{product.name}" from the inventory.
-                                          This action cannot be undone.
+                                          {t("this will permanently delete this item.")}
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                                         <AlertDialogAction
                                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                           onClick={async () => {
                                             try {
                                               await deleteProduct(product.id);
-                                              toast.success("Product deleted successfully");
+                                              toast.success(t("product deleted successfully"));
                                             } catch (err) {
-                                              toast.error("Failed to delete product");
+                                              toast.error(t("failed to delete product"));
                                             }
                                           }}
                                         >
-                                          Delete Product
+                                          {t("delete product")}
                                         </AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>

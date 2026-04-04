@@ -71,7 +71,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         <div className="flex items-center gap-1 sm:gap-2 bg-secondary/30 sm:bg-secondary/50 p-0.5 sm:p-1 rounded-xl border border-border/50">
           <div className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 border-r border-border/50">
             <Store className="w-3.5 h-3.5 sm:w-4 h-4 text-primary" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight hidden md:inline">{t("Active Shop")}</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight hidden md:inline">{t("active shop")}</span>
           </div>
           {shops.length === 1 && !isAdmin ? (
             <div className="px-3 py-1 text-sm font-bold truncate max-w-[140px] sm:max-w-[180px]">
@@ -80,10 +80,10 @@ export function TopBar({ title, subtitle }: TopBarProps) {
           ) : (
             <Select value={selectedShopId} onValueChange={setSelectedShopId}>
               <SelectTrigger className="w-[140px] sm:w-[180px] h-8 border-none bg-transparent hover:bg-secondary transition-all focus:ring-0 shadow-none text-xs font-bold">
-                <SelectValue placeholder={t("Select Shop")} />
+                <SelectValue placeholder={t("select shop")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-xs font-bold">{isAdmin ? t("All Shops (Admin)") : t("All My Shops")}</SelectItem>
+                <SelectItem value="all" className="text-xs font-bold">{isAdmin ? t("all shops (admin)") : t("all my shops")}</SelectItem>
                 {shops.map((s) => (
                   <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
                     {s.name}
@@ -97,7 +97,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         <div className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search..."
+            placeholder={t("search...")}
             className="pl-9 w-40 h-9 bg-secondary/50 border-none text-xs focus-visible:ring-1 focus-visible:ring-primary/20"
           />
         </div>
@@ -130,12 +130,12 @@ export function TopBar({ title, subtitle }: TopBarProps) {
           {showNotifications && (
             <div className="absolute right-0 top-12 w-80 bg-card border border-border rounded-lg shadow-lg animate-fade-in z-50">
               <div className="p-3 border-b border-border">
-                <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                <h3 className="text-sm font-semibold text-foreground">{t("notifications")}</h3>
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {storeNotifications.length === 0 ? (
                   <div className="p-8 text-center">
-                    <p className="text-xs text-muted-foreground">No notifications</p>
+                    <p className="text-xs text-muted-foreground">{t("no notifications")}</p>
                   </div>
                 ) : (
                   storeNotifications.slice(0, 10).map((n) => (
@@ -177,12 +177,12 @@ export function TopBar({ title, subtitle }: TopBarProps) {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/settings")}>
-                Settings
+                {t("settings")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t("logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
