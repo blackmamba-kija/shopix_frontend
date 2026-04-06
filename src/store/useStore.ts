@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { Product, Sale, Shop, ServiceSale, Notification, AuditLog } from "@/types/models";
+import { Product, Sale, Shop, ServiceSale, Notification, AuditLog, Expense } from "@/types/models";
 import { shopsApi } from "@/api/shops.api";
 import { productsApi } from "@/api/products.api";
 import { servicesApi } from "@/api/services.api";
@@ -22,37 +22,48 @@ interface StoreState {
   products: Product[];
   sales: Sale[];
   serviceSales: ServiceSale[];
+  expenses: Expense[];
+  notifications: Notification[];
+  auditLogs: AuditLog[];
+  user: StoredUser | null;
   selectedShopId: string;
+  sidebarCollapsed: boolean;
+  mobileMenuOpen: boolean;
+  syncQueue: SyncItem[];
+  isOnline: boolean;
+
+  setOnlineStatus: (status: boolean) => void;
+  updateUser: (user: StoredUser | null) => void;
   setSelectedShopId: (id: string) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  setMobileMenuOpen: (open: boolean) => void;
+  
   fetchShops: () => Promise<void>;
-  addShop: (shop: Omit<Shop, "id" | "createdAt">) => Promise<void>;
+  addShop: (shop: Omit<Shop, "id" | "createdAt" | "status">) => Promise<void>;
   updateShop: (id: string, data: Partial<Shop>) => Promise<void>;
   deleteShop: (id: string) => Promise<void>;
+
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, "id" | "registrationDate" | "status">) => Promise<void>;
   updateProduct: (id: string, data: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+
   fetchSales: () => Promise<void>;
-  addSale: (sale: { productId: string; shopId: string; quantity: number }) => Promise<void>;
+  addSale: (sale: { productId: string; shopId: string; quantity: number, sellingPrice?: number }) => Promise<void>;
+
   fetchServiceSales: () => Promise<void>;
   addServiceSale: (service: Omit<ServiceSale, "id" | "date" | "time" | "total">) => Promise<void>;
-  notifications: Notification[];
-  auditLogs: AuditLog[];
-  user: StoredUser | null;
-  updateUser: (user: StoredUser | null) => void;
+
+  fetchExpenses: () => Promise<void>;
+  addExpense: (expense: Partial<Expense>) => Promise<void>;
+  removeExpense: (id: string) => Promise<void>;
+
   addNotification: (notification: Omit<Notification, "id" | "time" | "read">) => void;
   markNotificationAsRead: (id: string) => void;
+
   fetchAuditLogs: () => Promise<void>;
   addAuditLog: (log: Omit<AuditLog, "id" | "timestamp">) => Promise<void>;
-  sidebarCollapsed: boolean;
-  setSidebarCollapsed: (collapsed: boolean) => void;
-  mobileMenuOpen: boolean;
-  setMobileMenuOpen: (open: boolean) => void;
-  
-  // Offline Sync State
-  syncQueue: SyncItem[];
-  isOnline: boolean;
-  setOnlineStatus: (status: boolean) => void;
+
   syncOfflineData: () => Promise<void>;
   refreshAllData: () => Promise<void>;
 }
@@ -64,6 +75,7 @@ export const useStore = create<StoreState>()(
       products: [],
       sales: [],
       serviceSales: [],
+      expenses: [],
       notifications: [],
       auditLogs: [],
       user: authHelper.getUser(),
@@ -96,10 +108,20 @@ export const useStore = create<StoreState>()(
         }
       },
 
+      fetchExpenses: async () => {
+        try {
+          const { expensesApi } = await import("@/api/expenses.api");
+          const expenses = await expensesApi.getAll();
+          set({ expenses });
+        } catch (e) {
+          console.error("Fetch expenses failed", e);
+        }
+      },
+
       addShop: async (shop) => {
         if (!get().isOnline) {
           const tempId = `temp_${Date.now()}`;
-          const newShop: Shop = { ...shop, id: tempId, createdAt: new Date().toISOString() };
+          const newShop: Shop = { ...shop, id: tempId, createdAt: new Date().toISOString(), status: "active" };
           set((state) => ({ 
             shops: [...state.shops, newShop],
             syncQueue: [...state.syncQueue, { id: tempId, type: "SHOP", action: "CREATE", data: shop, timestamp: Date.now() }]
@@ -191,27 +213,28 @@ export const useStore = create<StoreState>()(
         set({ sales });
       },
 
-      addSale: async ({ productId, shopId, quantity }) => {
+      addSale: async ({ productId, shopId, quantity, sellingPrice }) => {
         if (!get().isOnline) {
           const tempId = `sale_${Date.now()}`;
           const product = get().products.find(p => String(p.id) === String(productId));
+          const actualPrice = sellingPrice || product?.sellingPrice || 0;
           const newSale: Sale = {
             id: tempId,
             productId,
             shopId,
             quantity,
             productName: product?.name || "Offline Item",
-            sellingPrice: product?.sellingPrice || 0,
-            totalCost: (product?.sellingPrice || 0) * quantity,
+            sellingPrice: actualPrice,
+            totalCost: actualPrice * quantity,
             date: new Date().toISOString().split('T')[0],
             time: new Date().toLocaleTimeString(),
-            profit: ((product?.sellingPrice || 0) - (product?.buyingCost || 0)) * quantity
+            profit: (actualPrice - (product?.buyingCost || 0)) * quantity
           };
 
           set((state) => ({
             sales: [...state.sales, newSale],
             products: state.products.map(p => String(p.id) === String(productId) ? { ...p, quantity: p.quantity - quantity } : p),
-            syncQueue: [...state.syncQueue, { id: tempId, type: "SALE", action: "CREATE", data: { productId, shopId, quantity }, timestamp: Date.now() }]
+            syncQueue: [...state.syncQueue, { id: tempId, type: "SALE", action: "CREATE", data: { productId, shopId, quantity, sellingPrice }, timestamp: Date.now() }]
           }));
           
           toast.success("Sale saved offline!");
@@ -219,7 +242,7 @@ export const useStore = create<StoreState>()(
           return;
         }
 
-        const newSale = await salesApi.create({ productId, shopId, quantity });
+        const newSale = await salesApi.create({ productId, shopId, quantity, sellingPrice });
         set((state) => ({ sales: [...state.sales, newSale] }));
         await get().fetchProducts();
         get().addNotification({ type: "success", title: "Sale Recorded", message: `${quantity}x ${newSale.productName} recorded.` });
@@ -300,10 +323,33 @@ export const useStore = create<StoreState>()(
             get().fetchProducts(),
             get().fetchSales(),
             get().fetchServiceSales(),
-            get().fetchAuditLogs()
+            get().fetchAuditLogs(),
+            get().fetchExpenses()
           ]);
         } catch (e) {
           console.error("Refresh all data failed", e);
+        }
+      },
+
+      addExpense: async (expense) => {
+        try {
+          const { expensesApi } = await import("@/api/expenses.api");
+          const newExpense = await expensesApi.create(expense);
+          set((state) => ({ expenses: [newExpense, ...state.expenses] }));
+        } catch (e) {
+          console.error("Add expense failed", e);
+          throw e;
+        }
+      },
+
+      removeExpense: async (id) => {
+        try {
+          const { expensesApi } = await import("@/api/expenses.api");
+          await expensesApi.remove(id);
+          set((state) => ({ expenses: state.expenses.filter((e) => e.id !== id) }));
+        } catch (e) {
+          console.error("Remove expense failed", e);
+          throw e;
         }
       },
 

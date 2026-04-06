@@ -21,13 +21,15 @@ class ApiClient {
     this.timeout = timeout;
   }
 
-  private getHeaders(): HeadersInit {
+  private getHeaders(): Record<string, string> {
     const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
+    const headers: Record<string, string> = {
       "Accept": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
     };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   private async request<T>(
@@ -41,10 +43,17 @@ class ApiClient {
 
     try {
       const url = `${this.baseUrl}${endpoint}`;
+      const isFormData = body instanceof FormData;
+      
+      const headers = { ...this.getHeaders(), ...extraHeaders } as Record<string, string>;
+      if (!isFormData && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+      }
+
       const response = await fetch(url, {
         method,
-        headers: { ...this.getHeaders(), ...extraHeaders },
-        body: body ? JSON.stringify(body) : undefined,
+        headers,
+        body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
         signal: controller.signal,
       });
 
@@ -73,8 +82,8 @@ class ApiClient {
     return this.request<T>(endpoint, "GET");
   }
 
-  post<T>(endpoint: string, body: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, "POST", body);
+  post<T>(endpoint: string, body: any, extraHeaders?: Record<string, string>): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, "POST", body, extraHeaders);
   }
 
   put<T>(endpoint: string, body: any): Promise<ApiResponse<T>> {

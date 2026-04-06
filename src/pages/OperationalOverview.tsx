@@ -16,22 +16,26 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const OperationalOverview = () => {
-    const sales = useStore((s) => s.sales);
-    const products = useStore((s) => s.products);
-    const shops = useStore((s) => s.shops);
-    const selectedShopId = useStore((s) => s.selectedShopId);
+    const { sales, products, shops, expenses, fetchExpenses, selectedShopId } = useStore();
     const navigate = useNavigate();
     const { t } = useLanguage();
+
+    useEffect(() => {
+        fetchExpenses();
+    }, [fetchExpenses]);
 
     const today = format(new Date(), "yyyy-MM-dd");
 
     const shopFilter = (item: any) => selectedShopId === "all" || String(item.shopId) === String(selectedShopId);
 
     const filteredSales = sales.filter(s => s.date === today && shopFilter(s));
+    const filteredExpenses = expenses.filter(e => e.date === today && shopFilter(e));
     const filteredProducts = products.filter(p => shopFilter(p));
 
     const totalRevenue = filteredSales.reduce((sum, s) => sum + s.totalCost, 0);
-    const totalProfit = filteredSales.reduce((sum, s) => sum + s.profit, 0);
+    const totalSalesProfit = filteredSales.reduce((sum, s) => sum + s.profit, 0);
+    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const netProfit = totalSalesProfit - totalExpenses;
     const totalStock = filteredProducts.reduce((sum, p) => sum + p.quantity, 0);
     const totalValue = filteredProducts.reduce((sum, p) => sum + p.quantity * p.buyingCost, 0);
 
@@ -82,7 +86,7 @@ const OperationalOverview = () => {
                             <DollarSign className="w-8 h-8 text-emerald-600 mb-2" />
                             <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("today's profit")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {totalProfit.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
+                                {netProfit.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-emerald-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {t("view profit analysis")} &rarr;
@@ -91,18 +95,18 @@ const OperationalOverview = () => {
                     </Card>
 
                     <Card
-                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-indigo-500/20 transition-all active:scale-[0.98]"
-                        onClick={() => navigate("/inventory")}
+                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-rose-500/20 transition-all active:scale-[0.98]"
+                        onClick={() => navigate("/expenses")}
                     >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-indigo-500/10 transition-colors" />
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-rose-500/10 transition-colors" />
                         <CardContent className="p-6">
-                            <Layers className="w-8 h-8 text-indigo-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("current stock (total)")}</p>
+                            <DollarSign className="w-8 h-8 text-rose-600 mb-2" />
+                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("expenses")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {totalStock.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">{t("units")}</span>
+                                {totalExpenses.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
                             </h3>
-                            <p className="text-[10px] text-indigo-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {t("manage inventory")} &rarr;
+                            <p className="text-[10px] text-rose-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {t("view expenses")} &rarr;
                             </p>
                         </CardContent>
                     </Card>

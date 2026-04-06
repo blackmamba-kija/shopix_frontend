@@ -22,6 +22,7 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     const [type, setType] = useState(shop.type || "");
     const [location, setLocation] = useState(shop.location || "");
     const [logo, setLogo] = useState(shop.logo || "");
+    const [uploadingLogo, setUploadingLogo] = useState(false);
     const updateShop = useStore((s) => s.updateShop);
     const fetchShops = useStore((s) => s.fetchShops);
     const [loading, setLoading] = useState(false);
@@ -64,6 +65,22 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
         }
     };
 
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingLogo(true);
+        try {
+            const logoUrl = await (await import("@/api/shops.api")).shopsApi.uploadLogo(shop.id, file);
+            setLogo(logoUrl);
+            toast.success(t("logo uploaded"));
+        } catch (err) {
+            toast.error(t("failed to upload logo"));
+        } finally {
+            setUploadingLogo(false);
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -90,8 +107,24 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
                         <Input id="edit-shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("e.g. mall road, block c")} maxLength={200} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
                     </div>
                     <div className="space-y-2 flex flex-col">
-                        <Label htmlFor="edit-shop-logo" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("shop logo url")}</Label>
-                        <Input id="edit-shop-logo" value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://example.com/logo.png" className="bg-secondary/40 h-12 border-none rounded-xl font-bold text-xs" />
+                        <Label htmlFor="edit-shop-logo" className="font-bold text-xs uppercase text-muted-foreground ml-1">
+                            {t("shop logo")} {uploadingLogo && "(uploading...)"}
+                        </Label>
+                        <div className="flex items-center gap-3">
+                            <Input 
+                                id="edit-shop-logo" 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleLogoUpload} 
+                                disabled={uploadingLogo} 
+                                className="bg-secondary/40 h-12 border-none rounded-xl font-bold text-xs pt-3" 
+                            />
+                            {logo && (
+                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white border border-border shadow-sm flex-shrink-0">
+                                    <img src={logo.startsWith('http') ? logo : `${window.location.origin.replace(':8080', ':8000')}/${logo}`} className="w-full h-full object-contain" />
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>

@@ -28,6 +28,7 @@ const navItems = [
   { icon: Store, label: "Shops", path: "/shops", permission: "view_shops" },
   { icon: Package, label: "Inventory", path: "/inventory", permission: "view_products" },
   { icon: ShoppingCart, label: "Sales", path: "/sales", permission: "view_sales" },
+  { icon: CreditCard, label: "Expenses", path: "/expenses", permission: "view_expenses" },
   { icon: CreditCard, label: "Debts", path: "/debts", permission: "view_sales" },
   { icon: Printer, label: "Services", path: "/services", permission: "view_services" },
   { icon: FileText, label: "Reports", path: "/reports", permission: "view_reports" },

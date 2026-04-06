@@ -18,6 +18,7 @@ import Index from "./pages/Index";
 import ShopsPage from "./pages/ShopsPage";
 import InventoryPage from "./pages/InventoryPage";
 import SalesPage from "./pages/SalesPage";
+import ExpensesPage from "./pages/ExpensesPage";
 import ServicesPage from "./pages/ServicesPage";
 import ReportsPage from "./pages/ReportsPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -62,6 +63,7 @@ const protectedRoutes = [
   { path: "/shops", element: <ShopsPage />, permission: "view_shops" },
   { path: "/inventory", element: <InventoryPage />, permission: "view_products" },
   { path: "/sales", element: <SalesPage />, permission: "view_sales" },
+  { path: "/expenses", element: <ExpensesPage />, permission: "view_expenses" },
   { path: "/debts", element: <DebtsPage />, permission: "view_sales" },
   { path: "/services", element: <ServicesPage />, permission: "view_services" },
   { path: "/reports", element: <ReportsPage />, permission: "view_reports" },

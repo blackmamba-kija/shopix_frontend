@@ -32,4 +32,10 @@ export const shopsApi = {
   async remove(id: string): Promise<void> {
     await apiClient.delete(`/shops/${id}`);
   },
+  async uploadLogo(id: string, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    const res = await apiClient.post<any>(`/shops/${id}/logo`, formData);
+    return res.data.logo_url;
+  },
 };

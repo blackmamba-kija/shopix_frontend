@@ -76,6 +76,16 @@ export interface User {
   permissions?: string[];
 }
 
+export interface Expense {
+  id: string;
+  shopId: string;
+  userId: string;
+  category: string;
+  amount: number;
+  description?: string;
+  date: string;
+}
+
 export interface AuditLog {
   id: string;
   userId: string;
