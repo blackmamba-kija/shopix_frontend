@@ -9,6 +9,7 @@ import { Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { Shop } from "@/types/models";
 import { useLanguage } from "@/hooks/useLanguage";
+import { getAssetUrl } from "@/utils/assets";
 
 
 
@@ -121,7 +122,7 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
                             />
                             {logo && (
                                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-white border border-border shadow-sm flex-shrink-0">
-                                    <img src={logo.startsWith('http') ? logo : `${window.location.origin.replace(':8080', ':8000')}/${logo}`} className="w-full h-full object-contain" />
+                                    <img src={getAssetUrl(logo)} className="w-full h-full object-contain" />
                                 </div>
                             )}
                         </div>

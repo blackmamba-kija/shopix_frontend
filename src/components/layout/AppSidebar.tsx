@@ -40,6 +40,8 @@ const navItems = [
   { icon: Settings, label: "Settings", path: "/settings", permission: null },
 ];
 
+import { getAssetUrl } from "@/utils/assets";
+
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,7 +56,7 @@ export function AppSidebar() {
   const selectedShopId = useStore((s) => s.selectedShopId);
 
   const selectedShop = shops.find(s => String(s.id) === String(selectedShopId));
-  const displayLogo = selectedShop?.logo || "/shopix-logo.png";
+  const displayLogo = selectedShop?.logo ? getAssetUrl(selectedShop.logo) : "/shopix-logo.png";
   const displayName = selectedShop?.name || "SHOPIX";
 
   // Filter nav items: admins see everything, others see what they have permission for

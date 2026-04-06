@@ -30,6 +30,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Only handle http/https requests
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // Skip API calls for caching
   if (url.pathname.startsWith('/api') || url.host.includes('.kija.co.tz')) {
     return;

@@ -70,7 +70,7 @@ export default function AddExpenseDialog() {
                     <span>{t("add expense")}</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[480px] rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
+            <DialogContent className="sm:max-w-[480px] rounded-[2rem] border border-border shadow-2xl p-0 overflow-hidden bg-background">
                 <div className="bg-primary/5 p-8 pb-32 -mb-28">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-black italic uppercase tracking-tight flex items-center gap-3">
@@ -84,16 +84,16 @@ export default function AddExpenseDialog() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6 pt-0">
-                    <div className="space-y-4 bg-white p-6 rounded-3xl shadow-xl border border-secondary/50">
+                    <div className="space-y-4 bg-card p-6 rounded-3xl shadow-xl border border-border">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-1">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1 flex items-center gap-1">
                                 <Plus className="w-3 h-3" /> {t("select shop")} *
                             </Label>
                             <Select 
                                 value={formData.shopId} 
                                 onValueChange={(val) => setFormData(prev => ({ ...prev, shopId: val }))}
                             >
-                                <SelectTrigger className="h-12 bg-slate-50 border border-slate-200 hover:border-primary/50 transition-colors rounded-xl font-bold italic text-foreground">
+                                <SelectTrigger className="h-12 bg-muted/50 border border-border hover:border-primary/50 transition-colors rounded-xl font-bold italic text-foreground">
                                     <SelectValue placeholder={t("select shop")} />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl border-border shadow-xl">
@@ -108,14 +108,14 @@ export default function AddExpenseDialog() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-1">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1 flex items-center gap-1">
                                     <Tag className="w-3 h-3" /> {t("category")} *
                                 </Label>
                                 <Select 
                                     value={formData.category} 
                                     onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
                                 >
-                                    <SelectTrigger className="h-12 bg-slate-50 border border-slate-200 hover:border-primary/50 transition-colors rounded-xl font-bold italic text-foreground">
+                                    <SelectTrigger className="h-12 bg-muted/50 border border-border hover:border-primary/50 transition-colors rounded-xl font-bold italic text-foreground">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl border-border shadow-xl">
@@ -128,39 +128,39 @@ export default function AddExpenseDialog() {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-1">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1 flex items-center gap-1">
                                     <Plus className="w-3 h-3" /> {t("amount")} (Tsh) *
                                 </Label>
                                 <Input 
                                     type="number" 
                                     value={formData.amount} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                                    className="h-12 bg-slate-50 border border-slate-200 focus-visible:ring-primary/20 rounded-xl font-black italic text-rose-600"
+                                    className="h-12 bg-muted/50 border border-border focus-visible:ring-primary/20 rounded-xl font-black italic text-rose-600"
                                     placeholder="0"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-1">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1 flex items-center gap-1">
                                 <Calendar className="w-3 h-3" /> {t("date")} *
                             </Label>
                             <Input 
                                 type="date" 
                                 value={formData.date} 
                                 onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                                className="h-12 bg-slate-50 border border-slate-200 focus-visible:ring-primary/20 rounded-xl font-bold italic text-foreground"
+                                className="h-12 bg-muted/50 border border-border focus-visible:ring-primary/20 rounded-xl font-bold italic text-foreground"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-1">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1 flex items-center gap-1">
                                 <FileText className="w-3 h-3" /> {t("description")}
                             </Label>
                             <Input 
                                 value={formData.description} 
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                className="h-12 bg-slate-50 border border-slate-200 focus-visible:ring-primary/20 rounded-xl font-medium italic text-foreground"
+                                className="h-12 bg-muted/50 border border-border focus-visible:ring-primary/20 rounded-xl font-medium italic text-foreground"
                                 placeholder={t("details about the expense...")}
                             />
                         </div>
