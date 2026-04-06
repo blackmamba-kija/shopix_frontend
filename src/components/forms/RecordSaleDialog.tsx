@@ -35,14 +35,10 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
   const [shopId, setShopId] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [totalAmount, setTotalAmount] = useState<string>("");
 
-  // Fetch initial data when dialog opens
-  useEffect(() => {
-    if (open) {
-      fetchShops();
-      fetchProducts();
-    }
-  }, [open, fetchShops, fetchProducts]);
+  // Handling ID comparison safely
+  const selectedProduct = products.find((p) => String(p.id) === String(productId));
 
   // Robust filtering for products in inventory
   const availableProducts = products.filter((p) => {
@@ -52,8 +48,25 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
     return pShopId === String(shopId);
   });
 
-  // Handling ID comparison safely
-  const selectedProduct = products.find((p) => String(p.id) === String(productId));
+  useEffect(() => {
+    if (open) {
+      fetchShops();
+      fetchProducts();
+      setShopId("");
+      setProductId("");
+      setQuantity("");
+      setTotalAmount("");
+    }
+  }, [open, fetchShops, fetchProducts]);
+
+  // Update total amount when product or quantity changes
+  useEffect(() => {
+    if (selectedProduct && quantity && parseInt(quantity) > 0) {
+      setTotalAmount((selectedProduct.sellingPrice * parseInt(quantity)).toString());
+    } else {
+      setTotalAmount("");
+    }
+  }, [productId, quantity, selectedProduct]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,14 +79,24 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
       toast.error(`${t("only")} ${selectedProduct.quantity} ${t("remaining")} ${t("units")} ${t("in inventory")}`);
       return;
     }
-    setLoading(true);
     try {
-      await addSale({ productId, shopId, quantity: qty });
+      const qty = parseInt(quantity);
+      const total = parseFloat(totalAmount);
+      const unitPrice = total / qty;
+
+      await addSale({ 
+        productId, 
+        shopId, 
+        quantity: qty,
+        sellingPrice: unitPrice // Pass the calculated unit price to override
+      } as any);
+      
       await fetchSales();
       toast.success(t("sale recorded successfully"));
       setShopId("");
       setProductId("");
       setQuantity("");
+      setTotalAmount("");
       setOpen(false);
     } catch (err) {
       toast.error(t("failed to record sale"));
@@ -183,18 +206,30 @@ export function RecordSaleDialog({ trigger }: RecordSaleDialogProps = {}) {
           </div>
 
           {selectedProduct && quantity && parseInt(quantity) > 0 && (
-            <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">{t("unit price")}</span>
                 <span className="font-medium text-foreground">Tsh{selectedProduct.sellingPrice.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center text-lg font-bold pt-1 border-t border-primary/10">
-                <span className="text-foreground">{t("total")}</span>
-                <span className="text-primary">Tsh{(selectedProduct.sellingPrice * parseInt(quantity)).toLocaleString()}</span>
+              
+              <div className="space-y-1.5 pt-1 border-t border-primary/10">
+                <div className="flex justify-between items-center">
+                   <Label className="text-sm font-bold text-foreground">{t("total amount paid")} (Tsh)</Label>
+                   <span className="text-[10px] uppercase font-black text-primary/60 italic">{t("editable")}</span>
+                </div>
+                <Input 
+                  type="number" 
+                  value={totalAmount} 
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  className="h-10 bg-background border-primary/20 focus-visible:ring-primary/20 font-bold text-primary"
+                />
               </div>
+
               <div className="flex justify-between items-center text-xs text-success-foreground bg-success/10 px-2 py-1 rounded-md">
                 <span className="font-medium">{t("est. profit")}</span>
-                <span className="font-bold">Tsh{((selectedProduct.sellingPrice - selectedProduct.buyingCost) * parseInt(quantity)).toLocaleString()}</span>
+                <span className="font-bold">
+                  Tsh{(parseFloat(totalAmount || "0") - (selectedProduct.buyingCost * parseInt(quantity))).toLocaleString()}
+                </span>
               </div>
             </div>
           )}

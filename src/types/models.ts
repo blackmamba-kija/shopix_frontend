@@ -1,6 +1,7 @@
 export interface Shop {
   id: string;
   name: string;
+  logo?: string;
   type: string;
   location: string;
   status: "active" | "inactive";

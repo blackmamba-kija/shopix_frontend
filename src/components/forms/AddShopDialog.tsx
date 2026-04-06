@@ -16,6 +16,7 @@ export function AddShopDialog() {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
+  const [logo, setLogo] = useState("");
   const addShop = useStore((s) => s.addShop);
   const fetchShops = useStore((s) => s.fetchShops);
   const [loading, setLoading] = useState(false);
@@ -33,12 +34,13 @@ export function AddShopDialog() {
     }
     setLoading(true);
     try {
-      await addShop({ name: name.trim(), type: type.trim(), location: location.trim(), status: "active" });
+      await addShop({ name: name.trim(), logo: logo.trim(), type: type.trim(), location: location.trim(), status: "active" });
       await fetchShops();
       toast.success(t("shop created successfully"));
       setName("");
       setLocation("");
       setType("");
+      setLogo("");
       setOpen(false);
     } catch (err) {
       toast.error(t("failed to create shop"));
@@ -70,6 +72,10 @@ export function AddShopDialog() {
           <div className="space-y-2 flex flex-col">
             <Label htmlFor="shop-location" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("location")} *</Label>
             <Input id="shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("e.g. mall road, block c")} maxLength={200} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
+          </div>
+          <div className="space-y-2 flex flex-col">
+            <Label htmlFor="shop-logo" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("shop logo url")}</Label>
+            <Input id="shop-logo" value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://example.com/logo.png" className="bg-secondary/40 h-12 border-none rounded-xl font-bold text-xs" />
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>

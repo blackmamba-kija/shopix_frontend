@@ -4,6 +4,7 @@ import { Shop } from "@/types/models";
 const mapShop = (s: any): Shop => ({
   id: String(s.id || ""),
   name: String(s.name || ""),
+  logo: s.logo || "",
   type: s.type || "stationery",
   location: String(s.location || ""),
   status: s.status || "active",

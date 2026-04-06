@@ -21,6 +21,7 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
     const [name, setName] = useState(shop.name);
     const [type, setType] = useState(shop.type || "");
     const [location, setLocation] = useState(shop.location || "");
+    const [logo, setLogo] = useState(shop.logo || "");
     const updateShop = useStore((s) => s.updateShop);
     const fetchShops = useStore((s) => s.fetchShops);
     const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
             setName(shop.name);
             setType(shop.type || "");
             setLocation(shop.location || "");
+            setLogo(shop.logo || "");
         }
     }, [open, shop]);
 
@@ -46,7 +48,12 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
         }
         setLoading(true);
         try {
-            await updateShop(shop.id, { name: name.trim(), type: type.trim(), location: location.trim() });
+            await updateShop(shop.id, { 
+                name: name.trim(), 
+                type: type.trim(), 
+                location: location.trim(),
+                logo: logo.trim()
+            });
             await fetchShops();
             toast.success(t("success"));
             setOpen(false);
@@ -81,6 +88,10 @@ export function EditShopDialog({ shop }: EditShopDialogProps) {
                     <div className="space-y-2 flex flex-col">
                         <Label htmlFor="edit-shop-location" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("location")} *</Label>
                         <Input id="edit-shop-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("e.g. mall road, block c")} maxLength={200} className="bg-secondary/40 h-12 border-none rounded-xl font-bold" />
+                    </div>
+                    <div className="space-y-2 flex flex-col">
+                        <Label htmlFor="edit-shop-logo" className="font-bold text-xs uppercase text-muted-foreground ml-1">{t("shop logo url")}</Label>
+                        <Input id="edit-shop-logo" value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://example.com/logo.png" className="bg-secondary/40 h-12 border-none rounded-xl font-bold text-xs" />
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider">{t("cancel")}</Button>

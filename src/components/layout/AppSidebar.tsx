@@ -49,6 +49,12 @@ export function AppSidebar() {
   const updateUser = useStore((s) => s.updateUser);
   const { can, isAdmin, user } = usePermissions();
   const { t } = useLanguage();
+  const shops = useStore((s) => s.shops);
+  const selectedShopId = useStore((s) => s.selectedShopId);
+
+  const selectedShop = shops.find(s => String(s.id) === String(selectedShopId));
+  const displayLogo = selectedShop?.logo || "/shopix-logo.png";
+  const displayName = selectedShop?.name || "SHOPIX";
 
   // Filter nav items: admins see everything, others see what they have permission for
   const visibleItems = navItems.filter(item =>
@@ -76,15 +82,16 @@ export function AppSidebar() {
           collapsed ? "w-16 h-16" : "w-20 h-20"
         )}>
           <img
-            src="/shopix-logo.png"
-            alt="Shopix Logo"
-            className="w-full h-full object-contain scale-125"
+            src={displayLogo}
+            alt={displayName}
+            className="w-full h-full object-contain"
+            onError={(e) => { (e.target as HTMLImageElement).src = "/shopix-logo.png" }}
           />
         </div>
         {!collapsed && (
-          <div className="animate-in fade-in slide-in-from-left duration-500">
-            <h1 className="text-lg font-black tracking-tight leading-none italic">
-              <span className="bg-gradient-to-br from-rose-400 via-orange-300 to-rose-500 bg-clip-text text-transparent">SHOPIX</span>
+          <div className="animate-in fade-in slide-in-from-left duration-500 overflow-hidden">
+            <h1 className="text-lg font-black tracking-tight leading-none italic truncate max-w-[120px]">
+              <span className="bg-gradient-to-br from-rose-400 via-orange-300 to-rose-500 bg-clip-text text-transparent uppercase">{displayName}</span>
             </h1>
             <div className="flex items-center gap-1.5 mt-1">
               <div className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />

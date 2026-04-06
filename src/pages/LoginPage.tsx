@@ -39,6 +39,7 @@ const LoginPage = () => {
           assigned_shops: response.data.user.assigned_shops || [],
           permissions: response.data.user.permissions || []
         } as any);
+        await useStore.getState().refreshAllData();
         toast({
           title: "Access Granted",
           description: "Welcome to Shopix's next-generation retail platform.",

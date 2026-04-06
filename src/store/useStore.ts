@@ -54,6 +54,7 @@ interface StoreState {
   isOnline: boolean;
   setOnlineStatus: (status: boolean) => void;
   syncOfflineData: () => Promise<void>;
+  refreshAllData: () => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -288,7 +289,22 @@ export const useStore = create<StoreState>()(
         set({ syncQueue: [] });
         toast.success("Sync complete!", { id: "sync" });
         // Refresh all data
-        await Promise.all([get().fetchProducts(), get().fetchSales(), get().fetchShops(), get().fetchServiceSales()]);
+        await get().refreshAllData();
+      },
+
+      refreshAllData: async () => {
+        if (!get().isOnline) return;
+        try {
+          await Promise.all([
+            get().fetchShops(),
+            get().fetchProducts(),
+            get().fetchSales(),
+            get().fetchServiceSales(),
+            get().fetchAuditLogs()
+          ]);
+        } catch (e) {
+          console.error("Refresh all data failed", e);
+        }
       },
 
       sidebarCollapsed: false,

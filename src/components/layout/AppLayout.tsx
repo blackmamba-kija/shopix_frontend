@@ -13,15 +13,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
-  const fetchShops = useStore((s) => s.fetchShops);
-  const fetchProducts = useStore((s) => s.fetchProducts);
-  const fetchSales = useStore((s) => s.fetchSales);
-  const fetchServiceSales = useStore((s) => s.fetchServiceSales);
-
-  const collapsed = useStore((s) => s.sidebarCollapsed);
-  const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
-  const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
-  const updateUser = useStore((s) => s.updateUser);
+  const { refreshAllData, sidebarCollapsed: collapsed, mobileMenuOpen, setMobileMenuOpen, updateUser } = useStore();
 
   useEffect(() => {
     const handleResize = () => {
@@ -43,11 +35,8 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
       }
     }).catch(() => { });
 
-    fetchShops();
-    fetchProducts();
-    fetchSales();
-    fetchServiceSales();
-  }, [fetchShops, fetchProducts, fetchSales, fetchServiceSales, updateUser]);
+    refreshAllData();
+  }, [refreshAllData, updateUser]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
