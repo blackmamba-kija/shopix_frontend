@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import {
@@ -61,15 +62,17 @@ const OperationalOverview = () => {
                 {/* Global Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card
-                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-blue-500/20 transition-all active:scale-[0.98]"
+                        className="bg-white border border-blue-200 shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-blue-500/20 transition-all active:scale-[0.98]"
                         onClick={() => navigate("/sales")}
                     >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-blue-500/10 transition-colors" />
                         <CardContent className="p-6">
-                            <TrendingUp className="w-8 h-8 text-blue-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("today's revenue")}</p>
+                            <div className="p-2 bg-blue-50 w-fit rounded-lg mb-2">
+                                <TrendingUp className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t("today's revenue")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {totalRevenue.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
+                                {totalRevenue.toLocaleString()} <span className="text-xs font-medium text-slate-400">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-blue-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {t("view sales details")} &rarr;
@@ -78,15 +81,17 @@ const OperationalOverview = () => {
                     </Card>
 
                     <Card
-                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-emerald-500/20 transition-all active:scale-[0.98]"
+                        className="bg-white border border-emerald-200 shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-emerald-500/20 transition-all active:scale-[0.98]"
                         onClick={() => navigate("/sales")}
                     >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-emerald-500/10 transition-colors" />
                         <CardContent className="p-6">
-                            <DollarSign className="w-8 h-8 text-emerald-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("today's profit")}</p>
+                            <div className="p-2 bg-emerald-50 w-fit rounded-lg mb-2">
+                                <DollarSign className="w-6 h-6 text-emerald-600" />
+                            </div>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t("today's profit")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {netProfit.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
+                                {netProfit.toLocaleString()} <span className="text-xs font-medium text-slate-400">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-emerald-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {t("view profit analysis")} &rarr;
@@ -95,15 +100,17 @@ const OperationalOverview = () => {
                     </Card>
 
                     <Card
-                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-rose-500/20 transition-all active:scale-[0.98]"
+                        className="bg-white border border-rose-200 shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-rose-500/20 transition-all active:scale-[0.98]"
                         onClick={() => navigate("/expenses")}
                     >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-rose-500/10 transition-colors" />
                         <CardContent className="p-6">
-                            <DollarSign className="w-8 h-8 text-rose-600 mb-2" />
-                            <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t("expenses")}</p>
+                            <div className="p-2 bg-rose-50 w-fit rounded-lg mb-2">
+                                <DollarSign className="w-6 h-6 text-rose-600" />
+                            </div>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t("expenses")}</p>
                             <h3 className="text-2xl font-black mt-1 text-foreground">
-                                {totalExpenses.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">Tsh</span>
+                                {totalExpenses.toLocaleString()} <span className="text-xs font-medium text-slate-400">Tsh</span>
                             </h3>
                             <p className="text-[10px] text-rose-600 font-bold mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {t("view expenses")} &rarr;
@@ -112,21 +119,21 @@ const OperationalOverview = () => {
                     </Card>
 
                     <Card
-                        className="bg-card border-none shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-slate-900/20 transition-all active:scale-[0.98]"
+                        className="bg-white border border-indigo-200 shadow-sm overflow-hidden relative group cursor-pointer hover:ring-2 hover:ring-indigo-500/20 transition-all active:scale-[0.98]"
                         onClick={() => navigate("/inventory")}
                     >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-slate-500/5 rounded-full -mr-8 -mt-8 transition-colors" />
-                        <CardContent className="p-1.5 h-full">
-                            <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4.5 text-foreground h-full flex flex-col justify-center">
-                                <Package className="w-6 h-6 text-primary mb-2" />
-                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em]">{t("inventory cost")}</p>
-                                <h3 className="text-xl font-black mt-1 tracking-tight">
-                                    {totalValue.toLocaleString()} <span className="text-[10px] font-medium text-muted-foreground">Tsh</span>
-                                </h3>
-                                <p className="text-[9px] text-primary font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {t("full asset valuation")} &rarr;
-                                </p>
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8 transition-colors" />
+                        <CardContent className="p-6">
+                            <div className="p-2 bg-indigo-50 w-fit rounded-lg mb-2">
+                                <Package className="w-6 h-6 text-indigo-600" />
                             </div>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t("inventory cost")}</p>
+                            <h3 className="text-2xl font-black mt-1 text-foreground tracking-tight">
+                                {totalValue.toLocaleString()} <span className="text-xs font-medium text-slate-400">Tsh</span>
+                            </h3>
+                            <p className="text-[10px] text-indigo-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {t("full asset valuation")} &rarr;
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
