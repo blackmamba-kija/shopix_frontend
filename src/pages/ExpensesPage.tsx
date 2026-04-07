@@ -88,14 +88,14 @@ export default function ExpensesPage() {
 
         <div className="bg-card rounded-3xl shadow-xl border border-border overflow-hidden">
           <Table>
-            <TableHeader className="bg-muted/50 border-b border-border">
+            <TableHeader className="bg-muted/80 border-b border-border">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="font-black text-[10px] uppercase py-5 pl-6 tracking-widest text-muted-foreground">{t("date")}</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">{t("category")}</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">{t("shop")}</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">{t("amount")}</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground max-w-[200px]">{t("description")}</TableHead>
-                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-muted-foreground pr-6">{t("actions")}</TableHead>
+                <TableHead className="font-black text-[10px] uppercase py-5 pl-6 tracking-widest text-foreground">{t("date")}</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground">{t("category")}</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground">{t("shop")}</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground">{t("amount")}</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground max-w-[200px]">{t("description")}</TableHead>
+                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-foreground pr-6">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -109,28 +109,28 @@ export default function ExpensesPage() {
                 filteredExpenses.map((expense) => {
                   const shop = shops.find(s => String(s.id) === String(expense.shopId));
                   return (
-                    <TableRow key={expense.id} className="hover:bg-muted/30 transition-colors border-border group">
+                    <TableRow key={expense.id} className="hover:bg-muted/50 transition-colors border-border group">
                       <TableCell className="font-bold whitespace-nowrap pl-6 text-foreground">
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
                           {new Date(expense.date).toLocaleDateString()}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-black uppercase text-[9px] tracking-widest px-3 py-0.5">
+                        <Badge variant="outline" className="bg-primary/20 text-primary border-primary/50 font-black uppercase text-[9px] tracking-widest px-3 py-0.5">
                           {t(expense.category.toLowerCase())}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-bold text-sm italic text-foreground/80">{shop?.name || t("unknown shop")}</TableCell>
-                      <TableCell className="font-black text-rose-600 italic text-base tracking-tight">Tsh{expense.amount.toLocaleString()}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs font-semibold italic max-w-[200px] truncate">{expense.description || "-"}</TableCell>
+                      <TableCell className="font-bold text-sm italic text-foreground">{shop?.name || t("unknown shop")}</TableCell>
+                      <TableCell className="font-black text-rose-500 italic text-base tracking-tight">Tsh{expense.amount.toLocaleString()}</TableCell>
+                      <TableCell className="text-foreground text-xs font-medium italic max-w-[200px] truncate">{expense.description || "-"}</TableCell>
                       <TableCell className="text-right pr-6">
                         {(user?.role === 'admin' || user?.id === expense.userId) && (
                           <Button 
                             variant="ghost" 
                             size="icon" 
                             onClick={() => handleDelete(expense.id)}
-                            className="text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-all"
+                            className="text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
