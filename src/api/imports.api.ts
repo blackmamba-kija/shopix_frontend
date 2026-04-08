@@ -18,6 +18,12 @@ export const importsApi = {
 
     if (!response.ok) throw new Error("Failed to download template");
     
+    const contentType = response.headers.get("Content-Type");
+    if (contentType && contentType.includes("application/json")) {
+      const data = await response.json();
+      throw new Error(data.message || "Failed to download template");
+    }
+
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');

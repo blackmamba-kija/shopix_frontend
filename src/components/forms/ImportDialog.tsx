@@ -32,8 +32,8 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
     try {
       await importsApi.downloadTemplate(type);
       toast.success(t("template downloaded"));
-    } catch (error) {
-      toast.error(t("failed to download template"));
+    } catch (error: any) {
+      toast.error(error.message || t("failed to download template"));
     }
   };
 
