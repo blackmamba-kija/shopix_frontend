@@ -76,6 +76,29 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
     }
   };
 
+  const handleClear = async () => {
+    if (!selectedShopId || selectedShopId === "all") return;
+    
+    if (!confirm(t("are you sure you want to clear all products? this cannot be undone."))) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await importsApi.clearInventory(Number(selectedShopId));
+      if (response.success) {
+        toast.success(t("inventory cleared"));
+        fetchProducts();
+      } else {
+        toast.error(response.message || t("failed to clear inventory"));
+      }
+    } catch (error: any) {
+      toast.error(error.message || t("error clearing inventory"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -105,7 +128,18 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
           )}
 
           <div className="flex flex-col gap-3">
-            <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">{t("step 1: download template")}</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">{t("step 1: download template")}</label>
+              {type === "inventory" && selectedShopId !== "all" && (
+                <button 
+                  onClick={handleClear}
+                  disabled={loading}
+                  className="text-xs font-black text-destructive uppercase hover:underline disabled:opacity-50"
+                >
+                  {t("clear current inventory")}
+                </button>
+              )}
+            </div>
             <Button 
               variant="outline" 
               className="gap-2 h-12 rounded-xl border-border bg-secondary/50 font-bold hover:bg-secondary transition-colors" 

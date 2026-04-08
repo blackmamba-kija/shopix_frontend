@@ -33,5 +33,9 @@ export const importsApi = {
     document.body.appendChild(link);
     link.click();
     link.remove();
+  },
+
+  clearInventory: async (shopId: number): Promise<ApiResponse> => {
+    return apiClient.post("/import/clear", { shop_id: shopId });
   }
 };
