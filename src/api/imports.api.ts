@@ -22,7 +22,7 @@ export const importsApi = {
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.setAttribute('download', `${type}_template.csv`);
+    link.setAttribute('download', `${type}_template.xlsx`);
     document.body.appendChild(link);
     link.click();
     link.remove();
