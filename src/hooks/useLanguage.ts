@@ -377,6 +377,25 @@ const dict: Record<string, { en: string; sw: string }> = {
   "logo uploaded": { en: "Logo Uploaded", sw: "Nembo imepakiwa" },
   "failed to upload logo": { en: "Failed to upload logo", sw: "Imeshindwa kupakia nembo" },
   description: { en: "Description", sw: "Maelezo" },
+  import: { en: "Import", sw: "Ingiza" },
+  "import inventory": { en: "Import Inventory", sw: "Ingiza Stoo" },
+  "import sales": { en: "Import Sales", sw: "Ingiza Mauzo" },
+  "import services": { en: "Import Services", sw: "Ingiza Huduma" },
+  "download template": { en: "Download Template", sw: "Pakua Kiolezo" },
+  "upload an excel or csv file to bulk import inventory items": { en: "Upload an Excel or CSV file to bulk import inventory", sw: "Pakia faili ya Excel au CSV ili kuingiza stoo" },
+  "upload an excel or csv file to bulk import sales items": { en: "Upload an Excel or CSV file to bulk import sales", sw: "Pakia faili ya Excel au CSV ili kuingiza mauzo" },
+  "upload an excel or csv file to bulk import services items": { en: "Upload an Excel or CSV file to bulk import services", sw: "Pakia faili ya Excel au CSV ili kuingiza huduma" },
+  "step 1: download template": { en: "Step 1: Download Template", sw: "Hatua ya 1: Pakua Kiolezo" },
+  "step 2: upload your file": { en: "Step 2: Upload Your File", sw: "Hatua ya 2: Pakia Faili Yako" },
+  "click or drag and drop file": { en: "Click or drag and drop file", sw: "Bonyeza au kokota faili hapa" },
+  "xlsx, xls, csv (max 5mb)": { en: "XLSX, XLS, CSV (Max 5MB)", sw: "XLSX, XLS, CSV (Mwisho 5MB)" },
+  "import now": { en: "Import Now", sw: "Ingiza Sasa" },
+  "please select a specific shop from the filter to enable import.": { en: "Please select a specific shop from the filter to enable import.", sw: "Tafadhali chagua duka maalum ili kuwezesha uingizaji." },
+  "imported successfully": { en: "Imported successfully", sw: "Imeingizwa kikamilifu" },
+  "template downloaded": { en: "Template downloaded", sw: "Kiolezo kimepakuliwa" },
+  "inventory imported successfully": { en: "Inventory imported successfully", sw: "Stoo imeingizwa kikamilifu" },
+  "sales imported successfully": { en: "Sales imported successfully", sw: "Mauzo yameingizwa kikamilifu" },
+  "services imported successfully": { en: "Services imported successfully", sw: "Huduma zimeingizwa kikamilifu" }
 };
 
 export const useLanguage = create<LanguageState>((set, get) => ({

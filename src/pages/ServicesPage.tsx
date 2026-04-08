@@ -1,9 +1,10 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
-import { Printer, Search, Filter, Calendar as CalendarIcon, DollarSign, TrendingUp, History } from "lucide-react";
 import { AddServiceSaleDialog } from "@/components/forms/AddServiceSaleDialog";
+import { ImportDialog } from "@/components/forms/ImportDialog";
 import { usePermissions } from "@/hooks/useAuth";
+import { Printer, Search, Filter, Calendar as CalendarIcon, DollarSign, TrendingUp, History, FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -124,7 +125,21 @@ const ServicesPage = () => {
             )}
           </div>
 
-          {canRecordServices && <AddServiceSaleDialog />}
+          <div className="flex items-center gap-2">
+            {canRecordServices && (
+              <>
+                <ImportDialog 
+                  type="services" 
+                  trigger={
+                    <Button variant="outline" className="h-10 rounded-xl shadow-sm gap-2 px-4 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                      <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                    </Button>
+                  }
+                />
+                <AddServiceSaleDialog />
+              </>
+            )}
+          </div>
         </div>
 
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">

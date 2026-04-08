@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RestockInventoryDialog } from "@/components/forms/RestockInventoryDialog";
+import { ImportDialog } from "@/components/forms/ImportDialog";
+import { FileSpreadsheet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,11 +123,21 @@ const InventoryPage = () => {
               </Select>
               
               {canManageProducts && (
-                <AddProductDialog trigger={
-                  <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
-                    <PackagePlus className="w-4 h-4" /> {t("add product")}
-                  </Button>
-                }/>
+                <div className="flex items-center gap-2">
+                  <ImportDialog 
+                    type="inventory" 
+                    trigger={
+                      <Button variant="outline" className="h-11 rounded-xl shadow-sm gap-2 px-5 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                        <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                      </Button>
+                    }
+                  />
+                  <AddProductDialog trigger={
+                    <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
+                      <PackagePlus className="w-4 h-4" /> {t("add product")}
+                    </Button>
+                  }/>
+                </div>
               )}
             </div>
           </div>

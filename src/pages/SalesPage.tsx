@@ -1,9 +1,10 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus, FileSpreadsheet } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecordSaleDialog } from "@/components/forms/RecordSaleDialog";
+import { ImportDialog } from "@/components/forms/ImportDialog";
 import { usePermissions } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -125,8 +126,20 @@ const SalesPage = () => {
               </Button>
             )}
           </div>
-          <div className="flex items-center">
-            {canRecordSales && <RecordSaleDialog trigger={<Button className="gap-2"><Plus className="w-4 h-4" /> {t("record sale")}</Button>} />}
+          <div className="flex items-center gap-2">
+            {canRecordSales && (
+              <>
+                <ImportDialog 
+                  type="sales" 
+                  trigger={
+                    <Button variant="outline" className="h-10 rounded-xl shadow-sm gap-2 px-4 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                      <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                    </Button>
+                  }
+                />
+                <RecordSaleDialog trigger={<Button className="gap-2 h-10 px-4 rounded-xl"><Plus className="w-4 h-4" /> {t("record sale")}</Button>} />
+              </>
+            )}
           </div>
         </div>
 
