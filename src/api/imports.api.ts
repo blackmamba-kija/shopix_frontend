@@ -16,9 +16,10 @@ export const importsApi = {
       }
     });
 
-    if (!response.ok) throw new Error("Failed to download template");
-    
     const contentType = response.headers.get("Content-Type");
+    const isCsv = contentType && contentType.includes("text/csv");
+    const extension = isCsv ? "csv" : "xlsx";
+    
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
       throw new Error(data.message || "Failed to download template");
@@ -28,7 +29,7 @@ export const importsApi = {
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.setAttribute('download', `${type}_template.xlsx`);
+    link.setAttribute('download', `${type}_template.${extension}`);
     document.body.appendChild(link);
     link.click();
     link.remove();
