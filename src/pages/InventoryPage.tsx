@@ -46,6 +46,7 @@ const InventoryPage = () => {
   const [statusFilter, setStatusFilter] = useState<"all" | "low" | "expiring">("all");
   const { can, isAdmin } = usePermissions();
   const deleteProduct = useStore((s) => s.deleteProduct);
+  const refreshAllData = useStore((s) => s.refreshAllData);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [deletingProduct, setDeletingProduct] = useState<any>(null);
 
@@ -124,14 +125,22 @@ const InventoryPage = () => {
               
               {canManageProducts && (
                 <div className="flex items-center gap-2">
-                  <ImportDialog 
-                    type="inventory" 
-                    trigger={
-                      <Button variant="outline" className="h-11 rounded-xl shadow-sm gap-2 px-5 border-border hover:bg-secondary transition-all shrink-0 font-bold">
-                        <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
-                      </Button>
-                    }
-                  />
+                    <Button 
+                      variant="outline" 
+                      onClick={refreshAllData}
+                      className="h-11 w-11 p-0 rounded-xl border-border bg-secondary/50 shadow-sm hover:bg-secondary transition-all shrink-0"
+                      title={t("refresh data")}
+                    >
+                      <RefreshCcw className="w-4 h-4 text-primary" />
+                    </Button>
+                    <ImportDialog 
+                      type="inventory" 
+                      trigger={
+                        <Button variant="outline" className="h-11 rounded-xl shadow-sm gap-2 px-5 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                          <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                        </Button>
+                      }
+                    />
                   <AddProductDialog trigger={
                     <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
                       <PackagePlus className="w-4 h-4" /> {t("add product")}

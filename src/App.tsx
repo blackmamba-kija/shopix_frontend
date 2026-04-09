@@ -78,18 +78,30 @@ const protectedRoutes = [
 const App = () => {
   const setOnlineStatus = useStore((s) => s.setOnlineStatus);
 
+  const checkConnectivity = useStore((s) => s.checkConnectivity);
+  const syncOfflineData = useStore((s) => s.syncOfflineData);
+
   useEffect(() => {
-    const handleOnline = () => setOnlineStatus(true);
+    const handleOnline = () => {
+      setOnlineStatus(true);
+      syncOfflineData();
+    };
     const handleOffline = () => setOnlineStatus(false);
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
+    // Heartbeat to check actual connectivity every 30 seconds
+    const interval = setInterval(() => {
+      checkConnectivity();
+    }, 30000);
+
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      clearInterval(interval);
     };
-  }, [setOnlineStatus]);
+  }, [setOnlineStatus, checkConnectivity, syncOfflineData]);
 
   return (
     <QueryClientProvider client={queryClient}>

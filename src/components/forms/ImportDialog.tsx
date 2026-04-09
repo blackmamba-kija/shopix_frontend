@@ -6,6 +6,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
 import { importsApi } from "@/api/imports.api";
+import { cn } from "@/lib/utils";
 
 interface ImportDialogProps {
   type: "inventory" | "sales" | "services";
@@ -21,6 +22,7 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
   const fetchProducts = useStore((s) => s.fetchProducts);
   const fetchSales = useStore((s) => s.fetchSales);
   const fetchServiceSales = useStore((s) => s.fetchServiceSales);
+  const [result, setResult] = useState<{ success: number; failed: number; message?: string } | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,8 +60,13 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
       const response = await importsApi.importData(formData);
 
       if (response.success) {
+        setResult({ 
+          success: response.data?.success_count || 0, 
+          failed: response.data?.failed_count || 0,
+          message: response.message
+        });
         toast.success(t(response.message || "imported successfully"));
-        setOpen(false);
+        // setOpen(false); // Don't close automatically so they can see results
         setFile(null);
         
         // Refresh data
@@ -67,6 +74,7 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
         else if (type === "sales") fetchSales();
         else if (type === "services") fetchServiceSales();
       } else {
+        setResult({ success: 0, failed: 0, message: response.message });
         toast.error(response.message || t("import failed"));
       }
     } catch (error: any) {
@@ -130,15 +138,15 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">{t("step 1: download template")}</label>
-              {type === "inventory" && selectedShopId !== "all" && (
-                <button 
-                  onClick={handleClear}
-                  disabled={loading}
-                  className="text-xs font-black text-destructive uppercase hover:underline disabled:opacity-50"
-                >
-                  {t("clear current inventory")}
-                </button>
-              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleClear}
+                disabled={loading}
+                className="h-8 text-[10px] font-black text-rose-500 uppercase hover:bg-rose-50 hover:text-rose-600 transition-colors rounded-lg border border-rose-100"
+              >
+                {t("clear existing data")}
+              </Button>
             </div>
             <Button 
               variant="outline" 
@@ -170,6 +178,38 @@ export const ImportDialog = ({ type, trigger }: ImportDialogProps) => {
               </p>
             </div>
           </div>
+
+          {result && (
+            <div className={cn(
+              "p-4 rounded-xl border flex flex-col gap-2",
+              result.failed > 0 ? "bg-rose-50 border-rose-100" : "bg-emerald-50 border-emerald-100"
+            )}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">{t("import results")}</span>
+                <button 
+                  onClick={() => setResult(null)}
+                  className="text-[10px] font-bold text-muted-foreground hover:text-foreground underline"
+                >
+                  {t("clear")}
+                </button>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex flex-col">
+                  <span className="text-sm font-black text-emerald-600">{result.success}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t("success")}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-black text-rose-600">{result.failed}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t("failed")}</span>
+                </div>
+              </div>
+              {result.message && (
+                <p className="text-xs font-medium text-muted-foreground mt-1 py-2 border-t border-black/5">
+                  {result.message}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 bg-secondary/30 border-t border-border">

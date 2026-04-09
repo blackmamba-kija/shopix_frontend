@@ -470,7 +470,7 @@ const ReportsPage = () => {
                     disabled={isGenerating !== null}
                   >
                     <Download className="w-3.5 h-3.5" />
-                    {isGenerating === report.id + "_excel" ? t("generating...") : t("excel ai")}
+                    {isGenerating === report.id + "_excel" ? t("generating...") : t("excel export")}
                   </Button>
                   <Button
                     size="sm"
@@ -480,7 +480,7 @@ const ReportsPage = () => {
                     disabled={isGenerating !== null}
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    {isGenerating === report.id + "_pdf" ? t("creating...") : t("pdf print")}
+                    {isGenerating === report.id + "_pdf" ? t("creating...") : t("pdf export")}
                   </Button>
                 </div>
               </div>

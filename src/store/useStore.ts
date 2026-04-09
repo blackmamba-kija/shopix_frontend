@@ -8,6 +8,7 @@ import { salesApi } from "@/api/sales.api";
 import { auditLogsApi } from "@/api/audit-logs.api";
 import { authHelper, StoredUser } from "@/utils/helpers/auth.helper";
 import { toast } from "sonner";
+import { apiClient } from "@/api/client";
 
 interface SyncItem {
   id: string;
@@ -31,8 +32,10 @@ interface StoreState {
   mobileMenuOpen: boolean;
   syncQueue: SyncItem[];
   isOnline: boolean;
+  isSyncing: boolean;
 
   setOnlineStatus: (status: boolean) => void;
+  checkConnectivity: () => Promise<boolean>;
   updateUser: (user: StoredUser | null) => void;
   setSelectedShopId: (id: string) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -65,6 +68,7 @@ interface StoreState {
   addAuditLog: (log: Omit<AuditLog, "id" | "timestamp">) => Promise<void>;
 
   syncOfflineData: () => Promise<void>;
+  clearSyncQueue: () => void;
   refreshAllData: () => Promise<void>;
 }
 
@@ -82,11 +86,25 @@ export const useStore = create<StoreState>()(
       selectedShopId: "all",
       syncQueue: [],
       isOnline: navigator.onLine,
+      isSyncing: false,
 
       setOnlineStatus: (status: boolean) => {
+        const wasOffline = !get().isOnline;
         set({ isOnline: status });
-        if (status && get().syncQueue.length > 0) {
+        if (status && wasOffline && get().syncQueue.length > 0) {
           get().syncOfflineData();
+        }
+      },
+
+      checkConnectivity: async () => {
+        try {
+          // Simple check for online status
+          const isOnline = navigator.onLine;
+          if (isOnline) set({ isOnline: true });
+          return isOnline;
+        } catch (e) {
+          set({ isOnline: false });
+          return false;
         }
       },
 
@@ -291,28 +309,71 @@ export const useStore = create<StoreState>()(
       },
 
       syncOfflineData: async () => {
-        const { syncQueue, isOnline } = get();
-        if (!isOnline || syncQueue.length === 0) return;
+        const { syncQueue, isOnline, isSyncing } = get();
+        if (!isOnline || syncQueue.length === 0 || isSyncing) return;
 
+        set({ isSyncing: true });
         toast.loading(`Syncing ${syncQueue.length} offline actions...`, { id: "sync" });
+
+        const successfulItems: string[] = [];
+        const idMapping: Record<string, string> = {};
 
         for (const item of syncQueue) {
           try {
-            if (item.type === "SALE" && item.action === "CREATE") await salesApi.create(item.data);
-            if (item.type === "PRODUCT" && item.action === "CREATE") await productsApi.create(item.data);
-            if (item.type === "PRODUCT" && item.action === "UPDATE") await productsApi.update(item.id, item.data);
-            if (item.type === "SERVICE" && item.action === "CREATE") await servicesApi.create(item.data);
-            if (item.type === "SHOP" && item.action === "CREATE") await shopsApi.create(item.data);
-            if (item.type === "SHOP" && item.action === "UPDATE") await shopsApi.update(item.id, item.data);
+            let data = { ...item.data };
+            
+            // Map temp IDs to real IDs if they were created in the same session
+            if (item.type === "SALE" && data.productId && idMapping[data.productId]) {
+                data.productId = idMapping[data.productId];
+            }
+            if (item.type === "PRODUCT" && item.action === "UPDATE" && idMapping[item.id]) {
+                // If we are updating a product that was just created, use its new ID
+            }
+
+            let result: any = null;
+            if (item.type === "SALE" && item.action === "CREATE") result = await salesApi.create(data);
+            if (item.type === "PRODUCT" && item.action === "CREATE") result = await productsApi.create(data);
+            if (item.type === "PRODUCT" && item.action === "UPDATE") {
+                const targetId = idMapping[item.id] || item.id;
+                result = await productsApi.update(targetId, data);
+            }
+            if (item.type === "SERVICE" && item.action === "CREATE") result = await servicesApi.create(data);
+            if (item.type === "SHOP" && item.action === "CREATE") result = await shopsApi.create(data);
+            if (item.type === "SHOP" && item.action === "UPDATE") result = await shopsApi.update(item.id, data);
+
+            // If creation was successful, record the mapping
+            if (result && result.id && item.id.startsWith("temp_")) {
+                idMapping[item.id] = result.id;
+            }
+
+            successfulItems.push(item.id);
           } catch (e) {
-            console.error("Sync item failed", item, e);
+            console.error(`Sync failed for item ${item.id}`, item, e);
+            // Stop syncing if we hit a network error (not a validation error)
+            if (e instanceof Error && (e.message.includes("Network") || e.message.includes("Failed to fetch"))) {
+                set({ isOnline: false });
+                break;
+            }
           }
         }
 
-        set({ syncQueue: [] });
-        toast.success("Sync complete!", { id: "sync" });
-        // Refresh all data
+        // Only remove items that were successfully synced
+        if (successfulItems.length > 0) {
+          set((state) => ({
+            syncQueue: state.syncQueue.filter(item => !successfulItems.includes(item.id))
+          }));
+        }
+
+        toast.success(`Sync complete! ${successfulItems.length} items synced.`, { id: "sync" });
+        set({ isSyncing: false });
         await get().refreshAllData();
+      },
+
+      clearSyncQueue: () => {
+        if (confirm("Are you sure you want to clear the offline sync queue? Any unsynced changes will be lost.")) {
+          set({ syncQueue: [] });
+          toast.success("Sync queue cleared.");
+        }
       },
 
       refreshAllData: async () => {

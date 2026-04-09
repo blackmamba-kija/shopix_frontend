@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut, ChevronDown, Store, Menu } from "lucide-react";
+import { Bell, Search, LogOut, ChevronDown, Store, Menu, Wifi, WifiOff, RefreshCw, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,10 @@ export function TopBar({ title, subtitle }: TopBarProps) {
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);
   const updateUser = useStore((s) => s.updateUser);
   const { language, setLanguage, t } = useLanguage();
+  const isOnline = useStore((s) => s.isOnline);
+  const isSyncing = useStore((s) => s.isSyncing);
+  const syncQueue = useStore((s) => s.syncQueue);
+  const syncOfflineData = useStore((s) => s.syncOfflineData);
 
   const shops = useMemo(() => filterShops(shopsRaw), [filterShops, shopsRaw]);
 
@@ -91,6 +95,57 @@ export function TopBar({ title, subtitle }: TopBarProps) {
                 ))}
               </SelectContent>
             </Select>
+          )}
+        </div>
+        
+        {/* Sync Status Indicator */}
+        <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/50 border border-border/50">
+          {isSyncing ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
+              <span className="text-[10px] font-bold text-primary animate-pulse">{t("syncing...")}</span>
+            </>
+          ) : isOnline ? (
+            <>
+              <Wifi className="w-3.5 h-3.5 text-emerald-500" />
+              {syncQueue.length > 0 ? (
+                <button 
+                  onClick={syncOfflineData}
+                  className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+                >
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase">{t("sync now")}</span>
+                  <Badge variant="secondary" className="h-4 px-1 text-[8px] bg-emerald-100 text-emerald-700 border-emerald-200">
+                    {syncQueue.length}
+                  </Badge>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); useStore.getState().clearSyncQueue(); }}
+                    className="ml-2 p-1 hover:bg-emerald-600/10 rounded-md transition-colors"
+                  >
+                    <XCircle className="w-3 h-3 text-emerald-600/60 hover:text-emerald-700" />
+                  </button>
+                </button>
+              ) : (
+                <span className="text-[10px] font-bold text-emerald-600 uppercase hidden md:inline">{t("online")}</span>
+              )}
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-3.5 h-3.5 text-amber-500" />
+              <span className="text-[10px] font-bold text-amber-600 uppercase">{t("offline")}</span>
+              {syncQueue.length > 0 && (
+                <>
+                  <Badge variant="secondary" className="h-4 px-1 text-[8px] bg-amber-100 text-amber-700 border-amber-200 ml-1">
+                    {syncQueue.length}
+                  </Badge>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); useStore.getState().clearSyncQueue(); }}
+                    className="ml-1 p-1 hover:bg-amber-600/10 rounded-md transition-colors"
+                  >
+                    <XCircle className="w-3 h-3 text-amber-600/60 hover:text-amber-700" />
+                  </button>
+                </>
+              )}
+            </>
           )}
         </div>
 
