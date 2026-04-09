@@ -127,6 +127,7 @@ export const useStore = create<StoreState>()(
       },
 
       fetchExpenses: async () => {
+        if (!get().isOnline || get().user?.role !== "admin") return;
         try {
           const { expensesApi } = await import("@/api/expenses.api");
           const expenses = await expensesApi.getAll();
@@ -297,15 +298,19 @@ export const useStore = create<StoreState>()(
       },
 
       fetchAuditLogs: async () => {
-        if (!get().isOnline) return;
+        if (!get().isOnline || get().user?.role !== "admin") return;
         const response = await auditLogsApi.getAll();
         if (response.success && response.data) set({ auditLogs: response.data });
       },
 
       addAuditLog: async (log) => {
-         if (!get().isOnline) return;
-         const response = await auditLogsApi.create(log);
-         if (response.success && response.data) set((state) => ({ auditLogs: [response.data!, ...state.auditLogs] }));
+         if (!get().isOnline || get().user?.role !== "admin") return;
+         try {
+           const response = await auditLogsApi.create(log);
+           if (response.success && response.data) set((state) => ({ auditLogs: [response.data!, ...state.auditLogs] }));
+         } catch (e) {
+           console.error("Failed to add audit log", e);
+         }
       },
 
       syncOfflineData: async () => {
@@ -378,15 +383,22 @@ export const useStore = create<StoreState>()(
 
       refreshAllData: async () => {
         if (!get().isOnline) return;
+        const isAdmin = get().user?.role === "admin";
+        
         try {
-          await Promise.all([
+          const promises = [
             get().fetchShops(),
             get().fetchProducts(),
             get().fetchSales(),
             get().fetchServiceSales(),
-            get().fetchAuditLogs(),
-            get().fetchExpenses()
-          ]);
+          ];
+
+          if (isAdmin) {
+            promises.push(get().fetchAuditLogs());
+            promises.push(get().fetchExpenses());
+          }
+
+          await Promise.all(promises);
         } catch (e) {
           console.error("Refresh all data failed", e);
         }
