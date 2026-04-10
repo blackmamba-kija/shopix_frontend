@@ -11,24 +11,41 @@ export interface UserRecord {
 }
 
 export const ALL_PERMISSIONS = [
+    // Shops
     { key: "view_shops", label: "View Shops", group: "Shops" },
     { key: "manage_shops", label: "Manage Shops", group: "Shops" },
+    // Inventory
     { key: "view_products", label: "View Products", group: "Inventory" },
     { key: "add_products", label: "Add Products", group: "Inventory" },
     { key: "edit_products", label: "Edit Products", group: "Inventory" },
+    { key: "manage_imports", label: "Manage Data Imports", group: "Inventory" },
+    // Sales
     { key: "view_sales", label: "View Sales", group: "Sales" },
     { key: "record_sales", label: "Record Sales", group: "Sales" },
+    // Expenses
     { key: "view_expenses", label: "View Expenses", group: "Expenses" },
     { key: "record_expenses", label: "Record Expenses", group: "Expenses" },
-    { key: "view_services", label: "View Services", group: "Services" },
-    { key: "record_services", label: "Record Services", group: "Services" },
-    { key: "view_reports", label: "View Reports", group: "Reports" },
-    { key: "view_profit", label: "View Profit & Margins", group: "Financials" },
-    { key: "manage_imports", label: "Manage Data Imports", group: "Inventory" },
     { key: "edit_expenses", label: "Edit Expenses", group: "Expenses" },
     { key: "delete_expenses", label: "Delete Expenses", group: "Expenses" },
-    { key: "manage_debts", label: "Manage Borrowing & Debts", group: "Financials" },
+    // Services
+    { key: "view_services", label: "View Services", group: "Services" },
+    { key: "record_services", label: "Record Services", group: "Services" },
+    // Reports
+    { key: "view_reports", label: "View Reports", group: "Reports" },
     { key: "view_summary", label: "View Daily Summary", group: "Reports" },
+    // Financials
+    { key: "view_profit", label: "View Profit & Margins (Sales)", group: "Financials" },
+    { key: "manage_debts", label: "Manage Borrowing & Debts", group: "Financials" },
+    // Dashboard Widgets
+    { key: "dash_revenue", label: "Dashboard – Today's Revenue Card", group: "Dashboard" },
+    { key: "dash_profit", label: "Dashboard – Estimated Profit Card", group: "Dashboard" },
+    { key: "dash_inventory_value", label: "Dashboard – Inventory Value Card", group: "Dashboard" },
+    { key: "dash_alerts", label: "Dashboard – Critical Alerts Card", group: "Dashboard" },
+    { key: "dash_weekly_chart", label: "Dashboard – Weekly Performance Chart", group: "Dashboard" },
+    { key: "dash_revenue_sources", label: "Dashboard – Revenue Sources Chart", group: "Dashboard" },
+    { key: "dash_inventory_pulse", label: "Dashboard – Inventory Pulse Section", group: "Dashboard" },
+    { key: "dash_top_items", label: "Dashboard – Top Items Feed", group: "Dashboard" },
+    // Admin
     { key: "view_users", label: "View Users", group: "Admin" },
     { key: "manage_users", label: "Manage Users", group: "Admin" },
     { key: "view_audit_logs", label: "View Audit Logs (Shop Level)", group: "Admin" },
