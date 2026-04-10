@@ -103,12 +103,10 @@ const Dashboard = () => {
                       <Zap className="w-4 h-4" />
                       <span className="text-xs font-black uppercase tracking-wider">{t("systems online")}</span>
                    </div>
-                   {isAdmin && (
-                      <div className="bg-primary text-primary-foreground px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg shadow-primary/20">
-                        <ShieldCheck className="w-4 h-4" />
-                        <span className="text-xs font-black uppercase tracking-wider">{t("admin session")}</span>
-                      </div>
-                   )}
+                   <div className="bg-primary text-primary-foreground px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg shadow-primary/20">
+                     <ShieldCheck className="w-4 h-4" />
+                     <span className="text-xs font-black uppercase tracking-wider">{isAdmin ? t("admin session") : t("manager session")}</span>
+                   </div>
                 </div>
               </div>
            </div>
@@ -116,26 +114,14 @@ const Dashboard = () => {
 
         {/* Essential Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isAdmin ? (
-            <>
-              <StatCard title={t("total revenue")} value={formatTsh(totalRevenue)} icon={DollarSign} change={t("today's combined")} changeType="positive" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("inventory value")} value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} ${t("products")}`} changeType="neutral" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("est. profit")} value={formatTsh(totalProfit)} icon={TrendingUp} change={t("today's estimate")} changeType="positive" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("critical alerts")} value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change={t("items needing attention")} changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} className="bg-card shadow-xl border-none" />
-            </>
-          ) : (
-            <>
-              <StatCard title={t("today's sales")} value={todaySales.length.toString()} icon={ShoppingCart} change={t("product sales count")} changeType="neutral" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("today's services")} value={todayServices.length.toString()} icon={Activity} change={t("service count")} changeType="neutral" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("active inventory")} value={products.length.toString()} icon={Package} change={t("unique products")} changeType="neutral" className="bg-card shadow-xl border-none" />
-              <StatCard title={t("urgent tasks")} value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change={t("low stock alerts")} changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} className="bg-card shadow-xl border-none" />
-            </>
-          )}
+          <StatCard title={t("total revenue")} value={formatTsh(totalRevenue)} icon={DollarSign} change={t("today's combined")} changeType="positive" className="bg-card shadow-xl border-none" />
+          <StatCard title={t("inventory value")} value={formatTsh(products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0))} icon={Layers} change={`${products.length} ${t("products")}`} changeType="neutral" className="bg-card shadow-xl border-none" />
+          <StatCard title={t("est. profit")} value={formatTsh(totalProfit)} icon={TrendingUp} change={t("today's estimate")} changeType="positive" className="bg-card shadow-xl border-none" />
+          <StatCard title={t("critical alerts")} value={(lowStock + outOfStock).toString()} icon={AlertTriangle} change={t("items needing attention")} changeType={lowStock + outOfStock > 0 ? "negative" : "neutral"} className="bg-card shadow-xl border-none" />
         </div>
 
         {/* Detailed Insights */}
-        {isAdmin && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Performance Chart */}
             <div className="lg:col-span-2 bg-card border-none shadow-2xl rounded-[2.5rem] p-4 group overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-colors" />
@@ -225,7 +211,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        )}
 
         {/* Inventory & Operational Pulse */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

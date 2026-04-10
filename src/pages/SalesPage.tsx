@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus, FileSpreadsheet } from "lucide-react";
+import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus, FileSpreadsheet, Store } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecordSaleDialog } from "@/components/forms/RecordSaleDialog";
 import { ImportDialog } from "@/components/forms/ImportDialog";
@@ -62,15 +62,17 @@ const SalesPage = () => {
     <AppLayout title={t("sales")} subtitle={t("track daily product sales and transactions")}>
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {isAdmin && (
+          {(isAdmin || can("view_profit")) ? (
             <>
               <StatCard title={t("today's revenue")} value={formatTsh(todayRevenue)} icon={DollarSign} change={`${todaySales.length} ${t("sales today")}`} changeType="neutral" />
               <StatCard title={t("today's profit")} value={formatTsh(todayProfit)} icon={TrendingUp} change={t("estimated earnings")} changeType="positive" />
               <StatCard title={t("filtered revenue")} value={formatTsh(filtered.reduce((sum, s) => sum + Number(s.totalCost || 0), 0))} icon={ShoppingCart} change={`${filtered.length} ${t("total transactions")}`} changeType="neutral" />
             </>
-          )}
-          {!isAdmin && (
-            <StatCard title={t("total volume")} value={filtered.length.toString()} icon={ShoppingCart} change={t("total filtered transactions")} changeType="neutral" />
+          ) : (
+            <>
+              <StatCard title={t("total volume")} value={filtered.length.toString()} icon={ShoppingCart} change={t("total filtered transactions")} changeType="neutral" />
+              <StatCard title={t("active shops")} value={shops.length.toString()} icon={Store} change={t("available locations")} changeType="neutral" />
+            </>
           )}
         </div>
 
@@ -127,18 +129,18 @@ const SalesPage = () => {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {(isAdmin || can("manage_imports")) && (
+              <ImportDialog 
+                type="sales" 
+                trigger={
+                  <Button variant="outline" className="h-10 rounded-xl shadow-sm gap-2 px-4 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                    <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                  </Button>
+                }
+              />
+            )}
             {canRecordSales && (
-              <>
-                <ImportDialog 
-                  type="sales" 
-                  trigger={
-                    <Button variant="outline" className="h-10 rounded-xl shadow-sm gap-2 px-4 border-border hover:bg-secondary transition-all shrink-0 font-bold">
-                      <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
-                    </Button>
-                  }
-                />
-                <RecordSaleDialog trigger={<Button className="gap-2 h-10 px-4 rounded-xl"><Plus className="w-4 h-4" /> {t("record sale")}</Button>} />
-              </>
+              <RecordSaleDialog trigger={<Button className="gap-2 h-10 px-4 rounded-xl"><Plus className="w-4 h-4" /> {t("record sale")}</Button>} />
             )}
           </div>
         </div>
@@ -158,13 +160,13 @@ const SalesPage = () => {
                   <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("qty")}</TableHead>
                   <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("price")}</TableHead>
                   <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("total")}</TableHead>
-                  {isAdmin && <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("profit")}</TableHead>}
+                  {(isAdmin || can("view_profit")) && <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("profit")}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-20">
+                   <TableRow>
+                    <TableCell colSpan={(isAdmin || can("view_profit")) ? 7 : 6} className="text-center text-muted-foreground py-20">
                       <div className="flex flex-col items-center gap-3 opacity-60">
                         <Filter className="w-10 h-10" />
                         <p className="text-base font-medium">{t("no sales found matching your criteria")}</p>
@@ -185,7 +187,7 @@ const SalesPage = () => {
                         <TableCell className="p-4 text-right text-foreground font-medium">{sale.quantity}</TableCell>
                         <TableCell className="p-4 text-right text-muted-foreground font-mono">Tsh{sale.sellingPrice.toLocaleString()}</TableCell>
                         <TableCell className="p-4 text-right font-bold text-foreground text-lg">Tsh{sale.totalCost.toLocaleString()}</TableCell>
-                        {isAdmin && (
+                        {(isAdmin || can("view_profit")) && (
                           <TableCell className="p-4 text-right">
                             <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-success/10 text-success text-sm font-bold border border-success/20">
                               Tsh{sale.profit.toLocaleString()}

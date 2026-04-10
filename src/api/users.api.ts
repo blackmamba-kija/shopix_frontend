@@ -23,10 +23,15 @@ export const ALL_PERMISSIONS = [
     { key: "view_services", label: "View Services", group: "Services" },
     { key: "record_services", label: "Record Services", group: "Services" },
     { key: "view_reports", label: "View Reports", group: "Reports" },
+    { key: "view_profit", label: "View Profit & Margins", group: "Financials" },
+    { key: "manage_imports", label: "Manage Data Imports", group: "Inventory" },
+    { key: "edit_expenses", label: "Edit Expenses", group: "Expenses" },
+    { key: "delete_expenses", label: "Delete Expenses", group: "Expenses" },
+    { key: "manage_debts", label: "Manage Borrowing & Debts", group: "Financials" },
     { key: "view_summary", label: "View Daily Summary", group: "Reports" },
     { key: "view_users", label: "View Users", group: "Admin" },
     { key: "manage_users", label: "Manage Users", group: "Admin" },
-    { key: "view_audit_logs", label: "View Audit Logs", group: "Admin" },
+    { key: "view_audit_logs", label: "View Audit Logs (Shop Level)", group: "Admin" },
 ];
 
 export const usersApi = {

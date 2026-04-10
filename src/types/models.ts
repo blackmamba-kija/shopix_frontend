@@ -90,6 +90,7 @@ export interface AuditLog {
   id: string;
   userId: string;
   userName: string;
+  shopId?: string;
   action: string;
   module: string;
   details: string;

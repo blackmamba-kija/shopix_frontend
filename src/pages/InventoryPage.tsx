@@ -133,14 +133,16 @@ const InventoryPage = () => {
                     >
                       <RefreshCcw className="w-4 h-4 text-primary" />
                     </Button>
-                    <ImportDialog 
-                      type="inventory" 
-                      trigger={
-                        <Button variant="outline" className="h-11 rounded-xl shadow-sm gap-2 px-5 border-border hover:bg-secondary transition-all shrink-0 font-bold">
-                          <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
-                        </Button>
-                      }
-                    />
+                    {(isAdmin || can("manage_imports")) && (
+                      <ImportDialog 
+                        type="inventory" 
+                        trigger={
+                          <Button variant="outline" className="h-11 rounded-xl shadow-sm gap-2 px-5 border-border hover:bg-secondary transition-all shrink-0 font-bold">
+                            <FileSpreadsheet className="w-4 h-4 text-primary" /> {t("import")}
+                          </Button>
+                        }
+                      />
+                    )}
                   <AddProductDialog trigger={
                     <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
                       <PackagePlus className="w-4 h-4" /> {t("add product")}

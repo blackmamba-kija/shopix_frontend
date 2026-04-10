@@ -298,13 +298,16 @@ export const useStore = create<StoreState>()(
       },
 
       fetchAuditLogs: async () => {
-        if (!get().isOnline || get().user?.role !== "admin") return;
+        if (!get().isOnline) return;
+        const permissions = get().user?.permissions || [];
+        if (get().user?.role !== "admin" && !permissions.includes("view_audit_logs")) return;
+        
         const response = await auditLogsApi.getAll();
         if (response.success && response.data) set({ auditLogs: response.data });
       },
 
       addAuditLog: async (log) => {
-         if (!get().isOnline || get().user?.role !== "admin") return;
+         if (!get().isOnline) return;
          try {
            const response = await auditLogsApi.create(log);
            if (response.success && response.data) set((state) => ({ auditLogs: [response.data!, ...state.auditLogs] }));
@@ -383,8 +386,11 @@ export const useStore = create<StoreState>()(
 
       refreshAllData: async () => {
         if (!get().isOnline) return;
-        const isAdmin = get().user?.role === "admin";
-        
+        const { user } = get();
+        const isAdmin = user?.role === "admin";
+        const permissions = user?.permissions ?? [];
+        const canSeeAuditLogs = isAdmin || permissions.includes("view_audit_logs");
+
         try {
           const promises = [
             get().fetchShops(),
@@ -394,8 +400,11 @@ export const useStore = create<StoreState>()(
           ];
 
           if (isAdmin) {
-            promises.push(get().fetchAuditLogs());
             promises.push(get().fetchExpenses());
+          }
+
+          if (canSeeAuditLogs) {
+            promises.push(get().fetchAuditLogs());
           }
 
           await Promise.all(promises);

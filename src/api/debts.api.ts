@@ -60,5 +60,9 @@ export const debtsApi = {
   },
   async remove(id: string): Promise<void> {
     await apiClient.delete(`/debts/${id}`);
+  },
+  async update(id: string, data: Partial<Debt>): Promise<Debt> {
+    const res = await apiClient.put<any>(`/debts/${id}`, data);
+    return res.data?.data || res.data;
   }
 };
