@@ -36,10 +36,14 @@ export default function DebtsPage() {
 
     const canManageDebts = isAdmin || can("manage_debts");
 
+    const globalShopId = useStore((s) => s.selectedShopId);
+    const setSelectedShopId = useStore((s) => s.setSelectedShopId);
+    const selectedShop = globalShopId;
+
     // Add dialog
     const [openAdd, setOpenAdd] = useState(false);
     const [form, setForm] = useState({
-        customer_name: "", phone: "", shop_id: shops[0]?.id || "", product_id: "none",
+        customer_name: "", phone: "", shop_id: selectedShop !== "all" ? selectedShop : (shops[0]?.id || ""), product_id: "none",
         quantity: "1", total_amount: "", initial_payment: "", due_date: ""
     });
 
@@ -123,7 +127,11 @@ export default function DebtsPage() {
         } catch { toast.error(t("error")); }
     };
 
-    const filtered = debts.filter((d) => d.customerName.toLowerCase().includes(search.toLowerCase()));
+    const filtered = debts.filter((d) => {
+        const matchesSearch = d.customerName.toLowerCase().includes(search.toLowerCase());
+        const matchesShop = selectedShop === "all" || String(d.shopId) === String(selectedShop);
+        return matchesSearch && matchesShop;
+    });
 
     const statusStyle = (status: string) => {
         if (status === "paid") return "border-green-200 bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400";
@@ -135,15 +143,27 @@ export default function DebtsPage() {
         <AppLayout title={t("debts")} subtitle={t("manage borrowing and installments")}>
             <div className="flex flex-col gap-6">
                 {/* Toolbar */}
-                <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-2xl shadow-sm border border-border">
-                    <div className="relative w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            placeholder={t("search borrower...")}
-                            className="pl-9 h-11 border-none bg-secondary/50 shadow-sm rounded-xl font-bold"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl shadow-sm border border-border">
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                placeholder={t("search borrower...")}
+                                className="pl-9 h-11 border-none bg-secondary/50 shadow-sm rounded-xl font-bold"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+
+                        <Select value={selectedShop} onValueChange={setSelectedShopId}>
+                            <SelectTrigger className="w-full sm:w-44 h-11 border-none bg-secondary/50 rounded-xl font-bold">
+                                <SelectValue placeholder={t("all shops")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {isAdmin && <SelectItem value="all">{t("all shops")}</SelectItem>}
+                                {shops.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <Dialog open={openAdd} onOpenChange={setOpenAdd}>
