@@ -28,6 +28,7 @@ import AuditLogsPage from "./pages/AuditLogsPage";
 import OperationalOverview from "./pages/OperationalOverview";
 import DebtsPage from "./pages/DebtsPage";
 import HelpPage from "./pages/HelpPage";
+import AdminManagementPage from "./pages/AdminManagementPage";
 import NotFound from "./pages/NotFound";
 
 // Permissions
@@ -72,6 +73,7 @@ const protectedRoutes = [
   { path: "/users", element: <UsersPage />, permission: "view_users" },
   { path: "/audit-logs", element: <AuditLogsPage />, permission: "view_audit_logs" },
   { path: "/operational-summary", element: <OperationalOverview />, permission: "view_summary" },
+  { path: "/admin-management", element: <AdminManagementPage />, permission: null },
   { path: "/guide", element: <HelpPage />, permission: null },
 ];
 

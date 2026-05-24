@@ -8,7 +8,14 @@ const mapShop = (s: any): Shop => ({
   type: s.type || "stationery",
   location: String(s.location || ""),
   status: s.status || "active",
-  createdAt: s.createdAt || s.created_at || (s.created_at ? s.created_at.split('T')[0] : ""),
+  createdAt: s.createdAt || s.created_at || "",
+  isPaid: Boolean(s.isPaid ?? s.is_paid ?? false),
+  subscriptionAmount: Number(s.subscriptionAmount ?? s.subscription_amount ?? 0),
+  subscriptionType: s.subscriptionType ?? s.subscription_type ?? null,
+  paymentDate: s.paymentDate ?? s.payment_date ?? null,
+  subscriptionStartDate: s.subscriptionStartDate ?? s.subscription_start_date ?? null,
+  subscriptionEndDate: s.subscriptionEndDate ?? s.subscription_end_date ?? null,
+  subscriptionStatus: s.subscriptionStatus ?? s.subscription_status ?? "unpaid",
 });
 
 export const shopsApi = {
@@ -37,5 +44,17 @@ export const shopsApi = {
     formData.append('logo', file);
     const res = await apiClient.post<any>(`/shops/${id}/logo`, formData);
     return res.data.logo_url;
+  },
+  async updateSubscription(id: string, data: {
+    is_paid: boolean;
+    subscription_amount: number;
+    subscription_type: string;
+    payment_date: string;
+    subscription_start_date: string;
+    subscription_end_date: string;
+    status?: string;
+  }): Promise<Shop> {
+    const res = await apiClient.put<any>(`/shops/${id}/subscription`, data);
+    return mapShop(res.data);
   },
 };

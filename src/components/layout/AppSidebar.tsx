@@ -16,6 +16,7 @@ import {
   Shield,
   TrendingUp,
   HelpCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/useAuth";
@@ -36,6 +37,7 @@ const navItems = [
   { icon: Users, label: "Users", path: "/users", permission: "view_users" },
   { icon: Shield, label: "Audit Logs", path: "/audit-logs", permission: "view_audit_logs" },
   { icon: TrendingUp, label: "Daily Summary", path: "/operational-summary", permission: "view_summary" },
+  { icon: ShieldAlert, label: "Admin Panel", path: "/admin-management", permission: "__admin_only__" },
   { icon: HelpCircle, label: "Guide", path: "/guide", permission: null },
   { icon: Settings, label: "Settings", path: "/settings", permission: null },
 ];
@@ -60,9 +62,10 @@ export function AppSidebar() {
   const displayName = selectedShop?.name || "SHOPIX";
 
   // Filter nav items: admins see everything, others see what they have permission for
-  const visibleItems = navItems.filter(item =>
-    item.permission === null ? true : can(item.permission)
-  );
+  const visibleItems = navItems.filter(item => {
+    if (item.permission === "__admin_only__") return isAdmin;
+    return item.permission === null ? true : can(item.permission);
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("token");

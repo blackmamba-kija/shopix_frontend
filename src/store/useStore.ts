@@ -44,6 +44,15 @@ interface StoreState {
   fetchShops: () => Promise<void>;
   addShop: (shop: Omit<Shop, "id" | "createdAt" | "status">) => Promise<void>;
   updateShop: (id: string, data: Partial<Shop>) => Promise<void>;
+  updateSubscription: (id: string, data: {
+    is_paid: boolean;
+    subscription_amount: number;
+    subscription_type: string;
+    payment_date: string;
+    subscription_start_date: string;
+    subscription_end_date: string;
+    status?: string;
+  }) => Promise<void>;
   deleteShop: (id: string) => Promise<void>;
 
   fetchProducts: () => Promise<void>;
@@ -164,6 +173,12 @@ export const useStore = create<StoreState>()(
         }
         const updatedShop = await shopsApi.update(id, data);
         set((state) => ({ shops: state.shops.map((s) => s.id === id ? updatedShop : s) }));
+      },
+
+      updateSubscription: async (id, data) => {
+        const updatedShop = await shopsApi.updateSubscription(id, data);
+        set((state) => ({ shops: state.shops.map((s) => s.id === id ? updatedShop : s) }));
+        get().addAuditLog({ userId: get().user?.id || "0", userName: get().user?.name || "System", action: "UPDATE", module: "SHOPS", details: `Updated subscription for shop ID ${id}` });
       },
 
       deleteShop: async (id) => {

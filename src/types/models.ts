@@ -6,6 +6,13 @@ export interface Shop {
   location: string;
   status: "active" | "inactive";
   createdAt: string;
+  isPaid: boolean;
+  subscriptionAmount: number;
+  subscriptionType: "6_months" | "1_year" | "custom" | null;
+  paymentDate: string | null;
+  subscriptionStartDate: string | null;
+  subscriptionEndDate: string | null;
+  subscriptionStatus: "active" | "unpaid" | "expired";
 }
 
 export interface Product {
