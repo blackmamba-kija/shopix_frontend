@@ -22,6 +22,7 @@ export const ALL_PERMISSIONS = [
     // Sales
     { key: "view_sales", label: "View Sales", group: "Sales" },
     { key: "record_sales", label: "Record Sales", group: "Sales" },
+    { key: "delete_sales", label: "Delete Sales", group: "Sales" },
     // Expenses
     { key: "view_expenses", label: "View Expenses", group: "Expenses" },
     { key: "record_expenses", label: "Record Expenses", group: "Expenses" },

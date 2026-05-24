@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus, FileSpreadsheet, Store } from "lucide-react";
+import { DollarSign, TrendingUp, ShoppingCart, Search, Filter, Calendar as CalendarIcon, Plus, FileSpreadsheet, Store, Trash2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecordSaleDialog } from "@/components/forms/RecordSaleDialog";
 import { ImportDialog } from "@/components/forms/ImportDialog";
@@ -18,7 +18,27 @@ const SalesPage = () => {
   const { t } = useLanguage();
   const allSales = useStore((s) => s.sales);
   const allShops = useStore((s) => s.shops);
+  const removeSale = useStore(s => s.removeSale);
   const { can, isAdmin } = usePermissions();
+  const canDeleteSales = isAdmin || can("delete_sales");
+
+  const handleDelete = async (id: string) => {
+    if (confirm(t("are you sure you want to delete this sale?"))) {
+      try {
+        await removeSale(id);
+        const user = useStore.getState().user;
+        useStore.getState().addAuditLog({
+            userId: user?.id || "0",
+            userName: user?.name || "System",
+            action: "DELETE_SALE",
+            module: "Sales",
+            details: `Deleted sale ${id}`
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   // Filter states
   const [search, setSearch] = useState("");
@@ -161,6 +181,7 @@ const SalesPage = () => {
                   <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("price")}</TableHead>
                   <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("total")}</TableHead>
                   {(isAdmin || can("view_profit")) && <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("profit")}</TableHead>}
+                  {canDeleteSales && <TableHead className="p-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t("actions")}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -192,6 +213,13 @@ const SalesPage = () => {
                             <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-success/10 text-success text-sm font-bold border border-success/20">
                               Tsh{sale.profit.toLocaleString()}
                             </div>
+                          </TableCell>
+                        )}
+                        {canDeleteSales && (
+                          <TableCell className="p-4 text-right">
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(sale.id)} className="h-8 px-2 text-destructive hover:bg-destructive/10 rounded-lg">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </TableCell>
                         )}
                       </TableRow>

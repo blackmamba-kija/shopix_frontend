@@ -53,6 +53,7 @@ interface StoreState {
 
   fetchSales: () => Promise<void>;
   addSale: (sale: { productId: string; shopId: string; quantity: number, sellingPrice?: number }) => Promise<void>;
+  removeSale: (id: string) => Promise<void>;
 
   fetchServiceSales: () => Promise<void>;
   addServiceSale: (service: Omit<ServiceSale, "id" | "date" | "time" | "total">) => Promise<void>;
@@ -265,6 +266,26 @@ export const useStore = create<StoreState>()(
         set((state) => ({ sales: [...state.sales, newSale] }));
         await get().fetchProducts();
         get().addNotification({ type: "success", title: "Sale Recorded", message: `${quantity}x ${newSale.productName} recorded.` });
+      },
+
+      removeSale: async (id) => {
+        if (!get().isOnline) {
+          set((state) => ({ 
+            sales: state.sales.filter(s => s.id !== id),
+            syncQueue: [...state.syncQueue, { id, type: "SALE", action: "DELETE", data: null, timestamp: Date.now() }]
+          }));
+          return;
+        }
+        try {
+          await salesApi.remove(id);
+          set((state) => ({ sales: state.sales.filter((s) => s.id !== id) }));
+          // We could also re-fetch products if the backend restocks, let's do it safely
+          await get().fetchProducts();
+          toast.success("Sale deleted");
+        } catch (e: any) {
+          console.error("Failed to delete sale", e);
+          throw e; // allow UI to handle
+        }
       },
 
       fetchServiceSales: async () => {
