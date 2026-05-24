@@ -67,7 +67,7 @@ const InventoryPage = () => {
     if (!p || p.quantity == null) return false;
 
     let matchesStatus = true;
-    if (statusFilter === "low") matchesStatus = p.quantity <= 10;
+    if (statusFilter === "low") matchesStatus = p.quantity <= 3;
     else if (statusFilter === "expiring") {
       if (!p.expiryDate) matchesStatus = false;
       else {
@@ -180,7 +180,7 @@ const InventoryPage = () => {
               ) : (
                 filtered.map((product) => {
                   const shop = getShop(product.shopId);
-                  const isLowStock = product.quantity <= 10;
+                  const isLowStock = product.quantity <= 3;
                   const isExpiring = product.expiryDate && new Date(product.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000 && new Date(product.expiryDate).getTime() > Date.now();
 
                   return (

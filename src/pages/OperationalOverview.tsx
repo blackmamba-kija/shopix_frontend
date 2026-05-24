@@ -40,7 +40,7 @@ const OperationalOverview = () => {
     const totalStock = filteredProducts.reduce((sum, p) => sum + p.quantity, 0);
     const totalValue = filteredProducts.reduce((sum, p) => sum + p.quantity * p.buyingCost, 0);
 
-    const lowStockCount = filteredProducts.filter(p => p.quantity < 10).length;
+    const lowStockCount = filteredProducts.filter(p => p.quantity < 3).length;
 
     return (
         <AppLayout title={t("operational summary")} subtitle={t("daily business metrics and stock visibility")}>

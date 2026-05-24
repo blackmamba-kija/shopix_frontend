@@ -532,7 +532,7 @@ const ReportsPage = () => {
                       <div className="flex items-center gap-1">
                         <AlertCircle className="w-3 h-3 text-orange-500" />
                         <span className="text-sm font-black text-orange-600">
-                          {(getData("inventory") as any[]).filter(p => p.quantity <= 10).length} {t("critical")}
+                          {(getData("inventory") as any[]).filter(p => p.quantity <= 3).length} {t("critical")}
                         </span>
                       </div>
                     </div>

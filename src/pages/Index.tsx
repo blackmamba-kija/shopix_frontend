@@ -34,7 +34,7 @@ const Dashboard = () => {
   const show = (key: string) => isAdmin || can(key);
 
   // ─── Derived metrics ──────────────────────────────────────────────────────────
-  const lowStockProducts  = products.filter(p => p.quantity > 0 && p.quantity <= 10);
+  const lowStockProducts  = products.filter(p => p.quantity > 0 && p.quantity <= 3);
   const outOfStockProducts = products.filter(p => p.quantity === 0);
 
   const todayDateStr = new Date().toISOString().split("T")[0];
