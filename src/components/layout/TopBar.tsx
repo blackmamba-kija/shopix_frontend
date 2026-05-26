@@ -97,6 +97,38 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             </Select>
           )}
         </div>
+
+        {/* Subscription Days Remaining & Status */}
+        {!isAdmin && selectedShopId !== "all" && (
+          (() => {
+            const shop = shopsRaw.find(s => String(s.id) === selectedShopId);
+            if (!shop) return null;
+            
+            const isUnpaid = shop.subscriptionStatus === "unpaid";
+            const isExpired = shop.subscriptionStatus === "expired";
+            
+            return (
+              <div className="hidden md:flex items-center gap-2">
+                <div className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border",
+                  isUnpaid ? "bg-rose-500/10 border-rose-500/20 text-rose-700" :
+                  isExpired ? "bg-amber-500/10 border-amber-500/20 text-amber-700" :
+                  "bg-emerald-500/10 border-emerald-500/20 text-emerald-700"
+                )}>
+                  <Zap className={cn("w-3.5 h-3.5", 
+                    isUnpaid ? "text-rose-600" : 
+                    isExpired ? "text-amber-600" : 
+                    "text-emerald-600"
+                  )} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">
+                    {t(shop.subscriptionStatus)}: 
+                    {shop.subscriptionRemainingDays} {t("days")} {t("remaining")}
+                  </span>
+                </div>
+              </div>
+            );
+          })()
+        )}
         
         {/* Sync Status Indicator */}
         <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/50 border border-border/50">

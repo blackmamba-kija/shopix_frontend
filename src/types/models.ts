@@ -13,6 +13,7 @@ export interface Shop {
   subscriptionStartDate: string | null;
   subscriptionEndDate: string | null;
   subscriptionStatus: "active" | "unpaid" | "expired";
+  subscriptionRemainingDays: number;
 }
 
 export interface Product {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,16 @@ const LoginPage = () => {
   const { toast } = useToast();
   const { updateUser, isOnline, user: cachedUser } = useStore();
   
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expired') === 'true') {
+      toast({
+        title: "Subscription Expired",
+        description: "Your session was terminated because your subscription has expired. Please make a payment to continue.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -52,10 +62,13 @@ const LoginPage = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      const isExpired = error.response?.status === 403 && error.response?.data?.is_subscription_expired;
       toast({
-        title: "Endpoint Unreachable",
-        description: error instanceof Error ? error.message : "The authentication server is currently unavailable.",
+        title: isExpired ? "Subscription Expired" : "Endpoint Unreachable",
+        description: isExpired 
+          ? error.response.data.message 
+          : (error instanceof Error ? error.message : "The authentication server is currently unavailable."),
         variant: "destructive",
       });
     } finally {

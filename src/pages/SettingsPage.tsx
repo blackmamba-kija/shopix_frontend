@@ -179,7 +179,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base text-foreground">{t("low stock alerts")}</Label>
-                    <p className="text-sm text-muted-foreground">{t("get notified when product stock falls below 10.")}</p>
+                    <p className="text-sm text-muted-foreground">{t("get notified when product stock falls below 3.")}</p>
                   </div>
                   <Switch defaultChecked />
                 </div>

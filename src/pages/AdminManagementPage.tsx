@@ -78,11 +78,7 @@ const AdminManagementPage = () => {
     { key: "expired", label: "Expired", count: expiredCount, color: "text-amber-600 border-amber-500/30 bg-amber-500/10" },
   ];
 
-  const daysUntilExpiry = (end: string | null) => {
-    if (!end) return null;
-    const diff = Math.ceil((new Date(end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return diff;
-  };
+
 
   return (
     <AppLayout title="Admin Management" subtitle="Manage shop subscriptions, payments & access control">
@@ -153,8 +149,8 @@ const AdminManagementPage = () => {
                 filtered.map((shop) => {
                   const cfg = statusConfig[shop.subscriptionStatus] ?? statusConfig.unpaid;
                   const StatusIcon = cfg.icon;
-                  const days = daysUntilExpiry(shop.subscriptionEndDate);
-                  const isExpiringSoon = days !== null && days > 0 && days <= 30;
+                  const days = shop.subscriptionRemainingDays;
+                  const isExpiringSoon = shop.subscriptionStatus === 'active' && days !== null && days <= 30;
 
                   return (
                     <TableRow key={shop.id} className={cn("transition-all group", cfg.row)}>

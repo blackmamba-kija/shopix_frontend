@@ -28,10 +28,28 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
   useEffect(() => {
     // Sync profile to get latest permissions/shops
     authApi.getProfile().then((res: any) => {
-      if (res.success && res.data?.user) {
-        updateUser({ ...res.data.user, id: String(res.data.user.id) });
-      } else if (res.user) { // Handle potential different response shapes
-        updateUser({ ...res.user, id: String(res.user.id) });
+      const userData = res.data?.user || res.user;
+      if (userData) {
+        updateUser({ ...userData, id: String(userData.id) });
+        
+        // Subscription Check
+        if (userData.role !== 'admin') {
+            const assignedIds = userData.assigned_shops || [];
+            if (assignedIds.length > 0) {
+                const shops = useStore.getState().shops;
+                // Only check if we actually have shops loaded
+                if (shops.length > 0) {
+                    const userShops = shops.filter(s => assignedIds.includes(Number(s.id)));
+                    const hasActiveSub = userShops.some(s => s.subscriptionStatus === 'active');
+                    
+                    if (!hasActiveSub) {
+                        localStorage.removeItem('token');
+                        updateUser(null);
+                        window.location.href = '/login?expired=true';
+                    }
+                }
+            }
+        }
       }
     }).catch(() => { });
 
