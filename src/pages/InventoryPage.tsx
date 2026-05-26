@@ -188,6 +188,7 @@ const InventoryPage = () => {
                       <TableCell className="p-4">
                         <div className="flex flex-col">
                           <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">{product.name}</span>
+                          {product.description && <span className="text-[10px] text-muted-foreground line-clamp-1">{product.description}</span>}
                           <span className="text-[10px] font-mono text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded w-fit mt-1">{product.batchNumber || t("no-batch")}</span>
                         </div>
                       </TableCell>

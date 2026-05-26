@@ -24,7 +24,7 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
   const { t } = useLanguage();
 
   const [form, setForm] = useState({
-    name: "", category: "", shopId: "", manufacturer: "",
+    name: "", description: "", category: "", shopId: "", manufacturer: "",
     expiryDate: "", buyingCost: "", sellingPrice: "",
     quantity: "", supplier: "", batchNumber: "", barcode: "",
   });
@@ -41,6 +41,7 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
     try {
       await addProduct({
         name: form.name.trim(),
+        description: form.description.trim() || undefined,
         category: form.category.trim(),
         shopId: form.shopId,
         manufacturer: form.manufacturer.trim(),
@@ -54,7 +55,7 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
       });
       await fetchProducts();
       toast.success(t("success"));
-      setForm({ name: "", category: "", shopId: "", manufacturer: "", expiryDate: "", buyingCost: "", sellingPrice: "", quantity: "", supplier: "", batchNumber: "", barcode: "" });
+      setForm({ name: "", description: "", category: "", shopId: "", manufacturer: "", expiryDate: "", buyingCost: "", sellingPrice: "", quantity: "", supplier: "", batchNumber: "", barcode: "" });
       setOpen(false);
     } catch (err) {
       toast.error(t("error"));
@@ -86,6 +87,10 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
               <Label className="font-bold text-xs uppercase text-muted-foreground">{t("category")}</Label>
               <Input value={form.category} onChange={(e) => update("category", e.target.value)} placeholder={t("e.g. foundation")} maxLength={50} className="bg-secondary/30 h-10 border-none" />
             </div>
+          </div>
+          <div className="space-y-1.5 flex flex-col">
+            <Label className="font-bold text-xs uppercase text-muted-foreground">{t("description")}</Label>
+            <Input value={form.description} onChange={(e) => update("description", e.target.value)} placeholder={t("product description...")} maxLength={250} className="bg-secondary/30 h-12 border-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5 flex flex-col">

@@ -51,7 +51,7 @@ const Dashboard = () => {
   const serviceTotal  = serviceSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
 
   const inventoryHealthData = [
-    { name: t("healthy"), value: products.filter(p => p.quantity > 10).length, color: "hsl(142, 71%, 45%)" },
+    { name: t("healthy"), value: products.filter(p => p.quantity > 3).length, color: "hsl(142, 71%, 45%)" },
     { name: t("low"),     value: lowStockProducts.length,                       color: "hsl(38, 92%, 50%)" },
     { name: t("out"),     value: outOfStockProducts.length,                      color: "hsl(0, 84%, 60%)" },
   ];
