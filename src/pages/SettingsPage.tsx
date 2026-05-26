@@ -10,10 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useTheme } from "@/components/theme-provider";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useStore } from "@/store/useStore";
+import { usePermissions } from "@/hooks/useAuth";
+import { Zap, Calendar, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { theme, setTheme, color, setColor } = useTheme();
   const { t } = useLanguage();
+  const { shops: shopsRaw, selectedShopId } = useStore();
+  const { isAdmin } = usePermissions();
+
+  const selectedShop = shopsRaw.find(s => String(s.id) === selectedShopId);
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success(t("settings saved successfully"));
@@ -28,6 +36,9 @@ export default function SettingsPage() {
             <TabsTrigger value="users" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><Users className="w-4 h-4 mr-2 hidden sm:inline" /> {t("users")}</TabsTrigger>
             <TabsTrigger value="shops" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><Store className="w-4 h-4 mr-2 hidden sm:inline" /> {t("shops")}</TabsTrigger>
             <TabsTrigger value="currency" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><CreditCard className="w-4 h-4 mr-2 hidden sm:inline" /> {t("billing")}</TabsTrigger>
+            {!isAdmin && (
+              <TabsTrigger value="subscription" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><Zap className="w-4 h-4 mr-2 hidden sm:inline" /> {t("subscription")}</TabsTrigger>
+            )}
             <TabsTrigger value="notifications" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><Bell className="w-4 h-4 mr-2 hidden sm:inline" /> {t("alerts")}</TabsTrigger>
             <TabsTrigger value="appearance" className="py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"><Palette className="w-4 h-4 mr-2 hidden sm:inline" /> {t("theme")}</TabsTrigger>
           </TabsList>
@@ -105,6 +116,91 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="subscription" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">
+            {!selectedShop ? (
+              <div className="bg-card border border-border rounded-xl p-8 text-center">
+                <Store className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                <h3 className="font-bold text-lg">{t("no shop selected")}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{t("please select a specific shop from the top bar to view subscription details.")}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-card border border-border rounded-xl p-6 shadow-sm overflow-hidden relative group">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-colors" />
+                   <div className="relative z-10">
+                     <div className="flex items-center gap-3 mb-6">
+                       <div className="p-3 bg-primary/10 rounded-2xl"><Zap className="w-5 h-5 text-primary" /></div>
+                       <div>
+                         <h3 className="text-lg font-black tracking-tight italic lowercase">{t("subscription status")}</h3>
+                         <p className="text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground mt-0.5">{selectedShop.name}</p>
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{t("status")}</span>
+                          <span className={cn(
+                            "text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider",
+                            selectedShop.subscriptionStatus === "active" ? "bg-emerald-500/10 text-emerald-600" : 
+                            selectedShop.subscriptionStatus === "expired" ? "bg-amber-500/10 text-amber-600" :
+                            "bg-rose-500/10 text-rose-600"
+                          )}>
+                            {t(selectedShop.subscriptionStatus || "unpaid")}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{t("remaining days")}</span>
+                          <span className="text-base font-black italic text-primary">
+                            {selectedShop.subscriptionRemainingDays ?? 0} {t("days")}
+                          </span>
+                        </div>
+                     </div>
+                   </div>
+                </div>
+
+                <div className="bg-card border border-border rounded-xl p-6 shadow-sm overflow-hidden relative group">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-secondary/10 transition-colors" />
+                   <div className="relative z-10">
+                     <div className="flex items-center gap-3 mb-6">
+                       <div className="p-3 bg-secondary/30 rounded-2xl"><Calendar className="w-5 h-5 text-foreground" /></div>
+                       <div>
+                         <h3 className="text-lg font-black tracking-tight italic lowercase">{t("plan details")}</h3>
+                         <p className="text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground mt-0.5">{t("expiry & cycle")}</p>
+                       </div>
+                     </div>
+
+                     <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 border-b border-border/50">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{t("start date")}</span>
+                          <span className="text-xs font-black">{selectedShop.subscriptionStartDate ? new Date(selectedShop.subscriptionStartDate).toLocaleDateString() : "—"}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 border-b border-border/50">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{t("expiry date")}</span>
+                          <span className="text-xs font-black text-rose-600 italic">{selectedShop.subscriptionEndDate ? new Date(selectedShop.subscriptionEndDate).toLocaleDateString() : "—"}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{t("last payment")}</span>
+                          <span className="text-xs font-black">{selectedShop.paymentDate ? new Date(selectedShop.paymentDate).toLocaleDateString() : "—"}</span>
+                        </div>
+                     </div>
+                   </div>
+                </div>
+                
+                <div className="md:col-span-2 bg-primary/5 border border-primary/20 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                    <Heart className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                     <h4 className="font-black italic text-lg leading-tight uppercase tracking-tight">{t("need help with payment?")}</h4>
+                     <p className="text-sm text-muted-foreground font-medium mt-1">{t("if your subscription has expired or you need to upgrade, please contact our support team to renew your access.")}</p>
+                  </div>
+                  <Button className="font-black uppercase italic tracking-widest">{t("contact support")}</Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="shops" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">

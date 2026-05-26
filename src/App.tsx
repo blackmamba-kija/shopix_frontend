@@ -46,12 +46,32 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, permission }: ProtectedRouteProps) => {
   const user = useStore((s) => s.user);
+  const shops = useStore((s) => s.shops);
   const token = localStorage.getItem("token");
 
   if (!token) return <Navigate to="/login" replace />;
 
+  const isAdmin = user?.role === "admin";
+
+  // Check subscription status for non-admin users
+  // If the user has assigned shops, at least one must be active/paid
+  if (user && !isAdmin && shops.length > 0) {
+    const assignedIds = user.assigned_shops ?? [];
+    const myShops = shops.filter(s => assignedIds.includes(Number(s.id)));
+    
+    // Only block if they have assigned shops but NONE are active
+    if (myShops.length > 0) {
+      const hasActiveShop = myShops.some(s => s.subscriptionStatus === "active");
+      if (!hasActiveShop) {
+        // Clear session and redirect with expired flag
+        localStorage.removeItem("token");
+        return <Navigate to="/login?expired=true" replace />;
+      }
+    }
+  }
+
   // Admins bypass all permission checks
-  if (user && user.role !== "admin" && permission && !(user.permissions ?? []).includes(permission)) {
+  if (user && !isAdmin && permission && !(user.permissions ?? []).includes(permission)) {
     return <Navigate to="/" replace />;
   }
 
