@@ -23,15 +23,23 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, subtitle }: TopBarProps) {
-  const storeNotifications = useStore((s) => s.notifications);
+  const allNotifications = useStore((s) => s.notifications);
+  const selectedShopId = useStore((s) => s.selectedShopId);
+  const { user, isAdmin, filterShops } = usePermissions();
+
+  // Filter notifications by user and shop
+  const storeNotifications = useMemo(() => {
+    return allNotifications.filter(n => {
+      const matchesUser = n.userId === user?.id;
+      const matchesShop = selectedShopId === "all" || String(n.shopId) === selectedShopId;
+      return matchesUser && matchesShop;
+    });
+  }, [allNotifications, user, selectedShopId]);
+
   const markAsRead = useStore((s) => s.markNotificationAsRead);
   const unreadCount = storeNotifications.filter((n) => !n.read).length;
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
-  const { user } = usePermissions();
-  const { filterShops, isAdmin } = usePermissions();
-  const shopsRaw = useStore((s) => s.shops);
-  const selectedShopId = useStore((s) => s.selectedShopId);
   const setSelectedShopId = useStore((s) => s.setSelectedShopId);
   const mobileMenuOpen = useStore((s) => s.mobileMenuOpen);
   const setMobileMenuOpen = useStore((s) => s.setMobileMenuOpen);

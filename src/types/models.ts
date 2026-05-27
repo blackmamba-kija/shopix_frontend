@@ -65,6 +65,8 @@ export interface Notification {
   message: string;
   time: string;
   read: boolean;
+  userId?: string;
+  shopId?: string;
 }
 
 export interface DailySummary {

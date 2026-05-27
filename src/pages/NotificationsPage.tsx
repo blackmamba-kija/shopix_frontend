@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useStore } from "@/store/useStore";
 import { AlertTriangle, CheckCircle, Clock, Info, Check, Trash2 } from "lucide-react";
+import { usePermissions } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -23,12 +24,17 @@ const colorMap = {
 
 const NotificationsPage = () => {
   const { t } = useLanguage();
-  const notifications = useStore((s) => s.notifications);
+  const allNotifications = useStore((s) => s.notifications);
+  const selectedShopId = useStore((s) => s.selectedShopId);
+  const { user, isAdmin } = usePermissions();
   const markAsRead = useStore((s) => s.markNotificationAsRead);
-  const setNotifications = useStore((s) => {
-    // We don't have a direct clear action in useStore yet, so we'll just mark all as read or filter
-    // For now, let's just use what's available.
-    return s;
+
+  const notifications = allNotifications.filter(n => {
+    // Only show notifications for the current user (if logged in)
+    const matchesUser = n.userId === user?.id;
+    // If a specific shop is selected, only show for that shop
+    const matchesShop = selectedShopId === "all" || String(n.shopId) === selectedShopId;
+    return matchesUser && matchesShop;
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;

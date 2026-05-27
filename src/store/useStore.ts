@@ -217,7 +217,12 @@ export const useStore = create<StoreState>()(
             );
 
             if (!exists) {
-              get().addNotification({ type, title, message });
+              get().addNotification({ 
+                type, 
+                title, 
+                message,
+                shopId: String(p.shopId)
+              });
             }
           });
         } catch (e) {
@@ -347,8 +352,15 @@ export const useStore = create<StoreState>()(
       },
 
       addNotification: (notification) => {
+        const userId = get().user?.id;
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const newNotification: Notification = { ...notification, id: Math.random().toString(36).substr(2, 9), time, read: false };
+        const newNotification: Notification = { 
+          ...notification, 
+          id: Math.random().toString(36).substr(2, 9), 
+          time, 
+          read: false,
+          userId
+        };
         set((state) => ({ notifications: [newNotification, ...state.notifications].slice(0, 50) })); // Keep last 50
       },
 
