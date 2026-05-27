@@ -16,6 +16,18 @@ const mapShop = (s: any): Shop => ({
   subscriptionStartDate: s.subscriptionStartDate ?? s.subscription_start_date ?? null,
   subscriptionEndDate: s.subscriptionEndDate ?? s.subscription_end_date ?? null,
   subscriptionStatus: s.subscriptionStatus ?? s.subscription_status ?? "unpaid",
+  subscriptionRemainingDays: (() => {
+    const raw = s.subscriptionRemainingDays ?? s.subscription_remaining_days;
+    if (raw !== undefined) return Number(raw);
+    
+    // Auto-calculate if not provided by backend
+    const endStr = s.subscriptionEndDate ?? s.subscription_end_date;
+    if (!endStr) return 0;
+    const end = new Date(endStr);
+    const today = new Date();
+    const diff = end.getTime() - today.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  })()
 });
 
 export const shopsApi = {

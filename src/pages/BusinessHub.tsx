@@ -5,13 +5,26 @@ import { Store, Calendar, Zap, CreditCard, ShieldCheck, MapPin, Building2, Info,
 import { usePermissions } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 export default function BusinessHub() {
   const { t } = useLanguage();
-  const { shops: shopsRaw, selectedShopId } = useStore();
-  const { isAdmin } = usePermissions();
+  const { shops: shopsRaw, selectedShopId, setSelectedShopId, refreshAllData } = useStore();
+  const { isAdmin, filterShops } = usePermissions();
 
-  const selectedShop = shopsRaw.find(s => String(s.id) === selectedShopId);
+  useEffect(() => {
+    refreshAllData();
+  }, [refreshAllData]);
+
+  const shops = filterShops(shopsRaw);
+
+  // For regular users, if "all" is selected, default to their first assigned shop
+  // For admins, they must select a specific shop to see payment details
+  const effectiveShopId = (selectedShopId === "all" && !isAdmin && shops.length > 0)
+    ? String(shops[0].id)
+    : selectedShopId;
+
+  const selectedShop = shops.find(s => String(s.id) === effectiveShopId);
 
   return (
     <AppLayout 
@@ -115,6 +128,10 @@ export default function BusinessHub() {
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("last payment")}</p>
                                     <p className="text-sm font-bold text-foreground">{selectedShop.paymentDate ? new Date(selectedShop.paymentDate).toLocaleDateString() : "—"}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("subscription amount")}</p>
+                                    <p className="text-sm font-bold text-primary italic">Tsh {(selectedShop.subscriptionAmount || 0).toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
