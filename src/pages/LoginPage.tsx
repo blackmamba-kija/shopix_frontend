@@ -82,7 +82,7 @@ const LoginPage = () => {
       <div className="absolute inset-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-rose-600/10 blur-[130px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-orange-600/10 blur-[130px] animate-pulse delay-700" />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-pink-600/5 blur-[100px] animate-bounce duration-[10000]" />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-pink-600/5 blur-[100px] animate-bounce duration-[10s]" />
       </div>
 
       {/* Grid Overlay */}
