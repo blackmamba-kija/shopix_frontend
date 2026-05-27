@@ -25,12 +25,15 @@ interface TopBarProps {
 export function TopBar({ title, subtitle }: TopBarProps) {
   const allNotifications = useStore((s) => s.notifications);
   const selectedShopId = useStore((s) => s.selectedShopId);
+  const shopsRaw = useStore((s) => s.shops);
   const { user, isAdmin, filterShops } = usePermissions();
 
   // Filter notifications by user and shop
   const storeNotifications = useMemo(() => {
     return allNotifications.filter(n => {
-      const matchesUser = n.userId === user?.id;
+      // Only show notifications for the current user (if logged in)
+      const matchesUser = n.userId && user?.id && n.userId === user.id;
+      // If a specific shop is selected, only show for that shop
       const matchesShop = selectedShopId === "all" || String(n.shopId) === selectedShopId;
       return matchesUser && matchesShop;
     });

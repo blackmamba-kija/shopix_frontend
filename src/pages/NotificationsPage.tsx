@@ -31,7 +31,7 @@ const NotificationsPage = () => {
 
   const notifications = allNotifications.filter(n => {
     // Only show notifications for the current user (if logged in)
-    const matchesUser = n.userId === user?.id;
+    const matchesUser = n.userId && user?.id && n.userId === user.id;
     // If a specific shop is selected, only show for that shop
     const matchesShop = selectedShopId === "all" || String(n.shopId) === selectedShopId;
     return matchesUser && matchesShop;
