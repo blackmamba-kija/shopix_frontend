@@ -73,6 +73,7 @@ interface StoreState {
 
   addNotification: (notification: Omit<Notification, "id" | "time" | "read">) => void;
   markNotificationAsRead: (id: string) => void;
+  clearNotifications: () => void;
 
   fetchAuditLogs: () => Promise<void>;
   addAuditLog: (log: Omit<AuditLog, "id" | "timestamp">) => Promise<void>;
@@ -198,6 +199,27 @@ export const useStore = create<StoreState>()(
         try {
           const products = await productsApi.getAll();
           set({ products });
+
+          // Auto-generate notifications for low stock (<= 3)
+          const lowStock = products.filter(p => p.quantity <= 3 && p.quantity > 0);
+          const outOfStock = products.filter(p => p.quantity === 0);
+          
+          const currentNotifications = get().notifications;
+
+          [...lowStock, ...outOfStock].forEach(p => {
+            const type = p.quantity === 0 ? "expiry" : "warning";
+            const title = p.quantity === 0 ? "Out of Stock" : "Low Stock Alert";
+            const message = p.quantity === 0 ? `${p.name} is completely out of stock!` : `${p.name} has only ${p.quantity} items left.`;
+            
+            // Only add if no unread notification exists for this product with this message
+            const exists = currentNotifications.some(n => 
+              !n.read && n.title === title && n.message === message
+            );
+
+            if (!exists) {
+              get().addNotification({ type, title, message });
+            }
+          });
         } catch (e) {
           console.error("Fetch products failed", e);
         }
@@ -325,12 +347,17 @@ export const useStore = create<StoreState>()(
       },
 
       addNotification: (notification) => {
-        const newNotification: Notification = { ...notification, id: Math.random().toString(36).substr(2, 9), time: "Just now", read: false };
-        set((state) => ({ notifications: [newNotification, ...state.notifications] }));
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const newNotification: Notification = { ...notification, id: Math.random().toString(36).substr(2, 9), time, read: false };
+        set((state) => ({ notifications: [newNotification, ...state.notifications].slice(0, 50) })); // Keep last 50
       },
 
       markNotificationAsRead: (id) => {
         set((state) => ({ notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) }));
+      },
+
+      clearNotifications: () => {
+        set({ notifications: [] });
       },
 
       fetchAuditLogs: async () => {
