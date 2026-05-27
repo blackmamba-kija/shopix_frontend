@@ -33,13 +33,7 @@ export const serviceSales: ServiceSale[] = [
   { id: "3", serviceName: "Lamination A4", shopId: "4", quantity: 15, pricePerUnit: 1, total: 15, date: "2026-02-26", time: "13:00" },
 ];
 
-export const notifications: Notification[] = [
-  { id: "1", type: "warning", title: "Low Stock Alert", message: "L'Oreal True Match Concealer is running low (3 units)", time: "5 min ago", read: false },
-  { id: "2", type: "pending", title: "Stock Approval Pending", message: "Nivea Body Lotion 400ml awaiting approval", time: "1 hour ago", read: false },
-  { id: "3", type: "expiry", title: "Expiry Warning", message: "Nivea Body Lotion 400ml expires on Mar 15, 2025", time: "2 hours ago", read: false },
-  { id: "4", type: "success", title: "Sale Recorded", message: "10x A4 Printing Paper sold at Office Pro Supplies", time: "3 hours ago", read: true },
-  { id: "5", type: "info", title: "Restock Request", message: "HP 61 Ink Cartridge restock requested by seller", time: "5 hours ago", read: true },
-];
+export const notifications: Notification[] = [];
 
 export const dailySummary: DailySummary = {
   totalSales: 142,
