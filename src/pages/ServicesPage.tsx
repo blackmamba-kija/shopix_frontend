@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { AddServiceSaleDialog } from "@/components/forms/AddServiceSaleDialog";
 import { ImportDialog } from "@/components/forms/ImportDialog";
 import { usePermissions } from "@/hooks/useAuth";
-import { Printer, Search, Filter, Calendar as CalendarIcon, DollarSign, TrendingUp, History, FileSpreadsheet } from "lucide-react";
+import { Printer, Search, Filter, Calendar as CalendarIcon, DollarSign, TrendingUp, History, FileSpreadsheet, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const ServicesPage = () => {
   const [search, setSearch] = useState("");
   const globalShopId = useStore((s) => s.selectedShopId);
   const setSelectedShopId = useStore((s) => s.setSelectedShopId);
+  const removeServiceSale = useStore((s) => s.removeServiceSale);
   const selectedShop = globalShopId;
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -38,6 +39,7 @@ const ServicesPage = () => {
   );
   const shops = (allShops || []).filter(s => s && s.id);
   const canRecordServices = isAdmin || can("record_services");
+  const canDeleteServices = isAdmin || can("delete_services");
 
   const today = new Date().toISOString().split('T')[0];
   const todayItems = serviceSales.filter(s => s.date === today);
@@ -153,12 +155,13 @@ const ServicesPage = () => {
                   <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("qty")}</th>
                   <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("unit price")}</th>
                   <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("total")}</th>
+                  {canDeleteServices && <th className="text-right p-4 text-[10px] font-bold text-muted-foreground tracking-wider uppercase">{t("actions")}</th>}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-muted-foreground py-16">
+                    <td colSpan={canDeleteServices ? 7 : 6} className="text-center text-muted-foreground py-16">
                       <div className="flex flex-col items-center gap-2">
                         <Filter className="w-8 h-8 opacity-20" />
                         <p>{t("no service sales match your current filters.")}</p>
@@ -188,6 +191,22 @@ const ServicesPage = () => {
                         <td className="p-4 text-right">
                           <span className="font-bold text-lg text-foreground">{formatTsh(s.total)}</span>
                         </td>
+                        {canDeleteServices && (
+                          <td className="p-4 text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                if (confirm(t("are you sure you want to delete this service record?"))) {
+                                  removeServiceSale(s.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        )}
                       </tr>
                     );
                   })

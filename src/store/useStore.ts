@@ -66,6 +66,7 @@ interface StoreState {
 
   fetchServiceSales: () => Promise<void>;
   addServiceSale: (service: Omit<ServiceSale, "id" | "date" | "time" | "total">) => Promise<void>;
+  removeServiceSale: (id: string) => Promise<void>;
 
   fetchExpenses: () => Promise<void>;
   addExpense: (expense: Partial<Expense>) => Promise<void>;
@@ -349,6 +350,24 @@ export const useStore = create<StoreState>()(
         }
         const newServiceSale = await servicesApi.create(service);
         set((state) => ({ serviceSales: [...state.serviceSales, newServiceSale] }));
+      },
+
+      removeServiceSale: async (id) => {
+        if (!get().isOnline) {
+          set((state) => ({
+            serviceSales: state.serviceSales.filter(s => s.id !== id),
+            syncQueue: [...state.syncQueue, { id, type: "SERVICE", action: "DELETE", data: null, timestamp: Date.now() }]
+          }));
+          return;
+        }
+        try {
+          await servicesApi.remove(id);
+          set((state) => ({ serviceSales: state.serviceSales.filter((s) => s.id !== id) }));
+          toast.success("Service record deleted");
+        } catch (e: any) {
+          console.error("Failed to delete service", e);
+          throw e;
+        }
       },
 
       addNotification: (notification) => {

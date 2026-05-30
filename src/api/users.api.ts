@@ -31,6 +31,7 @@ export const ALL_PERMISSIONS = [
     // Services
     { key: "view_services", label: "View Services", group: "Services" },
     { key: "record_services", label: "Record Services", group: "Services" },
+    { key: "delete_services", label: "Delete Services", group: "Services" },
     // Reports
     { key: "view_reports", label: "View Reports", group: "Reports" },
     { key: "view_summary", label: "View Daily Summary", group: "Reports" },
