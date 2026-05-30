@@ -14,6 +14,10 @@ export const ALL_PERMISSIONS = [
     // Shops
     { key: "view_shops", label: "View Shops", group: "Shops" },
     { key: "manage_shops", label: "Manage Shops", group: "Shops" },
+    // Services
+    { key: "view_services", label: "View Services", group: "Services" },
+    { key: "record_services", label: "Record Services", group: "Services" },
+    { key: "delete_services", label: "Delete Services", group: "Services" },
     // Inventory
     { key: "view_products", label: "View Products", group: "Inventory" },
     { key: "add_products", label: "Add Products", group: "Inventory" },
@@ -28,10 +32,6 @@ export const ALL_PERMISSIONS = [
     { key: "record_expenses", label: "Record Expenses", group: "Expenses" },
     { key: "edit_expenses", label: "Edit Expenses", group: "Expenses" },
     { key: "delete_expenses", label: "Delete Expenses", group: "Expenses" },
-    // Services
-    { key: "view_services", label: "View Services", group: "Services" },
-    { key: "record_services", label: "Record Services", group: "Services" },
-    { key: "delete_services", label: "Delete Services", group: "Services" },
     // Reports
     { key: "view_reports", label: "View Reports", group: "Reports" },
     { key: "view_summary", label: "View Daily Summary", group: "Reports" },

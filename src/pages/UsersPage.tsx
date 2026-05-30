@@ -42,11 +42,7 @@ const RoleIcon = ({ role }: { role: string }) => {
     return <Eye className="w-3.5 h-3.5 mr-1" />;
 };
 
-/* group permissions by section */
-const permGroups = ALL_PERMISSIONS.reduce<Record<string, typeof ALL_PERMISSIONS>>((acc, p) => {
-    (acc[p.group] ||= []).push(p);
-    return acc;
-}, {});
+
 
 /* ─── PermissionsPanel ──────────────────────────────────── */
 function PermissionsPanel({
@@ -59,6 +55,13 @@ function PermissionsPanel({
     onShopsChange: (v: number[]) => void;
 }) {
     const { t } = useLanguage();
+    
+    /* group permissions by section */
+    const permGroups = ALL_PERMISSIONS.reduce<Record<string, typeof ALL_PERMISSIONS>>((acc, p) => {
+        (acc[p.group] ||= []).push(p);
+        return acc;
+    }, {});
+
     const toggle = (key: string) =>
         onChange(selected.includes(key) ? selected.filter(k => k !== key) : [...selected, key]);
 
