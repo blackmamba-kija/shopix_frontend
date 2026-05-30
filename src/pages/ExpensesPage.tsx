@@ -156,22 +156,21 @@ export default function ExpensesPage() {
                 <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground">{t("shop")}</TableHead>
                 <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground">{t("amount")}</TableHead>
                 <TableHead className="font-black text-[10px] uppercase tracking-widest text-foreground max-w-[200px]">{t("description")}</TableHead>
-                {(canEdit || canDelete) && (
-                  <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-foreground pr-6">{t("actions")}</TableHead>
-                )}
+                {/* Always show Actions column */}
+                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest text-foreground pr-6">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredExpenses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={canEdit || canDelete ? 6 : 5} className="text-center py-16 text-muted-foreground font-medium italic">
+                  <TableCell colSpan={6} className="text-center py-16 text-muted-foreground font-medium italic">
                     {t("no expenses found")}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredExpenses.map((expense) => {
                   const shop = shops.find((s) => String(s.id) === String(expense.shopId));
-                  const isOwner = user?.id === expense.userId;
+                  const isOwner = String(user?.id) === String(expense.userId);
                   return (
                     <TableRow key={expense.id} className="hover:bg-muted/50 transition-colors border-border group">
                       <TableCell className="font-bold whitespace-nowrap pl-6 text-foreground">
@@ -188,10 +187,10 @@ export default function ExpensesPage() {
                       <TableCell className="font-bold text-sm italic text-foreground">{shop?.name || t("unknown shop")}</TableCell>
                       <TableCell className="font-black text-rose-500 italic text-base tracking-tight">Tsh{expense.amount.toLocaleString()}</TableCell>
                       <TableCell className="text-foreground text-xs font-medium italic max-w-[200px] truncate">{expense.description || "—"}</TableCell>
-                      {(canEdit || canDelete) && (
+                      {(canEdit || canDelete || isOwner) && (
                         <TableCell className="text-right pr-6">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {(isAdmin || (canEdit && isOwner)) && (
+                          <div className="flex items-center justify-end gap-1">
+                            {(canEdit || isOwner) && (
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -201,7 +200,7 @@ export default function ExpensesPage() {
                                 <Edit2 className="w-4 h-4" />
                               </Button>
                             )}
-                            {(isAdmin || (canDelete && isOwner)) && (
+                            {(canDelete || isOwner) && (
                               <Button
                                 variant="ghost"
                                 size="icon"

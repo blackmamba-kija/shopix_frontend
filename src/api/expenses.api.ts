@@ -3,8 +3,8 @@ import { Expense } from "@/types/models";
 
 const mapExpense = (e: any): Expense => ({
   id: String(e.id || ""),
-  shopId: String(e.shop_id || ""),
-  userId: String(e.user_id || ""),
+  shopId: String(e.shop_id || e.shopId || ""),
+  userId: String(e.user_id || e.userId || ""),
   category: String(e.category || ""),
   amount: Number(e.amount || 0),
   description: e.description || "",

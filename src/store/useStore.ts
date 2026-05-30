@@ -12,7 +12,7 @@ import { apiClient } from "@/api/client";
 
 interface SyncItem {
   id: string;
-  type: "SALE" | "PRODUCT" | "SERVICE" | "SHOP";
+  type: "SALE" | "PRODUCT" | "SERVICE" | "SHOP" | "EXPENSE";
   action: "CREATE" | "UPDATE" | "DELETE";
   data: any;
   timestamp: number;
@@ -138,7 +138,7 @@ export const useStore = create<StoreState>()(
       },
 
       fetchExpenses: async () => {
-        if (!get().isOnline || get().user?.role !== "admin") return;
+        if (!get().isOnline) return;
         try {
           const { expensesApi } = await import("@/api/expenses.api");
           const expenses = await expensesApi.getAll();
@@ -414,6 +414,8 @@ export const useStore = create<StoreState>()(
             }
 
             let result: any = null;
+            const { expensesApi } = await import("@/api/expenses.api");
+            
             if (item.type === "SALE" && item.action === "CREATE") result = await salesApi.create(data);
             if (item.type === "PRODUCT" && item.action === "CREATE") result = await productsApi.create(data);
             if (item.type === "PRODUCT" && item.action === "UPDATE") {
@@ -423,9 +425,11 @@ export const useStore = create<StoreState>()(
             if (item.type === "SERVICE" && item.action === "CREATE") result = await servicesApi.create(data);
             if (item.type === "SHOP" && item.action === "CREATE") result = await shopsApi.create(data);
             if (item.type === "SHOP" && item.action === "UPDATE") result = await shopsApi.update(item.id, data);
+            if (item.type === "EXPENSE" && item.action === "CREATE") result = await expensesApi.create(data);
+            if (item.type === "EXPENSE" && item.action === "DELETE") await expensesApi.remove(item.id);
 
             // If creation was successful, record the mapping
-            if (result && result.id && item.id.startsWith("temp_")) {
+            if (result && result.id && (item.id.startsWith("temp_") || item.id.startsWith("exp_"))) {
                 idMapping[item.id] = result.id;
             }
 
@@ -474,9 +478,7 @@ export const useStore = create<StoreState>()(
             get().fetchServiceSales(),
           ];
 
-          if (isAdmin) {
-            promises.push(get().fetchExpenses());
-          }
+          promises.push(get().fetchExpenses());
 
           if (canSeeAuditLogs) {
             promises.push(get().fetchAuditLogs());
@@ -489,6 +491,24 @@ export const useStore = create<StoreState>()(
       },
 
       addExpense: async (expense) => {
+        if (!get().isOnline) {
+          const tempId = `exp_${Date.now()}`;
+          const newExpense: Expense = {
+            id: tempId,
+            shopId: expense.shopId || "",
+            userId: get().user?.id || "",
+            amount: expense.amount || 0,
+            category: expense.category || "Other",
+            description: expense.description || "",
+            date: expense.date || new Date().toISOString().split('T')[0],
+          };
+          set((state) => ({ 
+            expenses: [newExpense, ...state.expenses],
+            syncQueue: [...state.syncQueue, { id: tempId, type: "EXPENSE", action: "CREATE", data: expense, timestamp: Date.now() }]
+          }));
+          toast.info("Expense saved offline.");
+          return;
+        }
         try {
           const { expensesApi } = await import("@/api/expenses.api");
           const newExpense = await expensesApi.create(expense);
@@ -500,6 +520,13 @@ export const useStore = create<StoreState>()(
       },
 
       removeExpense: async (id) => {
+        if (!get().isOnline) {
+          set((state) => ({ 
+            expenses: state.expenses.filter((e) => e.id !== id),
+            syncQueue: [...state.syncQueue, { id, type: "EXPENSE", action: "DELETE", data: null, timestamp: Date.now() }]
+          }));
+          return;
+        }
         try {
           const { expensesApi } = await import("@/api/expenses.api");
           await expensesApi.remove(id);
