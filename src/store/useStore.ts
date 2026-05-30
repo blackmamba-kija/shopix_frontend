@@ -442,6 +442,7 @@ export const useStore = create<StoreState>()(
                 result = await productsApi.update(targetId, data);
             }
             if (item.type === "SERVICE" && item.action === "CREATE") result = await servicesApi.create(data);
+            if (item.type === "SERVICE" && item.action === "DELETE") await servicesApi.remove(item.id);
             if (item.type === "SHOP" && item.action === "CREATE") result = await shopsApi.create(data);
             if (item.type === "SHOP" && item.action === "UPDATE") result = await shopsApi.update(item.id, data);
             if (item.type === "EXPENSE" && item.action === "CREATE") result = await expensesApi.create(data);
