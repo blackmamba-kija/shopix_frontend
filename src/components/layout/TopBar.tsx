@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut, ChevronDown, Store, Menu, Wifi, WifiOff, RefreshCw, XCircle } from "lucide-react";
+import { Bell, Search, LogOut, ChevronDown, Store, Menu, Wifi, WifiOff, RefreshCw, XCircle, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
