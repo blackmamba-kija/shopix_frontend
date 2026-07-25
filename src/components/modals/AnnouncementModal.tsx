@@ -1,25 +1,25 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { announcementsApi, AnnouncementRecord } from "@/api/announcements.api";
-import { Sparkles, X, PlayCircle, Eye, CheckCircle2, Megaphone } from "lucide-react";
+import { Sparkles, X, Megaphone, CheckCircle2, ChevronDown, ChevronUp, Video } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { cn } from "@/lib/utils";
 
 export function getVideoEmbedUrl(url?: string): { type: "iframe" | "video" | "none"; embedUrl: string } {
     if (!url || !url.trim()) return { type: "none", embedUrl: "" };
     const clean = url.trim();
 
-    // YouTube
+    // YouTube - NO AUTOPLAY (autoplay=0)
     const ytMatch = clean.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
     if (ytMatch && ytMatch[1]) {
-        return { type: "iframe", embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0` };
+        return { type: "iframe", embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=0&rel=0` };
     }
 
-    // Vimeo
+    // Vimeo - NO AUTOPLAY (autoplay=0)
     const vimeoMatch = clean.match(/vimeo\.com\/(?:.*\/)?([0-9]+)/);
     if (vimeoMatch && vimeoMatch[1]) {
-        return { type: "iframe", embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1` };
+        return { type: "iframe", embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=0` };
     }
 
     // Direct MP4 / WebM / Video file
@@ -32,32 +32,35 @@ export function getVideoEmbedUrl(url?: string): { type: "iframe" | "video" | "no
 
 export function AnnouncementModal() {
     const [announcement, setAnnouncement] = useState<AnnouncementRecord | null>(null);
-    const [open, setOpen] = useState(false);
+    const [minimized, setMinimized] = useState(false);
     const { t } = useLanguage();
 
     useEffect(() => {
         let isMounted = true;
         const checkAnnouncement = async () => {
             const active = await announcementsApi.getActive();
-            if (!isMounted || !active) return;
+            if (!isMounted) return;
+
+            if (!active) {
+                setAnnouncement(null);
+                return;
+            }
 
             const isActive = active.is_active == true || String(active.is_active) === "1" || String(active.is_active) === "true";
-            if (!isActive) return;
-
-            const version = active.updated_at || active.created_at || "v1";
-            const dismissedKey = `dismissed_announcement_${active.id}_${version}`;
-            const isDismissed = localStorage.getItem(dismissedKey);
-            if (!isDismissed) {
+            if (isActive) {
                 setAnnouncement(active);
-                setOpen(true);
+            } else {
+                setAnnouncement(null);
             }
         };
 
         checkAnnouncement();
-        return () => { isMounted = false; };
+        // Periodically poll active status every 20 seconds so status changes reflect live
+        const interval = setInterval(checkAnnouncement, 20000);
+        return () => { isMounted = false; clearInterval(interval); };
     }, []);
 
-    if (!announcement || !open) return null;
+    if (!announcement) return null;
 
     const handleDismiss = () => {
         if (announcement) {
@@ -70,43 +73,46 @@ export function AnnouncementModal() {
     const media = getVideoEmbedUrl(announcement.video_url);
 
     return (
-        <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
-            <DialogContent aria-describedby={undefined} className="sm:max-w-2xl rounded-3xl border border-primary/20 shadow-2xl p-0 overflow-hidden bg-slate-950 text-white dark:border-primary/40 backdrop-blur-2xl">
-                {/* Header Banner */}
-                <div className="relative bg-gradient-to-r from-primary/30 via-indigo-600/30 to-purple-600/30 p-6 sm:p-8 border-b border-white/10">
-                    <div className="absolute top-4 right-4 z-20">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleDismiss}
-                            className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/80 text-white border border-white/10 transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </Button>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-3">
-                        <Badge className="bg-primary text-primary-foreground font-black tracking-wider uppercase text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
-                            <Megaphone className="w-3.5 h-3.5" /> System Update & Announcement
-                        </Badge>
-                    </div>
-
-                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white italic drop-shadow-md pr-8">
+        <div className="fixed top-20 right-4 lg:right-6 z-50 w-[92vw] sm:w-[420px] shadow-2xl rounded-3xl border border-primary/30 bg-slate-950 text-white backdrop-blur-2xl animate-in slide-in-from-top-5 duration-500 overflow-hidden">
+            {/* Header Banner */}
+            <div className="bg-gradient-to-r from-primary/30 via-indigo-600/30 to-purple-600/30 p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <Badge className="bg-primary text-primary-foreground font-black uppercase text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0 animate-pulse">
+                        <Megaphone className="w-3 h-3" /> System Update
+                    </Badge>
+                    <h3 className="text-sm font-black text-white italic truncate pr-2">
                         {announcement.title}
-                    </h2>
+                    </h3>
                 </div>
 
-                {/* Content Body */}
-                <div className="p-6 sm:p-8 space-y-6">
-                    {/* Video Player */}
+                <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMinimized(!minimized)}
+                        className="h-8 px-3 rounded-full bg-black/40 hover:bg-black/80 text-white border border-white/10 font-bold text-xs gap-1"
+                    >
+                        {minimized ? (
+                            <>Expand <ChevronDown className="w-3.5 h-3.5" /></>
+                        ) : (
+                            <>Minimize <ChevronUp className="w-3.5 h-3.5" /></>
+                        )}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Expandable Body */}
+            {!minimized && (
+                <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                    {/* Video Player — NO AUTOPLAY */}
                     {media.type !== "none" && (
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black aspect-video group">
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black aspect-video">
                             {media.type === "iframe" && (
                                 <iframe
                                     src={media.embedUrl}
                                     title={announcement.title}
                                     className="w-full h-full border-none rounded-2xl"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
                                 />
                             )}
@@ -114,7 +120,8 @@ export function AnnouncementModal() {
                                 <video
                                     src={media.embedUrl}
                                     controls
-                                    autoPlay
+                                    autoPlay={false}
+                                    preload="metadata"
                                     className="w-full h-full object-cover rounded-2xl"
                                 />
                             )}
@@ -123,27 +130,28 @@ export function AnnouncementModal() {
 
                     {/* Text Description */}
                     {announcement.description && (
-                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
-                            <p className="text-sm font-medium text-slate-300 leading-relaxed whitespace-pre-line">
+                        <div className="bg-white/5 border border-white/10 p-3.5 rounded-2xl">
+                            <p className="text-xs font-medium text-slate-300 leading-relaxed whitespace-pre-line">
                                 {announcement.description}
                             </p>
                         </div>
                     )}
 
-                    {/* Footer Actions */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/10">
-                        <p className="text-xs text-slate-400 font-bold italic flex items-center gap-1.5">
-                            <Sparkles className="w-4 h-4 text-primary animate-spin" /> Stay tuned for new updates!
+                    {/* Action Bar */}
+                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/10">
+                        <p className="text-[10px] text-slate-400 font-bold italic flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-primary animate-spin" /> Click play to watch video
                         </p>
                         <Button
-                            onClick={handleDismiss}
-                            className="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm uppercase tracking-wider shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
+                            onClick={() => setMinimized(true)}
+                            size="sm"
+                            className="h-9 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs uppercase tracking-wider shadow-lg shadow-primary/20"
                         >
-                            <CheckCircle2 className="w-4 h-4 mr-2" /> Got it, continue!
+                            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Minimize
                         </Button>
                     </div>
                 </div>
-            </DialogContent>
-        </Dialog>
+            )}
+        </div>
     );
 }
