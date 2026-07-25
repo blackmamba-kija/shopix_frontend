@@ -22,6 +22,7 @@ export const ALL_PERMISSIONS = [
     { key: "view_products", label: "View Products", group: "Inventory" },
     { key: "add_products", label: "Add Products", group: "Inventory" },
     { key: "edit_products", label: "Edit Products", group: "Inventory" },
+    { key: "delete_products", label: "Delete Products & Inventory", group: "Inventory" },
     { key: "manage_imports", label: "Manage Data Imports", group: "Inventory" },
     // Sales
     { key: "view_sales", label: "View Sales", group: "Sales" },

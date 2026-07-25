@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { AdminAnnouncementDialog } from "@/components/forms/AdminAnnouncementDialog";
 
 const Dashboard = () => {
   const allProducts = useStore((s) => s.products);
@@ -145,6 +146,7 @@ const Dashboard = () => {
                   <ShieldCheck className="w-4 h-4" />
                   <span className="text-xs font-black uppercase tracking-wider">{isAdmin ? t("admin session") : t("manager session")}</span>
                 </div>
+                {isAdmin && <AdminAnnouncementDialog />}
               </div>
             </div>
           </div>

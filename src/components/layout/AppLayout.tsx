@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { authApi } from "@/api/auth.api";
 import { authHelper } from "@/utils/helpers/auth.helper";
 import { cn } from "@/lib/utils";
+import { AnnouncementModal } from "@/components/modals/AnnouncementModal";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,9 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
+      {/* System Announcement & Video Promo Modal */}
+      <AnnouncementModal />
+
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
         <div

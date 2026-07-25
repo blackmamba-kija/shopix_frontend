@@ -133,6 +133,12 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
     const [permissions, setPermissions] = useState<string[]>([]);
     const [assignedShops, setAssignedShops] = useState<number[]>([]);
 
+    useEffect(() => {
+        if (open && !isAdmin && shops.length > 0) {
+            setAssignedShops(shops.map(s => Number(s.id)));
+        }
+    }, [open, isAdmin, shops]);
+
     const reset = () => {
         setForm({ name: "", email: "", password: "", role: "seller" });
         setPermissions([]);
@@ -144,7 +150,11 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
         if (!form.name || !form.email || !form.password) { toast.error(t("please fill all required fields")); return; }
         setLoading(true);
         try {
-            await usersApi.create({ ...form, permissions, assigned_shops: assignedShops });
+            const targetShops = (!isAdmin && assignedShops.length === 0)
+                ? shops.map(s => Number(s.id))
+                : assignedShops;
+
+            await usersApi.create({ ...form, permissions, assigned_shops: targetShops });
 
             // Log action
             const actor = useStore.getState().user;
