@@ -53,7 +53,6 @@ export function AddProductDialog({ trigger }: AddProductDialogProps = {}) {
         batchNumber: form.batchNumber.trim(),
         barcode: form.barcode.trim() || undefined,
       });
-      await fetchProducts();
       toast.success(t("success"));
       setForm({ name: "", description: "", category: "", shopId: "", manufacturer: "", expiryDate: "", buyingCost: "", sellingPrice: "", quantity: "", supplier: "", batchNumber: "", barcode: "" });
       setOpen(false);

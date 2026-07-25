@@ -76,7 +76,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
         else if (action === "set") newQuantity = inputQty;
 
         try {
-            const { productsApi } = await import("@/api/products.api");
+            const updateProduct = useStore.getState().updateProduct;
 
             const updatedData = {
                 quantity: newQuantity,
@@ -86,8 +86,7 @@ export function RestockInventoryDialog({ initialProductId, trigger }: RestockInv
                 expiryDate: newExpiryDate || selectedProduct!.expiryDate,
             };
 
-            await productsApi.update(selectedProductId, updatedData);
-            await fetchProducts();
+            await updateProduct(selectedProductId, updatedData);
 
             toast.success(t("success"));
             resetForm();

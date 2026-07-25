@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@/store/useStore";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -46,13 +46,13 @@ export default function ExpensesPage() {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  const filteredExpenses = expenses.filter((e) => {
+  const filteredExpenses = useMemo(() => expenses.filter((e) => {
     const matchesSearch =
       e.category.toLowerCase().includes(search.toLowerCase()) ||
       (e.description || "").toLowerCase().includes(search.toLowerCase());
     const matchesShop = selectedShopId === "all" || String(e.shopId) === String(selectedShopId);
     return matchesSearch && matchesShop;
-  });
+  }), [expenses, search, selectedShopId]);
 
   const handleOpenEdit = (expense: Expense) => {
     setEditingExpense(expense);

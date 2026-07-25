@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePermissions } from "@/hooks/useAuth";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -127,6 +128,7 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const { t } = useLanguage();
+    const { isAdmin } = usePermissions();
     const [form, setForm] = useState({ name: "", email: "", password: "", role: "seller" as UserRecord["role"] });
     const [permissions, setPermissions] = useState<string[]>([]);
     const [assignedShops, setAssignedShops] = useState<number[]>([]);
@@ -195,7 +197,7 @@ function AddUserDialog({ shops, onSuccess }: { shops: Shop[]; onSuccess: () => v
                             <Select value={form.role} onValueChange={(v: UserRecord["role"]) => setForm(f => ({ ...f, role: v }))}>
                                 <SelectTrigger className="bg-secondary/40 h-12 border-none rounded-xl font-bold"><SelectValue /></SelectTrigger>
                                 <SelectContent className="rounded-xl border-none shadow-xl">
-                                    <SelectItem value="admin" className="font-bold">{t("admin - full access")}</SelectItem>
+                                    {isAdmin && <SelectItem value="admin" className="font-bold">{t("admin - full access")}</SelectItem>}
                                     <SelectItem value="seller" className="font-bold">{t("seller - sales & inventory")}</SelectItem>
                                     <SelectItem value="viewer" className="font-bold">{t("viewer - read only")}</SelectItem>
                                 </SelectContent>
@@ -327,6 +329,8 @@ function EditUserDialog({ user, shops, onSuccess }: { user: UserRecord; shops: S
 /* ─── UsersPage ─────────────────────────────────────────── */
 export default function UsersPage() {
     const { t } = useLanguage();
+    const { isAdmin, can } = usePermissions();
+    const canManageUsers = isAdmin || can("manage_users");
     const [users, setUsers] = useState<UserRecord[]>([]);
     const [shops, setShops] = useState<Shop[]>([]);
     const [loading, setLoading] = useState(true);
@@ -425,7 +429,7 @@ export default function UsersPage() {
                             <Input placeholder={t("search users...")} value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-12 bg-card border-none shadow-sm rounded-xl font-bold w-full sm:w-64" />
                         </div>
                         <Button variant="ghost" size="icon" onClick={load} className="w-12 h-12 rounded-xl bg-card shadow-sm hover:text-primary"><RefreshCw className="w-4 h-4" /></Button>
-                        <AddUserDialog shops={shops} onSuccess={load} />
+                        {canManageUsers && <AddUserDialog shops={shops} onSuccess={load} />}
                     </div>
                 </div>
 
@@ -506,11 +510,17 @@ export default function UsersPage() {
                                                 )}
                                             </td>
                                             <td className="p-6 pr-8">
-                                                <div className="flex items-center justify-end gap-2 opactiy-0 group-hover:opacity-100 transition-opacity">
-                                                    <EditUserDialog user={user} shops={shops} onSuccess={load} />
-                                                    <Button variant="ghost" size="sm" className="h-9 px-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl font-bold" onClick={() => setDeletingUser(user)}>
-                                                        <Trash2 className="w-4 h-4 mr-2" />{t("delete")}
-                                                    </Button>
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {canManageUsers ? (
+                                                        <>
+                                                            <EditUserDialog user={user} shops={shops} onSuccess={load} />
+                                                            <Button variant="ghost" size="sm" className="h-9 px-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl font-bold" onClick={() => setDeletingUser(user)}>
+                                                                <Trash2 className="w-4 h-4 mr-2" />{t("delete")}
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground italic">{t("view only")}</span>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

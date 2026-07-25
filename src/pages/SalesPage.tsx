@@ -6,11 +6,10 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { RecordSaleDialog } from "@/components/forms/RecordSaleDialog";
 import { ImportDialog } from "@/components/forms/ImportDialog";
 import { usePermissions } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -53,27 +52,32 @@ const SalesPage = () => {
   const dateFromRef = useRef<HTMLInputElement>(null);
   const dateToRef = useRef<HTMLInputElement>(null);
 
-  const sales = (allSales || []).filter(s =>
+  const sales = useMemo(() => (allSales || []).filter(s =>
     s && s.shopId &&
     (selectedShop === "all" || String(s.shopId) === String(selectedShop))
-  );
-  const shops = (allShops || []).filter(s => s && s.id);
+  ), [allSales, selectedShop]);
+
+  const shops = useMemo(() => (allShops || []).filter(s => s && s.id), [allShops]);
   const canRecordSales = isAdmin || can("record_sales");
 
-  const today = new Date().toISOString().split('T')[0];
-  const todaySales = sales.filter((s) => s.date === today);
-  const todayRevenue = todaySales.reduce((sum, s) => sum + Number(s.totalCost || 0), 0);
-  const todayProfit = todaySales.reduce((sum, s) => sum + Number(s.profit || 0), 0);
+  const { todaySales, todayRevenue, todayProfit, filtered } = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const tSales = sales.filter((s) => s.date === today);
+    const tRev = tSales.reduce((sum, s) => sum + Number(s.totalCost || 0), 0);
+    const tProf = tSales.reduce((sum, s) => sum + Number(s.profit || 0), 0);
 
-  const filtered = sales.filter((s) => {
-    const productName = s.productName || "";
-    const matchesSearch = productName.toLowerCase().includes(search.toLowerCase());
-    const matchesDateFrom = !dateFrom || s.date >= dateFrom;
-    const matchesDateTo = !dateTo || s.date <= dateTo;
-    const matchesMinAmount = !minAmount || Number(s.totalCost) >= parseFloat(minAmount);
-    const matchesMaxAmount = !maxAmount || Number(s.totalCost) <= parseFloat(maxAmount);
-    return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinAmount && matchesMaxAmount;
-  });
+    const f = sales.filter((s) => {
+      const productName = s.productName || "";
+      const matchesSearch = productName.toLowerCase().includes(search.toLowerCase());
+      const matchesDateFrom = !dateFrom || s.date >= dateFrom;
+      const matchesDateTo = !dateTo || s.date <= dateTo;
+      const matchesMinAmount = !minAmount || Number(s.totalCost) >= parseFloat(minAmount);
+      const matchesMaxAmount = !maxAmount || Number(s.totalCost) <= parseFloat(maxAmount);
+      return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinAmount && matchesMaxAmount;
+    });
+
+    return { todaySales: tSales, todayRevenue: tRev, todayProfit: tProf, filtered: f };
+  }, [sales, search, dateFrom, dateTo, minAmount, maxAmount]);
 
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);

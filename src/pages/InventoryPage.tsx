@@ -3,7 +3,7 @@ import { useStore } from "@/store/useStore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Clock, CheckCircle, XCircle, Search, Filter, Box, DollarSign, ArrowUpRight, RefreshCcw, PackagePlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { usePermissions } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,8 @@ import {
 import { useLanguage } from "@/hooks/useLanguage";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import { importsApi } from "@/api/imports.api";
+
 const InventoryPage = () => {
   const { t } = useLanguage();
   const formatTsh = (v: number) => `Tsh${v.toLocaleString()}`;
@@ -49,41 +51,71 @@ const InventoryPage = () => {
   const refreshAllData = useStore((s) => s.refreshAllData);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [deletingProduct, setDeletingProduct] = useState<any>(null);
+  const [clearingInventory, setClearingInventory] = useState(false);
 
   const [search, setSearch] = useState("");
   const globalShopId = useStore((s) => s.selectedShopId);
   const setSelectedShopId = useStore((s) => s.setSelectedShopId);
   const selectedShop = globalShopId;
 
-  const products = (allProducts || []).filter(p =>
+  const handleClearInventory = async () => {
+    if (selectedShop === "all") {
+      toast.error(t("please select a specific shop to clear inventory"));
+      return;
+    }
+    if (!confirm(t("are you sure you want to delete all inventory for this shop? this action cannot be undone."))) {
+      return;
+    }
+    setClearingInventory(true);
+    try {
+      const res = await importsApi.clearInventory(Number(selectedShop));
+      if (res.success) {
+        toast.success(t("inventory cleared successfully"));
+        refreshAllData(true);
+      } else {
+        toast.error(res.message || t("failed to clear inventory"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("error clearing inventory"));
+    } finally {
+      setClearingInventory(false);
+    }
+  };
+
+  const products = useMemo(() => (allProducts || []).filter(p =>
     p && p.shopId &&
     (selectedShop === "all" || String(p.shopId) === String(selectedShop))
-  );
-  const shops = (allShops || []).filter(s => s && s.id);
+  ), [allProducts, selectedShop]);
+
+  const shops = useMemo(() => (allShops || []).filter(s => s && s.id), [allShops]);
   const canManageProducts = isAdmin || can("add_products") || can("edit_products");
   const canDeleteProducts = isAdmin || can("delete_products");
 
-  const filtered = products.filter((p) => {
-    if (!p || p.quantity == null) return false;
+  const { filtered, totalStockValue, totalPotentialRevenue } = useMemo(() => {
+    const f = products.filter((p) => {
+      if (!p || p.quantity == null) return false;
 
-    let matchesStatus = true;
-    if (statusFilter === "low") matchesStatus = p.quantity <= 3;
-    else if (statusFilter === "expiring") {
-      if (!p.expiryDate) matchesStatus = false;
-      else {
-        const diff = new Date(p.expiryDate).getTime() - Date.now();
-        matchesStatus = diff < 90 * 24 * 60 * 60 * 1000 && diff > 0;
+      let matchesStatus = true;
+      if (statusFilter === "low") matchesStatus = p.quantity <= 3;
+      else if (statusFilter === "expiring") {
+        if (!p.expiryDate) matchesStatus = false;
+        else {
+          const diff = new Date(p.expiryDate).getTime() - Date.now();
+          matchesStatus = diff < 90 * 24 * 60 * 60 * 1000 && diff > 0;
+        }
       }
-    }
 
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.batchNumber && p.batchNumber.toLowerCase().includes(search.toLowerCase()));
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+        (p.batchNumber && p.batchNumber.toLowerCase().includes(search.toLowerCase()));
 
-    return matchesStatus && matchesSearch;
-  });
+      return matchesStatus && matchesSearch;
+    });
 
-  const totalStockValue = filtered.reduce((sum, p) => sum + (Number(p.quantity || 0) * Number(p.buyingCost || 0)), 0);
-  const totalPotentialRevenue = filtered.reduce((sum, p) => sum + (Number(p.quantity || 0) * Number(p.sellingPrice || 0)), 0);
+    const stockVal = f.reduce((sum, p) => sum + (Number(p.quantity || 0) * Number(p.buyingCost || 0)), 0);
+    const potRev = f.reduce((sum, p) => sum + (Number(p.quantity || 0) * Number(p.sellingPrice || 0)), 0);
+
+    return { filtered: f, totalStockValue: stockVal, totalPotentialRevenue: potRev };
+  }, [products, statusFilter, search]);
 
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);
 
@@ -123,16 +155,31 @@ const InventoryPage = () => {
                 </SelectContent>
               </Select>
               
-              {canManageProducts && (
-                <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={refreshAllData}
-                      className="h-11 w-11 p-0 rounded-xl border-border bg-secondary/50 shadow-sm hover:bg-secondary transition-all shrink-0"
-                      title={t("refresh data")}
-                    >
-                      <RefreshCcw className="w-4 h-4 text-primary" />
-                    </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => refreshAllData(true)}
+                  className="h-11 w-11 p-0 rounded-xl border-border bg-secondary/50 shadow-sm hover:bg-secondary transition-all shrink-0"
+                  title={t("refresh data")}
+                >
+                  <RefreshCcw className="w-4 h-4 text-primary" />
+                </Button>
+
+                {canDeleteProducts && selectedShop !== "all" && (
+                  <Button
+                    variant="outline"
+                    onClick={handleClearInventory}
+                    disabled={clearingInventory}
+                    className="h-11 rounded-xl shadow-sm gap-2 px-4 border-destructive/30 text-destructive hover:bg-destructive/10 transition-all shrink-0 font-bold"
+                    title={t("clear all inventory for selected shop")}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t("clear inventory")}</span>
+                  </Button>
+                )}
+
+                {canManageProducts && (
+                  <>
                     {(isAdmin || can("manage_imports")) && (
                       <ImportDialog 
                         type="inventory" 
@@ -143,13 +190,14 @@ const InventoryPage = () => {
                         }
                       />
                     )}
-                  <AddProductDialog trigger={
-                    <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
-                      <PackagePlus className="w-4 h-4" /> {t("add product")}
-                    </Button>
-                  }/>
-                </div>
-              )}
+                    <AddProductDialog trigger={
+                      <Button className="h-11 rounded-xl shadow-md gap-2 px-5 hover:scale-[1.02] transition-transform shrink-0 font-bold">
+                        <PackagePlus className="w-4 h-4" /> {t("add product")}
+                      </Button>
+                    }/>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -213,43 +261,45 @@ const InventoryPage = () => {
                       </TableCell>
                       <TableCell className="p-4 text-right">
                         <div className="flex justify-end gap-2 items-center">
-                          <RestockInventoryDialog
-                            initialProductId={product.id}
-                            trigger={
-                              <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary">
-                                <RefreshCcw className="w-3.5 h-3.5" />
-                                <span className="font-bold text-xs">{t("restock")}</span>
-                              </Button>
-                            }
-                          />
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-secondary rounded-full">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-md border-border">
-                              <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-2 py-1.5">{t("product actions")}</DropdownMenuLabel>
-                              {canManageProducts && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="gap-2 focus:bg-secondary focus:text-foreground rounded-lg cursor-pointer" onSelect={() => setEditingProduct(product)}>
-                                    <Edit className="w-4 h-4" />
-                                    <span className="font-bold text-xs">{t("edit details")}</span>
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                                {canDeleteProducts && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="gap-2 focus:bg-destructive/10 text-destructive rounded-lg cursor-pointer transition-colors" onSelect={() => setDeletingProduct(product)}>
-                                      <Trash2 className="w-4 h-4" />
-                                      <span className="font-bold text-xs">{t("delete item")}</span>
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          {canManageProducts && (
+                            <RestockInventoryDialog
+                              initialProductId={product.id}
+                              trigger={
+                                <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary">
+                                  <RefreshCcw className="w-3.5 h-3.5" />
+                                  <span className="font-bold text-xs">{t("restock")}</span>
+                                </Button>
+                              }
+                            />
+                          )}
+
+                          {canManageProducts && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingProduct(product)}
+                              className="h-8 w-8 p-0 hover:bg-secondary rounded-lg"
+                              title={t("edit details")}
+                            >
+                              <Edit className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                            </Button>
+                          )}
+
+                          {canDeleteProducts && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeletingProduct(product)}
+                              className="h-8 w-8 p-0 hover:bg-destructive/10 text-destructive hover:text-destructive rounded-lg"
+                              title={t("delete item")}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+
+                          {!canManageProducts && !canDeleteProducts && (
+                            <span className="text-xs text-muted-foreground italic">{t("view only")}</span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

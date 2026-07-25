@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DollarSign, ShoppingCart, TrendingUp, Package, AlertTriangle, Clock, BarChart3, PieChart as PieChartIcon, Layers, CheckCircle, ArrowUpRight, ShieldCheck, Zap } from "lucide-react";
@@ -20,58 +21,90 @@ const Dashboard = () => {
   const { t } = useLanguage();
 
   // ─── Scoped data ─────────────────────────────────────────────────────────────
-  const products = (allProducts || []).filter(p =>
+  const products = useMemo(() => (allProducts || []).filter(p =>
     p && p.shopId && (selectedShopId === "all" || String(p.shopId) === String(selectedShopId))
-  );
-  const sales = (allSales || []).filter(s =>
+  ), [allProducts, selectedShopId]);
+
+  const sales = useMemo(() => (allSales || []).filter(s =>
     s && s.shopId && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId))
-  );
-  const serviceSales = (allServiceSales || []).filter(s =>
+  ), [allSales, selectedShopId]);
+
+  const serviceSales = useMemo(() => (allServiceSales || []).filter(s =>
     s && s.shopId && (selectedShopId === "all" || String(s.shopId) === String(selectedShopId))
-  );
+  ), [allServiceSales, selectedShopId]);
 
   // ─── Permission helpers ───────────────────────────────────────────────────────
   const show = (key: string) => isAdmin || can(key);
 
   // ─── Derived metrics ──────────────────────────────────────────────────────────
-  const lowStockProducts  = products.filter(p => p.quantity > 0 && p.quantity <= 3);
-  const outOfStockProducts = products.filter(p => p.quantity === 0);
+  const {
+    lowStockProducts,
+    outOfStockProducts,
+    todaySales,
+    todayServices,
+    totalRevenue,
+    totalProfit,
+    inventoryValue,
+    productTotal,
+    serviceTotal,
+    inventoryHealthData,
+    revenueSourceData,
+    chartWeeklyData
+  } = useMemo(() => {
+    const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 3);
+    const outOfStock = products.filter(p => p.quantity === 0);
 
-  const todayDateStr = new Date().toISOString().split("T")[0];
-  const todaySales    = sales.filter(s => s.date === todayDateStr);
-  const todayServices = serviceSales.filter(s => s.date === todayDateStr);
+    const todayDateStr = new Date().toISOString().split("T")[0];
+    const todayS = sales.filter(s => s.date === todayDateStr);
+    const todayServ = serviceSales.filter(s => s.date === todayDateStr);
 
-  const totalRevenue = todaySales.reduce((sum, s) => sum + Number(s.totalCost || 0), 0) +
-    todayServices.reduce((sum, s) => sum + Number(s.total || 0), 0);
-  const totalProfit  = todaySales.reduce((sum, s) => sum + Number(s.profit || 0), 0) +
-    todayServices.reduce((sum, s) => sum + Number(s.total || 0), 0);
-  const inventoryValue = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0);
+    const revenue = todayS.reduce((sum, s) => sum + Number(s.totalCost || 0), 0) +
+      todayServ.reduce((sum, s) => sum + Number(s.total || 0), 0);
+    const profit = todayS.reduce((sum, s) => sum + Number(s.profit || 0), 0) +
+      todayServ.reduce((sum, s) => sum + Number(s.total || 0), 0);
+    const val = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.buyingCost)), 0);
 
-  const productTotal  = sales.reduce((sum, s) => sum + Number(s.totalCost || 0), 0);
-  const serviceTotal  = serviceSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
+    const pTotal = sales.reduce((sum, s) => sum + Number(s.totalCost || 0), 0);
+    const sTotal = serviceSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
 
-  const inventoryHealthData = [
-    { name: t("healthy"), value: products.filter(p => p.quantity > 3).length, color: "hsl(142, 71%, 45%)" },
-    { name: t("low"),     value: lowStockProducts.length,                       color: "hsl(38, 92%, 50%)" },
-    { name: t("out"),     value: outOfStockProducts.length,                      color: "hsl(0, 84%, 60%)" },
-  ];
+    const invHealth = [
+      { name: t("healthy"), value: products.filter(p => p.quantity > 3).length, color: "hsl(142, 71%, 45%)" },
+      { name: t("low"),     value: lowStock.length,                              color: "hsl(38, 92%, 50%)" },
+      { name: t("out"),     value: outOfStock.length,                             color: "hsl(0, 84%, 60%)" },
+    ];
 
-  const revenueSourceData = [
-    { name: t("product sales"),    value: productTotal, color: "hsl(var(--primary))" },
-    { name: t("service revenue"),  value: serviceTotal, color: "hsl(var(--primary) / 0.4)" },
-  ];
+    const revSource = [
+      { name: t("product sales"),   value: pTotal, color: "hsl(var(--primary))" },
+      { name: t("service revenue"), value: sTotal, color: "hsl(var(--primary) / 0.4)" },
+    ];
 
-  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const chartWeeklyData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const dateStr = d.toISOString().split("T")[0];
+    const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const weeklyData = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const dateStr = d.toISOString().split("T")[0];
+      return {
+        name: weekDays[d.getDay()],
+        sales:    sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + Number(s.totalCost || 0), 0),
+        services: serviceSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + Number(s.total || 0), 0),
+      };
+    });
+
     return {
-      name: weekDays[d.getDay()],
-      sales:    sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + Number(s.totalCost || 0), 0),
-      services: serviceSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + Number(s.total || 0), 0),
+      lowStockProducts: lowStock,
+      outOfStockProducts: outOfStock,
+      todaySales: todayS,
+      todayServices: todayServ,
+      totalRevenue: revenue,
+      totalProfit: profit,
+      inventoryValue: val,
+      productTotal: pTotal,
+      serviceTotal: sTotal,
+      inventoryHealthData: invHealth,
+      revenueSourceData: revSource,
+      chartWeeklyData: weeklyData
     };
-  });
+  }, [products, sales, serviceSales, t]);
 
   const formatTsh = (v: number) => `Tsh ${v.toLocaleString()}`;
 

@@ -79,9 +79,10 @@ interface StoreState {
   fetchAuditLogs: () => Promise<void>;
   addAuditLog: (log: Omit<AuditLog, "id" | "timestamp">) => Promise<void>;
 
+  lastFetchedAt: number | null;
   syncOfflineData: () => Promise<void>;
   clearSyncQueue: () => void;
-  refreshAllData: () => Promise<void>;
+  refreshAllData: (force?: boolean) => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -99,6 +100,7 @@ export const useStore = create<StoreState>()(
       syncQueue: [],
       isOnline: navigator.onLine,
       isSyncing: false,
+      lastFetchedAt: null,
 
       setOnlineStatus: (status: boolean) => {
         const wasOffline = !get().isOnline;
@@ -483,8 +485,13 @@ export const useStore = create<StoreState>()(
         }
       },
 
-      refreshAllData: async () => {
+      refreshAllData: async (force?: boolean) => {
         if (!get().isOnline) return;
+        // Debounce fetching if fetched recently (within 15 seconds), unless forced
+        if (!force && get().lastFetchedAt && Date.now() - get().lastFetchedAt! < 15000) {
+          return;
+        }
+
         const { user } = get();
         const isAdmin = user?.role === "admin";
         const permissions = user?.permissions ?? [];
@@ -505,6 +512,7 @@ export const useStore = create<StoreState>()(
           }
 
           await Promise.all(promises);
+          set({ lastFetchedAt: Date.now() });
         } catch (e) {
           console.error("Refresh all data failed", e);
         }
@@ -565,6 +573,12 @@ export const useStore = create<StoreState>()(
     {
       name: "shopix-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        selectedShopId: state.selectedShopId,
+        sidebarCollapsed: state.sidebarCollapsed,
+        syncQueue: state.syncQueue,
+      }),
     }
   )
 );

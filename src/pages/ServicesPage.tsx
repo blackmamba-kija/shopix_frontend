@@ -5,13 +5,12 @@ import { AddServiceSaleDialog } from "@/components/forms/AddServiceSaleDialog";
 import { ImportDialog } from "@/components/forms/ImportDialog";
 import { usePermissions } from "@/hooks/useAuth";
 import { Printer, Search, Filter, Calendar as CalendarIcon, DollarSign, TrendingUp, History, FileSpreadsheet, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useRef } from "react";
 
 const ServicesPage = () => {
   const { formatTsh, t } = useLanguage();
@@ -33,26 +32,31 @@ const ServicesPage = () => {
   const dateFromRef = useRef<HTMLInputElement>(null);
   const dateToRef = useRef<HTMLInputElement>(null);
 
-  const serviceSales = (allServiceSales || []).filter(s =>
+  const serviceSales = useMemo(() => (allServiceSales || []).filter(s =>
     s && s.shopId &&
     (selectedShop === "all" || String(s.shopId) === String(selectedShop))
-  );
-  const shops = (allShops || []).filter(s => s && s.id);
+  ), [allServiceSales, selectedShop]);
+
+  const shops = useMemo(() => (allShops || []).filter(s => s && s.id), [allShops]);
   const canRecordServices = isAdmin || can("record_services");
   const canDeleteServices = isAdmin || can("delete_services");
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayItems = serviceSales.filter(s => s.date === today);
-  const todayRevenue = todayItems.reduce((sum, s) => sum + Number(s.total || 0), 0);
+  const { todayItems, todayRevenue, filtered } = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const tItems = serviceSales.filter(s => s.date === today);
+    const tRev = tItems.reduce((sum, s) => sum + Number(s.total || 0), 0);
 
-  const filtered = serviceSales.filter((s) => {
-    const matchesSearch = s.serviceName.toLowerCase().includes(search.toLowerCase());
-    const matchesDateFrom = !dateFrom || s.date >= dateFrom;
-    const matchesDateTo = !dateTo || s.date <= dateTo;
-    const matchesMinAmount = !minAmount || Number(s.total) >= parseFloat(minAmount);
-    const matchesMaxAmount = !maxAmount || Number(s.total) <= parseFloat(maxAmount);
-    return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinAmount && matchesMaxAmount;
-  });
+    const f = serviceSales.filter((s) => {
+      const matchesSearch = s.serviceName.toLowerCase().includes(search.toLowerCase());
+      const matchesDateFrom = !dateFrom || s.date >= dateFrom;
+      const matchesDateTo = !dateTo || s.date <= dateTo;
+      const matchesMinAmount = !minAmount || Number(s.total) >= parseFloat(minAmount);
+      const matchesMaxAmount = !maxAmount || Number(s.total) <= parseFloat(maxAmount);
+      return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinAmount && matchesMaxAmount;
+    });
+
+    return { todayItems: tItems, todayRevenue: tRev, filtered: f };
+  }, [serviceSales, search, dateFrom, dateTo, minAmount, maxAmount]);
 
   const getShop = (shopId: string) => shops.find((s) => s.id === shopId);
 
