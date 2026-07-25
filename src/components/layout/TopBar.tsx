@@ -1,7 +1,8 @@
-import { Bell, Search, LogOut, ChevronDown, Store, Menu, Wifi, WifiOff, RefreshCw, XCircle, Zap } from "lucide-react";
+import { Bell, Search, LogOut, ChevronDown, Store, Menu, Wifi, WifiOff, RefreshCw, XCircle, Zap, Megaphone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AdminAnnouncementDialog } from "@/components/forms/AdminAnnouncementDialog";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "@/store/useStore";
@@ -199,6 +200,16 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             className="pl-9 w-40 h-9 bg-secondary/50 border-none text-xs focus-visible:ring-1 focus-visible:ring-primary/20"
           />
         </div>
+
+        {isAdmin && (
+          <AdminAnnouncementDialog
+            trigger={
+              <Button size="sm" variant="outline" className="hidden xl:flex h-9 rounded-xl gap-1.5 border-purple-500/30 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 font-bold text-xs">
+                <Megaphone className="w-4 h-4 text-purple-600" /> Announcements
+              </Button>
+            }
+          />
+        )}
 
         <div className="block">
           <Select value={language} onValueChange={(v: any) => setLanguage(v)}>

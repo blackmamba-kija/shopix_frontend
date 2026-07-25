@@ -24,7 +24,13 @@ export function usePermissions() {
     const can = (permission: string): boolean => {
         if (!user) return false;
         if (isAdmin) return true;
-        return (user.permissions ?? []).includes(permission);
+        const perms = user.permissions ?? [];
+        if (permission === "view_users" && perms.includes("manage_users")) return true;
+        if (permission === "view_products" && (perms.includes("add_products") || perms.includes("edit_products") || perms.includes("delete_products"))) return true;
+        if (permission === "view_sales" && (perms.includes("record_sales") || perms.includes("delete_sales"))) return true;
+        if (permission === "view_expenses" && (perms.includes("record_expenses") || perms.includes("edit_expenses") || perms.includes("delete_expenses"))) return true;
+        if (permission === "view_services" && (perms.includes("record_services") || perms.includes("delete_services"))) return true;
+        return perms.includes(permission);
     };
 
     /** Returns true if the user can access the given shop by its ID */

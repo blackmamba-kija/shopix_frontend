@@ -72,8 +72,17 @@ const ProtectedRoute = ({ children, permission }: ProtectedRouteProps) => {
   }
 
   // Admins bypass all permission checks
-  if (user && !isAdmin && permission && !(user.permissions ?? []).includes(permission)) {
-    return <Navigate to="/" replace />;
+  if (user && !isAdmin && permission) {
+    const perms = user.permissions ?? [];
+    let hasPerm = perms.includes(permission);
+    if (permission === "view_users" && perms.includes("manage_users")) hasPerm = true;
+    if (permission === "view_products" && (perms.includes("add_products") || perms.includes("edit_products") || perms.includes("delete_products"))) hasPerm = true;
+    if (permission === "view_sales" && (perms.includes("record_sales") || perms.includes("delete_sales"))) hasPerm = true;
+    if (permission === "view_expenses" && (perms.includes("record_expenses") || perms.includes("edit_expenses") || perms.includes("delete_expenses"))) hasPerm = true;
+    if (permission === "view_services" && (perms.includes("record_services") || perms.includes("delete_services"))) hasPerm = true;
+    if (!hasPerm) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;
