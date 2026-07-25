@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { announcementsApi, AnnouncementRecord } from "@/api/announcements.api";
-import { Sparkles, X, Megaphone, CheckCircle2, ChevronDown, ChevronUp, Video } from "lucide-react";
+import { Sparkles, Megaphone, EyeOff, Maximize2, Minimize2 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
 
@@ -32,40 +32,38 @@ export function getVideoEmbedUrl(url?: string): { type: "iframe" | "video" | "no
 
 export function AnnouncementModal() {
     const [announcement, setAnnouncement] = useState<AnnouncementRecord | null>(null);
-    const [minimized, setMinimized] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [minimized, setMinimized] = useState(true);
     const { t } = useLanguage();
 
     useEffect(() => {
         let isMounted = true;
         const checkAnnouncement = async () => {
             const active = await announcementsApi.getActive();
-            if (!isMounted) return;
-
-            if (!active) {
-                setAnnouncement(null);
-                return;
-            }
+            if (!isMounted || !active) return;
 
             const isActive = active.is_active == true || String(active.is_active) === "1" || String(active.is_active) === "true";
-            if (isActive) {
+            if (!isActive) return;
+
+            const version = active.updated_at || active.created_at || "v1";
+            const permanentHideKey = `permanently_hidden_announcement_${active.id}_${version}`;
+            const isPermanentlyHidden = localStorage.getItem(permanentHideKey);
+            if (!isPermanentlyHidden) {
                 setAnnouncement(active);
-            } else {
-                setAnnouncement(null);
+                setOpen(true);
             }
         };
 
         checkAnnouncement();
-        // Periodically poll active status every 20 seconds so status changes reflect live
-        const interval = setInterval(checkAnnouncement, 20000);
-        return () => { isMounted = false; clearInterval(interval); };
+        return () => { isMounted = false; };
     }, []);
 
-    if (!announcement) return null;
+    if (!announcement || !open) return null;
 
-    const handleDismiss = () => {
+    const handlePermanentHide = () => {
         if (announcement) {
             const version = announcement.updated_at || announcement.created_at || "v1";
-            localStorage.setItem(`dismissed_announcement_${announcement.id}_${version}`, "true");
+            localStorage.setItem(`permanently_hidden_announcement_${announcement.id}_${version}`, "true");
         }
         setOpen(false);
     };
@@ -73,14 +71,17 @@ export function AnnouncementModal() {
     const media = getVideoEmbedUrl(announcement.video_url);
 
     return (
-        <div className="fixed top-20 right-4 lg:right-6 z-50 w-[92vw] sm:w-[420px] shadow-2xl rounded-3xl border border-primary/30 bg-slate-950 text-white backdrop-blur-2xl animate-in slide-in-from-top-5 duration-500 overflow-hidden">
-            {/* Header Banner */}
-            <div className="bg-gradient-to-r from-primary/30 via-indigo-600/30 to-purple-600/30 p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 overflow-hidden">
-                    <Badge className="bg-primary text-primary-foreground font-black uppercase text-[9px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0 animate-pulse">
-                        <Megaphone className="w-3 h-3" /> System Update
+        <div className={cn(
+            "fixed top-20 right-4 lg:right-6 z-50 shadow-2xl rounded-3xl border border-primary/30 bg-slate-950 text-white backdrop-blur-2xl transition-all duration-300 overflow-hidden",
+            minimized ? "w-auto max-w-[340px] sm:max-w-[400px]" : "w-[92vw] sm:w-[440px]"
+        )}>
+            {/* Minimized Pill Bar Header */}
+            <div className="bg-gradient-to-r from-primary/30 via-indigo-600/30 to-purple-600/30 p-3 sm:p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 overflow-hidden cursor-pointer" onClick={() => setMinimized(!minimized)}>
+                    <Badge className="bg-primary text-primary-foreground font-black uppercase text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 animate-pulse">
+                        <Megaphone className="w-3 h-3" /> Update
                     </Badge>
-                    <h3 className="text-sm font-black text-white italic truncate pr-2">
+                    <h3 className="text-xs font-black text-white italic truncate pr-1">
                         {announcement.title}
                     </h3>
                 </div>
@@ -90,20 +91,34 @@ export function AnnouncementModal() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setMinimized(!minimized)}
-                        className="h-8 px-3 rounded-full bg-black/40 hover:bg-black/80 text-white border border-white/10 font-bold text-xs gap-1"
+                        className="h-7 px-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold gap-1"
+                        title={minimized ? "Expand Announcement" : "Minimize"}
                     >
                         {minimized ? (
-                            <>Expand <ChevronDown className="w-3.5 h-3.5" /></>
+                            <>
+                                <Maximize2 className="w-3 h-3 text-primary" /> Expand
+                            </>
                         ) : (
-                            <>Minimize <ChevronUp className="w-3.5 h-3.5" /></>
+                            <>
+                                <Minimize2 className="w-3 h-3" /> Minimize
+                            </>
                         )}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handlePermanentHide}
+                        className="w-7 h-7 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30"
+                        title="Permanently Hide Announcement"
+                    >
+                        <EyeOff className="w-3.5 h-3.5" />
                     </Button>
                 </div>
             </div>
 
-            {/* Expandable Body */}
+            {/* Expanded Body */}
             {!minimized && (
-                <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-300">
                     {/* Video Player — NO AUTOPLAY */}
                     {media.type !== "none" && (
                         <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black aspect-video">
@@ -138,16 +153,22 @@ export function AnnouncementModal() {
                     )}
 
                     {/* Action Bar */}
-                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/10">
-                        <p className="text-[10px] text-slate-400 font-bold italic flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-primary animate-spin" /> Click play to watch video
-                        </p>
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
                         <Button
                             onClick={() => setMinimized(true)}
+                            variant="outline"
                             size="sm"
-                            className="h-9 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs uppercase tracking-wider shadow-lg shadow-primary/20"
+                            className="h-8 px-3 rounded-xl border-white/20 hover:bg-white/10 text-white font-bold text-xs"
                         >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Minimize
+                            <Minimize2 className="w-3.5 h-3.5 mr-1" /> Minimize
+                        </Button>
+                        <Button
+                            onClick={handlePermanentHide}
+                            size="sm"
+                            variant="destructive"
+                            className="h-8 px-3 rounded-xl font-bold text-xs gap-1"
+                        >
+                            <EyeOff className="w-3.5 h-3.5" /> Permanently Hide
                         </Button>
                     </div>
                 </div>
