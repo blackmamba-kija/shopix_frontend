@@ -54,7 +54,35 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
       }
     }).catch(() => { });
 
-    refreshAllData();
+    refreshAllData(true);
+
+    // Real-Time Background Synchronization
+    const handleOnline = () => {
+      useStore.getState().setOnlineStatus(true);
+      useStore.getState().syncOfflineData();
+    };
+    const handleOffline = () => {
+      useStore.getState().setOnlineStatus(false);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Real-time polling every 12 seconds to sync app & web live
+    const interval = setInterval(() => {
+      if (navigator.onLine) {
+        refreshAllData(true);
+        if (useStore.getState().syncQueue.length > 0) {
+          useStore.getState().syncOfflineData();
+        }
+      }
+    }, 12000);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      clearInterval(interval);
+    };
   }, [refreshAllData, updateUser]);
 
   return (

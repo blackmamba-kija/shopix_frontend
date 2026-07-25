@@ -70,8 +70,8 @@ export function AnnouncementModal() {
     return (
         <div
             className={cn(
-                "fixed top-20 right-4 lg:right-6 z-50 shadow-2xl rounded-3xl border border-primary/40 bg-slate-950 text-white backdrop-blur-2xl transition-all duration-300 overflow-hidden",
-                minimized ? "w-auto max-w-[340px] sm:max-w-[420px]" : "w-[92vw] sm:w-[450px]"
+                "fixed top-16 right-2 sm:right-6 z-[9999] shadow-2xl rounded-2xl sm:rounded-3xl border border-primary/50 bg-slate-950 text-white backdrop-blur-2xl transition-all duration-300 overflow-hidden",
+                minimized ? "w-auto max-w-[calc(100vw-1rem)] sm:max-w-[420px]" : "w-[94vw] sm:w-[450px]"
             )}
         >
             {/* Minimized Top-Right Banner Bar */}
