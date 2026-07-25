@@ -14,31 +14,40 @@ export interface AnnouncementRecord {
 export const announcementsApi = {
     getActive: async (): Promise<AnnouncementRecord | null> => {
         try {
-            const res = await apiClient.get<AnnouncementRecord | null>("/announcements/active");
-            return res.data || null;
+            const res = await apiClient.get<any>("/announcements/active");
+            if (!res || !res.success) return null;
+            const item = (res.data as any)?.data || res.data;
+            if (!item || !item.id) return null;
+            return item;
         } catch {
             return null;
         }
     },
 
     getAll: async (): Promise<AnnouncementRecord[]> => {
-        const res = await apiClient.get<AnnouncementRecord[]>("/announcements");
-        return res.data || [];
+        try {
+            const res = await apiClient.get<any>("/announcements");
+            const list = (res.data as any)?.data || res.data || [];
+            return Array.isArray(list) ? list : [];
+        } catch {
+            return [];
+        }
     },
 
     create: async (data: Partial<AnnouncementRecord>): Promise<AnnouncementRecord> => {
-        const res = await apiClient.post<AnnouncementRecord>("/announcements", data);
-        return res.data!;
+        const res = await apiClient.post<any>("/announcements", data);
+        return (res.data as any)?.data || res.data;
     },
 
     update: async (id: number, data: Partial<AnnouncementRecord>): Promise<AnnouncementRecord> => {
-        const res = await apiClient.put<AnnouncementRecord>(`/announcements/${id}`, data);
-        return res.data!;
+        const res = await apiClient.put<any>(`/announcements/${id}`, data);
+        return (res.data as any)?.data || res.data;
     },
 
     toggle: async (id: number): Promise<{ is_active: boolean; message: string }> => {
-        const res = await apiClient.post<{ message: string; data: AnnouncementRecord }>(`/announcements/${id}/toggle`, {});
-        return { is_active: (res.data as any)?.data?.is_active ?? false, message: res.message || "Updated" };
+        const res = await apiClient.post<any>(`/announcements/${id}/toggle`, {});
+        const item = (res.data as any)?.data || res.data;
+        return { is_active: Boolean(item?.is_active), message: res.message || "Updated" };
     },
 
     remove: async (id: number): Promise<void> => {

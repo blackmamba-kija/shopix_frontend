@@ -39,10 +39,13 @@ export function AnnouncementModal() {
         let isMounted = true;
         const checkAnnouncement = async () => {
             const active = await announcementsApi.getActive();
-            if (!isMounted || !active || !active.is_active) return;
+            if (!isMounted || !active) return;
 
-            // Check if user previously dismissed this announcement ID
-            const dismissedKey = `dismissed_announcement_${active.id}`;
+            const isActive = active.is_active == true || String(active.is_active) === "1" || String(active.is_active) === "true";
+            if (!isActive) return;
+
+            const version = active.updated_at || active.created_at || "v1";
+            const dismissedKey = `dismissed_announcement_${active.id}_${version}`;
             const isDismissed = localStorage.getItem(dismissedKey);
             if (!isDismissed) {
                 setAnnouncement(active);
@@ -58,7 +61,8 @@ export function AnnouncementModal() {
 
     const handleDismiss = () => {
         if (announcement) {
-            localStorage.setItem(`dismissed_announcement_${announcement.id}`, "true");
+            const version = announcement.updated_at || announcement.created_at || "v1";
+            localStorage.setItem(`dismissed_announcement_${announcement.id}_${version}`, "true");
         }
         setOpen(false);
     };
