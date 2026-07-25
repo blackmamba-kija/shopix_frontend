@@ -29,6 +29,7 @@ import OperationalOverview from "./pages/OperationalOverview";
 import DebtsPage from "./pages/DebtsPage";
 import HelpPage from "./pages/HelpPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
+import AnnouncementManagementPage from "./pages/AnnouncementManagementPage";
 import BusinessHub from "./pages/BusinessHub";
 import NotFound from "./pages/NotFound";
 
@@ -101,6 +102,7 @@ const protectedRoutes = [
   { path: "/notifications", element: <NotificationsPage />, permission: null },
   { path: "/settings", element: <SettingsPage />, permission: null },
   { path: "/users", element: <UsersPage />, permission: "view_users" },
+  { path: "/announcements", element: <AnnouncementManagementPage />, permission: null },
   { path: "/audit-logs", element: <AuditLogsPage />, permission: "view_audit_logs" },
   { path: "/operational-summary", element: <OperationalOverview />, permission: "view_summary" },
   { path: "/admin-management", element: <AdminManagementPage />, permission: null },

@@ -48,10 +48,10 @@ export const ALL_PERMISSIONS = [
     { key: "dash_revenue_sources", label: "Dashboard – Revenue Sources Chart", group: "Dashboard" },
     { key: "dash_inventory_pulse", label: "Dashboard – Inventory Pulse Section", group: "Dashboard" },
     { key: "dash_top_items", label: "Dashboard – Top Items Feed", group: "Dashboard" },
-    // Admin
-    { key: "view_users", label: "View Users", group: "Admin" },
-    { key: "manage_users", label: "Manage Users", group: "Admin" },
-    { key: "view_audit_logs", label: "View Audit Logs (Shop Level)", group: "Admin" },
+    // Admin & User Management
+    { key: "view_users", label: "View Users", group: "Admin & Users" },
+    { key: "manage_users", label: "Manage & Create Sub-Users for Shop", group: "Admin & Users" },
+    { key: "view_audit_logs", label: "View Audit Logs (Shop Level)", group: "Admin & Users" },
 ];
 
 export const usersApi = {

@@ -18,6 +18,7 @@ import {
   HelpCircle,
   ShieldAlert,
   Building2,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/useAuth";
@@ -36,6 +37,7 @@ const navItems = [
   { icon: FileText, label: "Reports", path: "/reports", permission: "view_reports" },
   { icon: Bell, label: "Notifications", path: "/notifications", permission: null },
   { icon: Users, label: "Users", path: "/users", permission: "view_users" },
+  { icon: Megaphone, label: "Announcements", path: "/announcements", permission: "__admin_only__" },
   { icon: Shield, label: "Audit Logs", path: "/audit-logs", permission: "view_audit_logs" },
   { icon: TrendingUp, label: "Daily Summary", path: "/operational-summary", permission: "view_summary" },
   { icon: ShieldAlert, label: "Admin Panel", path: "/admin-management", permission: "__admin_only__" },

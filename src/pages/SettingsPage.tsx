@@ -70,11 +70,36 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2">
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col items-center justify-center py-12 text-center">
-              <Users className="w-12 h-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-lg font-bold mb-1">{t("user management")}</h3>
-              <p className="text-sm text-muted-foreground max-w-md">{t("manage sellers, administrators, and assign roles across your shops in the user management module.")}</p>
-              <Button variant="outline" className="mt-6" asChild><Link to="/users">{t("open user directory")}</Link></Button>
+            <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/50 pb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                    <Users className="w-6 h-6 text-primary" /> {t("user management & sub-user creation")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 font-medium">
+                    Configure shop-level users, assign seller permissions, and allow shop managers to create sub-users.
+                  </p>
+                </div>
+                <Button className="font-bold gap-2 rounded-xl h-11 px-6 shadow-md" asChild>
+                  <Link to="/users">
+                    <Users className="w-4 h-4" /> {t("open user directory")}
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Setting Guidance Card */}
+              <div className="bg-secondary/30 border border-border/60 p-5 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                  <p className="text-sm font-bold text-foreground">How to allow sellers to create shop-level users:</p>
+                </div>
+                <ol className="text-xs text-muted-foreground font-medium space-y-1.5 list-decimal pl-5">
+                  <li>Go to <Link to="/users" className="text-primary font-bold underline">User Management Directory</Link>.</li>
+                  <li>Click <strong>Edit</strong> on the seller / user you want to authorize.</li>
+                  <li>Under <strong>Admin & Users</strong> permissions, check <span className="text-foreground font-bold">"Manage & Create Sub-Users for Shop"</span>.</li>
+                  <li>Assign the specific <strong>Shop(s)</strong> that seller is allowed to manage.</li>
+                </ol>
+              </div>
             </div>
           </TabsContent>
 
